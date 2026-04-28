@@ -19,3 +19,7 @@ backend/uploads/
 # OS
 .DS_Store
 Thumbs.db
+web/.env
+web/node_modules/
+web/.next/
+web/seed-admin.js

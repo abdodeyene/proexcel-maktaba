@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
+
+model Product {
+  id             Int      @id @default(autoincrement())
+  title          String
+  author         String?
+  price          Float
+  compareAtPrice Float?
+  category       String?
+  g1             String?  @default("#1a237e")
+  g2             String?  @default("#3949ab")
+  emoji          String?  @default("📦")
+  stock          Int      @default(0)
+  rating         Float    @default(4.5)
+  reviewCount    Int      @default(0)
+  isPromo        Boolean  @default(false)
+  isBestOffer    Boolean  @default(false)
+  isNew          Boolean  @default(false)
+  description    String?
+  variants       Json?
+  media          Json?
+  reviews        Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Category {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  emoji String? @default("📚")
+  color String?
+  glow  String?
+  image String?
+  count Int     @default(0)
+
+  @@map("categories")
+}
+
+model Order {
+  id       Int      @id @default(autoincrement())
+  orderNum String   @unique
+  name     String
+  phone    String
+  address  String
+  city     String
+  total    Float
+  status   String   @default("pending")
+  cart     Json
+  date     DateTime @default(now())
+
+  @@map("orders")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String?
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
