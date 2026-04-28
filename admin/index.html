@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – ProExcel Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <div style="font-size:1.5rem">📚</div>
+      <div>
+        <div class="sidebar-logo-text">Pro<span>Excel</span></div>
+        <div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:1px">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Principale</div>
+      <a href="index.html" class="sidebar-link active"><span class="sl-icon">📊</span> Dashboard</a>
+      <a href="products.html" class="sidebar-link"><span class="sl-icon">📦</span> Produits</a>
+      <a href="orders.html" class="sidebar-link"><span class="sl-icon">🛒</span> Commandes <span class="sl-badge" id="pendingCount">0</span></a>
+      <a href="categories.html" class="sidebar-link"><span class="sl-icon">🗂️</span> Catégories</a>
+      <div class="sidebar-section-label">Analytiques</div>
+      <a href="#" class="sidebar-link"><span class="sl-icon">👥</span> Clients</a>
+      <a href="#" class="sidebar-link"><span class="sl-icon">📈</span> Analytiques</a>
+      <a href="#" class="sidebar-link"><span class="sl-icon">⭐</span> Avis</a>
+      <div class="sidebar-section-label">Configuration</div>
+      <a href="settings.html" class="sidebar-link"><span class="sl-icon">⚙️</span> Paramètres</a>
+      <a href="../index.html" class="sidebar-link" target="_blank"><span class="sl-icon">🌐</span> Voir la boutique</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-admin">
+        <div class="sidebar-avatar">A</div>
+        <div>
+          <div class="sidebar-admin-name">Admin ProExcel</div>
+          <div class="sidebar-admin-role">Super Admin</div>
+        </div>
+      </div>
+      <button class="sidebar-theme-btn">🌙 Mode sombre</button>
+      <button class="sidebar-logout" onclick="adminLogout()">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <!-- TOP BAR -->
+    <div class="admin-topbar">
+      <div class="topbar-title">Dashboard <span>Vue d'ensemble</span></div>
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Rechercher…">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-new" onclick="location.href='products.html?new=1'">
+          + Nouveau produit
+        </button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- PERIOD FILTER -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <h2 style="font-size:1.2rem;font-weight:800">Aperçu des ventes</h2>
+        <div style="display:flex;gap:0.4rem" id="periodBtns">
+          <button class="chart-filter active" data-period="week" onclick="selectPeriod('week',this)">Semaine</button>
+          <button class="chart-filter" data-period="month" onclick="selectPeriod('month',this)">Mois</button>
+          <button class="chart-filter" data-period="year" onclick="selectPeriod('year',this)">Année</button>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-card fade-up" style="animation-delay:0s">
+          <div class="stat-card-header">
+            <span class="stat-label">Revenus totaux</span>
+            <div class="stat-icon si-blue">💰</div>
+          </div>
+          <div class="stat-value" id="statRevenue">–</div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="stat-trend trend-up">▲ 4.2%</span>
+            <span class="stat-sub">vs. période précédente</span>
+          </div>
+        </div>
+        <div class="stat-card fade-up" style="animation-delay:0.08s">
+          <div class="stat-card-header">
+            <span class="stat-label">Commandes</span>
+            <div class="stat-icon si-green">🛒</div>
+          </div>
+          <div class="stat-value" id="statOrders">–</div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="stat-trend trend-up">▲ 7.1%</span>
+            <span class="stat-sub">ce mois</span>
+          </div>
+        </div>
+        <div class="stat-card fade-up" style="animation-delay:0.16s">
+          <div class="stat-card-header">
+            <span class="stat-label">Clients</span>
+            <div class="stat-icon si-purple">👥</div>
+          </div>
+          <div class="stat-value" id="statCustomers">0</div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="stat-trend trend-up">▲ 2.8%</span>
+            <span class="stat-sub">nouveaux ce mois</span>
+          </div>
+        </div>
+        <div class="stat-card fade-up" style="animation-delay:0.24s">
+          <div class="stat-card-header">
+            <span class="stat-label">Stock faible</span>
+            <div class="stat-icon si-red">⚠️</div>
+          </div>
+          <div class="stat-value text-red" id="statLowStock">–</div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="stat-trend trend-down">▼ 3 produits</span>
+            <span class="stat-sub">à réapprovisionner</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS + TOP PRODUCTS -->
+      <div class="grid-2col" style="margin-bottom:1.5rem">
+
+        <!-- Sales Chart -->
+        <div class="a-card">
+          <div class="a-card-header">
+            <span class="a-card-title">Tendances des ventes</span>
+            <div class="chart-filters" id="chartFilters">
+              <button class="chart-filter active" data-period="week" onclick="renderChart('week')">Sem.</button>
+              <button class="chart-filter" data-period="month" onclick="renderChart('month')">Mois</button>
+              <button class="chart-filter" data-period="year" onclick="renderChart('year')">Année</button>
+            </div>
+          </div>
+          <div class="a-card-body">
+            <div class="chart-area" id="chartArea"></div>
+            <div class="chart-stats-row">
+              <div class="chart-stat">
+                <div class="chart-stat-val text-primary" id="chartTotal">–</div>
+                <div class="chart-stat-lbl">Chiffre d'affaires</div>
+              </div>
+              <div class="chart-stat">
+                <div class="chart-stat-val text-green" id="chartAvg">–</div>
+                <div class="chart-stat-lbl">Panier moyen</div>
+              </div>
+              <div class="chart-stat">
+                <div class="chart-stat-val" id="chartOrdersCount">–</div>
+                <div class="chart-stat-lbl">Commandes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="a-card">
+          <div class="a-card-header">
+            <span class="a-card-title">Meilleurs produits</span>
+            <a href="products.html" class="a-card-action">Voir tout →</a>
+          </div>
+          <div class="a-card-body" style="padding-top:0.5rem">
+            <div id="topProducts"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visitors + Recent Orders -->
+      <div class="grid-2col">
+
+        <!-- Recent Orders Table -->
+        <div class="a-card">
+          <div class="a-card-header">
+            <span class="a-card-title">Commandes récentes</span>
+            <a href="orders.html" class="a-card-action">Voir tout →</a>
+          </div>
+          <div class="a-table-wrap">
+            <table class="a-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Client</th>
+                  <th>Date</th>
+                  <th>Montant</th>
+                  <th>Statut</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Visitors widget -->
+        <div class="a-card">
+          <div class="a-card-header">
+            <span class="a-card-title">Visiteurs (14j)</span>
+            <span class="a-card-action" id="visitorTotal" style="cursor:default">–</span>
+          </div>
+          <div class="a-card-body">
+            <div class="visitors-row" id="visitorsRow"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem">
+              <div style="background:var(--a-bg);border-radius:10px;padding:1rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--a-primary)" id="avgVisit">–</div>
+                <div style="font-size:0.72rem;color:var(--a-text2);margin-top:0.25rem">Moy./jour</div>
+              </div>
+              <div style="background:var(--a-bg);border-radius:10px;padding:1rem;text-align:center">
+                <div style="font-size:1.4rem;font-weight:800;color:var(--a-green)" id="convRate">–</div>
+                <div style="font-size:0.72rem;color:var(--a-text2);margin-top:0.25rem">Taux conversion</div>
+              </div>
+            </div>
+            <!-- Low stock alert -->
+            <div style="margin-top:1.25rem;padding:1rem;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px">
+              <div style="font-size:0.78rem;font-weight:700;color:var(--a-red);margin-bottom:0.5rem">⚠️ Stocks faibles</div>
+              <div id="lowStockList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </main>
+</div>
+
+<script src="../store.js"></script>
+<script src="admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const orders = getOrders();
+
+  // Pending count badge
+  const pending = orders.filter(o => o.status === 'pending').length;
+  document.getElementById('pendingCount').textContent = pending;
+
+  // Stats – real data from orders only
+  const totalRev = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + (o.total || 0), 0);
+  document.getElementById('statRevenue').textContent = totalRev.toLocaleString('fr-FR') + ' DH';
+  document.getElementById('statOrders').textContent = orders.length.toLocaleString();
+  const uniqueClients = new Set(orders.map(o => o.phone || o.name)).size;
+  document.getElementById('statCustomers').textContent = uniqueClients;
+  const adminProds = JSON.parse(localStorage.getItem('proexcel_products') || 'null') || ADMIN_PRODUCTS;
+  const lowStock = adminProds.filter(p => p.stock <= 8).length;
+  document.getElementById('statLowStock').textContent = lowStock;
+
+  // Chart
+  renderChart('week');
+
+  // Chart stats
+  const weekData = CHART_DATA.week;
+  const weekTotal = weekData.values.reduce((s, v) => s + v, 0);
+  document.getElementById('chartTotal').textContent = weekTotal.toLocaleString() + ' DH';
+  document.getElementById('chartAvg').textContent = Math.round(weekTotal / orders.length) + ' DH';
+  document.getElementById('chartOrdersCount').textContent = orders.filter(o => {
+    const d = new Date(o.date); const now = new Date();
+    return (now - d) < 7 * 24 * 3600 * 1000;
+  }).length;
+
+  // Top products
+  renderTopProducts();
+
+  // Recent orders
+  renderDashboardOrders();
+
+  // Visitors
+  renderVisitors();
+  const visits = Array.from({length:14}, () => Math.floor(Math.random() * 80 + 20));
+  const total = visits.reduce((s,v) => s+v, 0);
+  document.getElementById('visitorTotal').textContent = total + ' visites';
+  document.getElementById('avgVisit').textContent = Math.round(total / 14);
+  document.getElementById('convRate').textContent = (orders.length / total * 100).toFixed(1) + '%';
+
+  // Low stock list
+  const lowProds = adminProds.filter(p => p.stock <= 8);
+  document.getElementById('lowStockList').innerHTML = lowProds.map(p =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;font-size:0.78rem">
+      <span style="color:var(--a-text)">${p.emoji} ${p.title.substring(0,28)}…</span>
+      <span style="color:var(--a-red);font-weight:700">${p.stock} unités</span>
+    </div>`
+  ).join('');
+});
+
+function selectPeriod(period, btn) {
+  renderChart(period);
+  const data = CHART_DATA[period];
+  const total = data.values.reduce((s,v) => s+v, 0);
+  document.getElementById('chartTotal').textContent = total.toLocaleString() + ' DH';
+  document.getElementById('chartAvg').textContent = Math.round(total / getOrders().length) + ' DH';
+}
+</script>
+</body>
+</html>

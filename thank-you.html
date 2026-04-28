@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merci – ProExcel</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>(function(){var t=localStorage.getItem('proexcel_theme')||'dark';document.documentElement.setAttribute('data-theme',t);var l=localStorage.getItem('proexcel_lang')||'fr';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';})();</script>
+</head>
+<body data-page="thankyou">
+
+<!-- Floating bg circles -->
+<div class="ty-bg">
+  <div class="ty-circle"></div>
+  <div class="ty-circle"></div>
+  <div class="ty-circle"></div>
+</div>
+
+<!-- Confetti container -->
+<div class="ty-confetti-container" id="confettiContainer"></div>
+
+<div class="thankyou-page">
+  <div class="ty-card">
+
+    <!-- Animated checkmark -->
+    <div class="ty-checkmark-wrap">
+      <div class="ty-checkmark-circle">
+        <svg viewBox="0 0 52 52">
+          <path d="M14 27 L22 35 L38 17" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="ty-pulse"></div>
+    </div>
+
+    <div class="ty-badge">
+      ✨ <span data-i18n="ty_badge">Commande confirmée</span>
+    </div>
+
+    <h1 class="ty-title" data-i18n="ty_title">Merci pour votre commande !</h1>
+
+    <p class="ty-order-num">
+      <span data-i18n="ty_order">Commande n°</span>
+      <strong id="tyOrderNum">#PE000001</strong>
+    </p>
+
+    <p class="ty-message" data-i18n="ty_message">
+      Votre commande a été reçue et est en cours de traitement. Vous serez contacté sous 24h pour la confirmation de livraison.
+    </p>
+
+    <!-- Steps -->
+    <div class="ty-steps">
+      <div class="ty-step">
+        <div class="ty-step-icon">📦</div>
+        <div class="ty-step-label" data-i18n="ty_step1">Commande reçue</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-icon">⚙️</div>
+        <div class="ty-step-label" data-i18n="ty_step2">En préparation</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-icon">🚚</div>
+        <div class="ty-step-label" data-i18n="ty_step3">Livraison sous 48h</div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="ty-btns">
+      <button class="ty-btn-primary" onclick="location.href='index.html'">
+        <span data-i18n="ty_btn1">Retour à l'accueil</span>
+      </button>
+      <button class="ty-btn-outline" onclick="location.href='best-offers.html'">
+        <span data-i18n="ty_btn2">Continuer mes achats</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="store.js"></script>
+<script src="script.js"></script>
+<script>
+(function() {
+  // Apply theme/lang
+  const theme = localStorage.getItem('proexcel_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  const lang = localStorage.getItem('proexcel_lang') || 'fr';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  // Show order number
+  const params = new URLSearchParams(location.search);
+  const orderNum = params.get('order') || 'PE' + Date.now().toString().slice(-6);
+  document.getElementById('tyOrderNum').textContent = '#' + orderNum;
+
+  // Confetti
+  function launchConfetti() {
+    const colors = ['#3b82f6','#8b5cf6','#22c55e','#ef4444','#f59e0b','#ec4899','#06b6d4'];
+    const container = document.getElementById('confettiContainer');
+    for (let i = 0; i < 80; i++) {
+      setTimeout(() => {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 10 + 6;
+        piece.style.cssText = `
+          left: ${Math.random() * 100}vw;
+          width: ${size}px; height: ${size}px;
+          background: ${color};
+          animation-duration: ${Math.random() * 2 + 2}s;
+          animation-delay: ${Math.random() * 0.5}s;
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+          transform: rotate(${Math.random() * 360}deg);
+        `;
+        container.appendChild(piece);
+        setTimeout(() => piece.remove(), 4000);
+      }, i * 40);
+    }
+  }
+
+  // Small delay then confetti
+  setTimeout(launchConfetti, 400);
+  // Re-launch after 3s for extra effect
+  setTimeout(launchConfetti, 3000);
+})();
+</script>
+</body>
+</html>

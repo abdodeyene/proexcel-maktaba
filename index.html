@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProExcel – Maktaba | Livres Scolaires & Parascolaires</title>
+  <meta name="description" content="Livres scolaires et parascolaires au Maroc. Primaire, collège, lycée. Livraison 48h partout au Maroc.">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ProExcel">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%233b82f6'/><text y='.9em' font-size='70' x='15'>📚</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (function(){
+      var t=localStorage.getItem('proexcel_theme')||'dark';
+      document.documentElement.setAttribute('data-theme',t);
+      var l=localStorage.getItem('proexcel_lang')||'fr';
+      document.documentElement.lang=l;
+      document.documentElement.dir=l==='ar'?'rtl':'ltr';
+    })();
+  </script>
+</head>
+<body data-page="home">
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <button class="mobile-menu-btn" aria-label="Menu">☰</button>
+    <a href="index.html" class="logo">Pro<span>Excel</span></a>
+    <nav>
+      <a href="index.html" class="active" data-i18n="nav_home">Accueil</a>
+      <a href="best-offers.html" data-i18n="nav_offers">Meilleures Offres</a>
+      <a href="index.html#about" data-i18n="nav_about">À Propos</a>
+      <a href="contact.html" data-i18n="nav_contact">Contact</a>
+      <!-- Inline search next to nav links -->
+      <div class="header-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="headerSearchInput" class="header-search-input" type="text" placeholder="Rechercher…" autocomplete="off" data-i18n-placeholder="search_ph">
+        <div class="header-search-dropdown" id="headerSearchDropdown"></div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <div class="search-wrap open-search" title="Rechercher">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span data-i18n="search_ph">Rechercher…</span>
+      </div>
+      <button class="btn-theme" title="Thème">☀️</button>
+      <button class="btn-lang" title="Langue">عربي</button>
+      <a href="cart.html" class="btn-icon" title="Panier">
+        🛒
+        <span class="cart-count" style="display:none">0</span>
+      </a>
+      <a href="login.html" class="btn-login" title="Connexion">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span data-i18n="nav_login">Connexion</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="index.html" data-i18n="nav_home">Accueil</a>
+  <a href="best-offers.html" data-i18n="nav_offers">Meilleures Offres</a>
+  <a href="index.html#about" data-i18n="nav_about">À Propos</a>
+  <a href="contact.html" data-i18n="nav_contact">Contact</a>
+  <div class="mobile-nav-extras">
+    <button class="btn-theme btn-theme-mob" title="Thème">☀️</button>
+    <button class="btn-lang btn-lang-mob" title="Langue">عربي</button>
+  </div>
+</nav>
+
+<!-- HERO SLIDER -->
+<section class="hero">
+  <div class="slider">
+
+    <!-- Slide 1 -->
+    <div class="slide">
+      <div class="slide-bg" style="background: radial-gradient(ellipse at 70% 50%, #1a237e 0%, #070b12 65%), url('') center/cover;"></div>
+      <div class="slide-overlay"></div>
+      <div class="slide-content">
+        <div class="slide-tag" data-i18n="hero1_tag">Rentrée Scolaire 2026</div>
+        <h1 class="slide-title"><span data-i18n="hero1_title">Tous vos manuels</span><br><span class="text-gold" data-i18n="hero1_span">en un seul endroit</span></h1>
+        <p class="slide-sub" data-i18n="hero1_sub">Découvrez notre sélection complète de livres scolaires pour le primaire, collège et lycée au Maroc.</p>
+        <div class="slide-btns">
+          <button class="btn-primary" onclick="location.href='best-offers.html'" data-i18n="hero1_btn1">Explorer le catalogue ›</button>
+          <button class="btn-outline" onclick="location.href='index.html#about'" data-i18n="hero1_btn2">En savoir plus</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+      <div class="slide-bg" style="background: radial-gradient(ellipse at 30% 60%, #4a0080 0%, #070b12 65%);"></div>
+      <div class="slide-overlay"></div>
+      <div class="slide-content">
+        <div class="slide-tag" data-i18n="hero2_tag">Offres Spéciales</div>
+        <h1 class="slide-title"><span data-i18n="hero2_title">Économisez jusqu'à</span><br><span class="text-gold" data-i18n="hero2_span">30% sur les packs</span></h1>
+        <p class="slide-sub" data-i18n="hero2_sub">Achetez vos livres en pack et économisez. Livraison gratuite pour les commandes supérieures à 499 DH.</p>
+        <div class="slide-btns">
+          <button class="btn-primary" onclick="location.href='best-offers.html'" data-i18n="hero2_btn1">Voir les offres ›</button>
+          <button class="btn-outline" onclick="location.href='product.html?id=11'" data-i18n="hero2_btn2">Voir les packs</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+      <div class="slide-bg" style="background: radial-gradient(ellipse at 60% 40%, #1b3a1b 0%, #070b12 65%);"></div>
+      <div class="slide-overlay"></div>
+      <div class="slide-content">
+        <div class="slide-tag" data-i18n="hero3_tag">Nouveautés 2026</div>
+        <h1 class="slide-title"><span data-i18n="hero3_title">Les nouveaux</span><br><span class="text-gold" data-i18n="hero3_span">livres sont arrivés</span></h1>
+        <p class="slide-sub" data-i18n="hero3_sub">Informatique, Technologie, Langues… Découvrez les dernières parutions pour préparer votre baccalauréat.</p>
+        <div class="slide-btns">
+          <button class="btn-primary" onclick="location.href='best-offers.html?sort=new'" data-i18n="hero3_btn1">Voir les nouveautés ›</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dots -->
+  <div class="slider-dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <!-- Arrows -->
+  <div class="slider-arrows">
+    <div class="arrow arrow-prev">‹</div>
+    <div class="arrow arrow-next">›</div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag" data-i18n="cat_tag">Parcourir</div>
+    <h2 class="section-title" data-i18n="cat_title">Nos Catégories</h2>
+    <p class="section-sub" data-i18n="cat_sub">Des livres pour tous les niveaux et toutes les matières du système éducatif marocain</p>
+  </div>
+  <div class="categories-grid" id="categoriesGrid"></div>
+</div>
+
+<!-- PROMO BANNER -->
+<div class="promo-wrap">
+  <div class="promo-banner">
+    <div class="promo-text">
+      <div class="section-tag" data-i18n="promo_tag">Offre Limitée</div>
+      <h2 data-i18n-html="promo_h2_html">Livraison Gratuite<br>dès <span class="text-gold">499 DH</span></h2>
+      <p data-i18n="promo_p">Commandez plus de livres et bénéficiez de la livraison gratuite partout au Maroc!</p>
+    </div>
+    <div class="promo-stats">
+      <div class="p-stat"><div class="p-stat-num">1200+</div><div class="p-stat-label" data-i18n="stat1">Titres disponibles</div></div>
+      <div class="p-stat"><div class="p-stat-num">15K+</div><div class="p-stat-label" data-i18n="stat2">Clients satisfaits</div></div>
+      <div class="p-stat"><div class="p-stat-num">30%</div><div class="p-stat-label" data-i18n="stat3">Économies max</div></div>
+    </div>
+    <button class="btn-primary" onclick="location.href='best-offers.html'" data-i18n="see_all">Voir toutes les offres ›</button>
+  </div>
+</div>
+
+<!-- FEATURED PRODUCTS -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-tag" data-i18n="feat_tag">Tendances</div>
+    <h2 class="section-title" data-i18n="feat_title">Livres en Vedette</h2>
+    <p class="section-sub" data-i18n="feat_sub">Les manuels les plus demandés cette saison</p>
+  </div>
+  <div class="scroll-wrap" style="padding:0 1rem">
+    <button class="scroll-arrow scroll-arrow-left" onclick="scrollGrid('featGrid',-1)" aria-label="Précédent">‹</button>
+    <div class="products-grid" id="featGrid"></div>
+    <button class="scroll-arrow scroll-arrow-right" onclick="scrollGrid('featGrid',1)" aria-label="Suivant">›</button>
+  </div>
+</div>
+
+<!-- PROMO PRODUCTS -->
+<div class="section" style="padding-top:0">
+  <div class="section-header">
+    <div class="section-tag" data-i18n="offers_tag">Promotions</div>
+    <h2 class="section-title" data-i18n="offers_title">Offres Spéciales</h2>
+    <p class="section-sub" data-i18n="offers_sub">Des prix réduits sur une sélection de livres scolaires</p>
+  </div>
+  <div class="scroll-wrap" style="padding:0 1rem">
+    <button class="scroll-arrow scroll-arrow-left" onclick="scrollGrid('promoGrid',-1)" aria-label="Précédent">‹</button>
+    <div class="products-grid" id="promoGrid"></div>
+    <button class="scroll-arrow scroll-arrow-right" onclick="scrollGrid('promoGrid',1)" aria-label="Suivant">›</button>
+  </div>
+  <div style="text-align:center;margin-top:2.5rem">
+    <button class="btn-primary" onclick="location.href='best-offers.html'" data-i18n="see_all">Voir toutes les offres ›</button>
+  </div>
+</div>
+
+<!-- ABOUT + HOURS + MAP -->
+<div class="about-wrap" id="about">
+  <div class="about-inner">
+    <!-- About text -->
+    <div class="about-text">
+      <div class="section-tag" style="display:inline-block" data-i18n="about_tag">Notre Histoire</div>
+      <h2><span data-i18n="about_h2a">ProExcel</span><br><span class="text-gold" data-i18n="about_span">Votre Maktaba</span></h2>
+      <p data-i18n="about_p1">Depuis plus de 10 ans, ProExcel est la référence en matière de livres scolaires et parascolaires au Maroc. Nous proposons une sélection rigoureuse des meilleurs manuels pour accompagner les élèves du primaire au baccalauréat.</p>
+      <p data-i18n="about_p2">Notre équipe de spécialistes choisit chaque titre avec soin pour vous garantir la qualité et la conformité avec les programmes officiels du Ministère de l'Éducation Nationale.</p>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label" data-i18n="stat4">Années d'expérience</div></div>
+        <div class="stat-item"><div class="stat-num">1200+</div><div class="stat-label" data-i18n="stat5">Titres en stock</div></div>
+        <div class="stat-item"><div class="stat-num">15K+</div><div class="stat-label" data-i18n="stat6">Clients fidèles</div></div>
+        <div class="stat-item"><div class="stat-num">48h</div><div class="stat-label" data-i18n="stat7">Livraison rapide</div></div>
+      </div>
+    </div>
+
+    <!-- Hours -->
+    <div class="hours-card">
+      <div class="hours-head" data-i18n="hours_head">🕐 Horaires d'Ouverture</div>
+      <ul class="hours-list">
+        <li class="h-item"><span class="h-day" data-i18n="h_mon">Lundi – Vendredi</span><span class="h-time" data-i18n="h_mon_t">08:30 – 19:00</span></li>
+        <li class="h-item"><span class="h-day" data-i18n="h_sat">Samedi</span><span class="h-time" data-i18n="h_sat_t">09:00 – 18:00</span></li>
+        <li class="h-item"><span class="h-day" data-i18n="h_sun">Dimanche</span><span class="h-time" data-i18n="h_sun_t">10:00 – 14:00</span></li>
+        <li class="h-item"><span class="h-day" data-i18n="h_hol">Jours fériés</span><span class="h-closed" data-i18n="h_hol_t">Fermé</span></li>
+      </ul>
+      <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+        <div style="font-size:.78rem;color:var(--text2);margin-bottom:.5rem">📞 Téléphone</div>
+        <div style="font-weight:600;font-size:.9rem">+212 6 12 34 56 78</div>
+        <div style="font-size:.78rem;color:var(--text2);margin-top:.75rem;margin-bottom:.5rem">📧 Email</div>
+        <div style="font-weight:600;font-size:.9rem">contact@proexcel.ma</div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div>
+      <div class="map-box" style="margin-bottom:1rem">
+        <div class="map-pin-anim">
+          <div class="pin">📍</div>
+          <div class="map-address">
+            <strong>ProExcel Maktaba</strong><br>
+            Avenue Mohammed V, Hay Riad<br>
+            Rabat 10000, Maroc
+          </div>
+          <button class="btn-map" onclick="window.open('https://maps.google.com/?q=Rabat+Hay+Riad+Maroc','_blank')" data-i18n="open_maps">Ouvrir dans Maps</button>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1rem;font-size:.82rem;color:var(--text2)">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem"><span>🚗</span> Parking gratuit disponible</div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem"><span>🚌</span> Arrêt de bus à 100m</div>
+        <div style="display:flex;align-items:center;gap:.5rem"><span>🛵</span> Livraison à domicile 24-48h</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="f-brand">
+      <div class="logo">Pro<span>Excel</span></div>
+      <p class="f-desc" data-i18n="footer_desc">Votre librairie scolaire de confiance au Maroc. Des livres de qualité pour réussir votre année scolaire.</p>
+      <div class="f-socials">
+        <a class="s-btn" href="#" title="Facebook" id="footerFacebook">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a class="s-btn" href="#" title="Instagram" id="footerInstagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a class="s-btn" href="#" title="TikTok" id="footerTiktok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.3a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+        </a>
+        <a class="s-btn" href="#" title="YouTube" id="footerYoutube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.4a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="f-col">
+      <h4 data-i18n="footer_nav">Navigation</h4>
+      <ul class="f-links">
+        <li><a href="index.html" data-i18n="nav_home">Accueil</a></li>
+        <li><a href="best-offers.html" data-i18n="nav_offers">Meilleures Offres</a></li>
+        <li><a href="index.html#about" data-i18n="nav_about">À Propos</a></li>
+        <li><a href="contact.html" data-i18n="nav_contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4 data-i18n="footer_cat">Catégories</h4>
+      <ul class="f-links">
+        <li><a href="best-offers.html?cat=Mathématiques">Mathématiques</a></li>
+        <li><a href="best-offers.html?cat=Sciences">Sciences</a></li>
+        <li><a href="best-offers.html?cat=Langues">Langues</a></li>
+        <li><a href="best-offers.html?cat=Informatique">Informatique</a></li>
+        <li><a href="best-offers.html?cat=Pack">Packs</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4 data-i18n="footer_info">Infos</h4>
+      <ul class="f-links">
+        <li><a href="politique-retour.html" data-i18n="footer_return">Politique de retour</a></li>
+        <li><a href="cgu.html" data-i18n="footer_cgu">Conditions d'utilisation</a></li>
+        <li><a href="confidentialite.html" data-i18n="footer_privacy">Confidentialité</a></li>
+        <li><a href="shipping.html" data-i18n="footer_shipping">Livraison & Expédition</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="f-bottom">
+    <p>© 2026 ProExcel Maktaba. Tous droits réservés.</p>
+    <div class="f-payments">
+      <span class="pay-badge">💳 CMI</span>
+      <span class="pay-badge">🏦 Virement</span>
+      <span class="pay-badge">💵 Cash</span>
+    </div>
+  </div>
+</footer>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <button class="close-overlay" title="Fermer">✕</button>
+  <div class="search-modal">
+    <input class="search-modal-input" id="searchInput" placeholder="Rechercher un livre, matière, auteur…" autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="store.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

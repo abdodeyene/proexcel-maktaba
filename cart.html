@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panier – ProExcel</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>(function(){var t=localStorage.getItem('proexcel_theme')||'dark';document.documentElement.setAttribute('data-theme',t);var l=localStorage.getItem('proexcel_lang')||'fr';document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';})();</script>
+</head>
+<body data-page="cart">
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="logo">Pro<span>Excel</span></a>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="best-offers.html">Meilleures Offres</a>
+      <a href="index.html#about">À Propos</a>
+      <a href="contact.html">Contact</a>
+      <div class="header-search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="headerSearchInput" class="header-search-input" type="text" placeholder="Rechercher…" autocomplete="off">
+        <div class="header-search-dropdown" id="headerSearchDropdown"></div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <div class="search-wrap open-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span data-i18n="search_ph">Rechercher…</span>
+      </div>
+      <button class="btn-theme">☀️</button>
+      <button class="btn-lang">عربي</button>
+      <a href="cart.html" class="btn-icon active">🛒<span class="cart-count" style="display:none">0</span></a>
+      <a href="login.html" class="btn-login" data-i18n="nav_login">Connexion</a>
+      <button class="mobile-menu-btn">☰</button>
+    </div>
+  </div>
+</header>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="index.html">Accueil</a>
+  <a href="best-offers.html">Meilleures Offres</a>
+  <a href="contact.html">Contact</a>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="breadcrumb-nav">
+      <a href="index.html">Accueil</a>
+      <span>›</span>
+      <span>Mon Panier</span>
+    </div>
+    <h1>🛒 Mon Panier</h1>
+    <p>Vérifiez vos articles et procédez au paiement</p>
+  </div>
+</div>
+
+<!-- CART CONTENT -->
+<div class="cart-layout">
+
+  <!-- Cart Items -->
+  <div>
+    <div class="cart-items-head">
+      <h2>Articles</h2>
+      <span class="cart-count-text" id="cartCountText"></span>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-cart" id="emptyCart" style="display:none">
+      <div class="empty-icon">🛒</div>
+      <h3>Votre panier est vide</h3>
+      <p>Ajoutez des livres à votre panier pour commencer vos achats</p>
+      <button class="btn-primary" onclick="location.href='best-offers.html'">Parcourir le catalogue ›</button>
+    </div>
+
+    <!-- Filled Cart -->
+    <div id="filledCart">
+      <div id="cartItems"></div>
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+        <button class="btn-outline" onclick="location.href='best-offers.html'" style="padding:.6rem 1.25rem;font-size:.85rem">‹ Continuer les achats</button>
+        <button class="btn-outline" onclick="if(confirm('Vider le panier?')){localStorage.removeItem('proexcel_cart');updateCartBadge();renderCart();}" style="padding:.6rem 1.25rem;font-size:.85rem;border-color:rgba(229,62,62,0.3);color:#fc8181">🗑 Vider le panier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="order-summary">
+    <h3>Récapitulatif</h3>
+
+    <div class="sum-line">
+      <span class="sum-lbl">Sous-total</span>
+      <span class="sum-val" id="sumSubtotal">0 DH</span>
+    </div>
+    <div class="sum-line">
+      <span class="sum-lbl">Livraison</span>
+      <span class="sum-val" id="sumShipping">25 DH</span>
+    </div>
+
+    <!-- Shipping note -->
+    <div class="shipping-note" id="shippingNote" style="display:none"></div>
+
+    <div class="sum-total">
+      <span class="sum-total-lbl">Total à payer</span>
+      <span class="sum-total-val" id="sumTotal">0 DH</span>
+    </div>
+
+    <!-- Coupon -->
+    <div style="margin-top:1rem">
+      <div style="font-size:.75rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem">Code Promo</div>
+      <div class="coupon-row">
+        <input class="coupon-input" id="couponInput" placeholder="PROMO2026" type="text">
+        <button class="btn-coupon" onclick="applyCoupon()">Appliquer</button>
+      </div>
+    </div>
+
+    <button class="btn-checkout" onclick="location.href='checkout.html'">Valider la commande →</button>
+    <button class="btn-continue" onclick="location.href='best-offers.html'">‹ Continuer les achats</button>
+
+    <!-- Trust badges -->
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:.5rem">
+      <div style="font-size:.72rem;color:var(--text2);display:flex;align-items:center;gap:.4rem">🔒 Paiement 100% sécurisé</div>
+      <div style="font-size:.72rem;color:var(--text2);display:flex;align-items:center;gap:.4rem">🚚 Livraison 24-48h au Maroc</div>
+      <div style="font-size:.72rem;color:var(--text2);display:flex;align-items:center;gap:.4rem">🔄 Retour facile sous 7 jours</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="f-brand">
+      <div class="logo">Pro<span>Excel</span></div>
+      <p class="f-desc">Votre librairie scolaire de confiance au Maroc.</p>
+    </div>
+    <div class="f-col">
+      <h4>Navigation</h4>
+      <ul class="f-links">
+        <li><a href="index.html">Accueil</a></li>
+        <li><a href="best-offers.html">Meilleures Offres</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4>Aide</h4>
+      <ul class="f-links">
+        <li><a href="politique-retour.html">Politique de retour</a></li>
+        <li><a href="shipping.html">Livraison</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4>Contact</h4>
+      <ul class="f-links">
+        <li><a href="#">+212 6 12 34 56 78</a></li>
+        <li><a href="#">contact@proexcel.ma</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="f-bottom">
+    <p>© 2026 ProExcel Maktaba. Tous droits réservés.</p>
+    <div class="f-payments">
+      <span class="pay-badge">💳 CMI</span>
+      <span class="pay-badge">🏦 Virement</span>
+      <span class="pay-badge">💵 Cash</span>
+    </div>
+  </div>
+</footer>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <button class="close-overlay">✕</button>
+  <div class="search-modal">
+    <input class="search-modal-input" id="searchInput" placeholder="Rechercher un livre…" autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<script src="store.js"></script>
+<script src="script.js"></script>
+<script>
+function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim().toUpperCase();
+  if (code === 'PROEXCEL10') {
+    showToast('🎉', 'Code appliqué!', 'Réduction de 10% appliquée');
+  } else if (code === 'BACK2SCHOOL') {
+    showToast('🎉', 'Code appliqué!', 'Livraison gratuite activée');
+  } else {
+    showToast('❌', 'Code invalide', 'Ce code promo n\'existe pas');
+  }
+}
+function checkout() {
+  const cart = getCart();
+  if (cart.length === 0) { showToast('⚠️', 'Panier vide', 'Ajoutez des articles avant de commander'); return; }
+  showToast('✅', 'Commande reçue!', 'Nous vous contacterons bientôt pour confirmer');
+  setTimeout(() => { localStorage.removeItem('proexcel_cart'); updateCartBadge(); location.href = 'index.html'; }, 2500);
+}
+</script>
+</body>
+</html>

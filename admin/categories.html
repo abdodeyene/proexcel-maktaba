@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catégories – ProExcel Admin</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <div style="font-size:1.5rem">📚</div>
+      <div>
+        <div class="sidebar-logo-text">Pro<span>Excel</span></div>
+        <div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:1px">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Principale</div>
+      <a href="index.html" class="sidebar-link"><span class="sl-icon">📊</span> Dashboard</a>
+      <a href="products.html" class="sidebar-link"><span class="sl-icon">📦</span> Produits</a>
+      <a href="orders.html" class="sidebar-link"><span class="sl-icon">🛒</span> Commandes</a>
+      <a href="categories.html" class="sidebar-link active"><span class="sl-icon">🗂️</span> Catégories</a>
+      <div class="sidebar-section-label">Configuration</div>
+      <a href="settings.html" class="sidebar-link"><span class="sl-icon">⚙️</span> Paramètres</a>
+      <a href="../index.html" class="sidebar-link" target="_blank"><span class="sl-icon">🌐</span> Voir la boutique</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-admin">
+        <div class="sidebar-avatar">A</div>
+        <div>
+          <div class="sidebar-admin-name">Admin ProExcel</div>
+          <div class="sidebar-admin-role">Super Admin</div>
+        </div>
+      </div>
+      <button class="sidebar-theme-btn">🌙 Mode sombre</button>
+      <button class="sidebar-logout" onclick="adminLogout()">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="topbar-title">Catégories <span>Gérer les catégories</span></div>
+      <div class="topbar-actions">
+        <button class="btn-new" onclick="openCatModal()">+ Nouvelle catégorie</button>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- Categories Grid -->
+      <div class="categories-admin-grid" id="catGrid"></div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: Create/Edit Category -->
+<div id="catModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--a-card);border-radius:16px;max-width:500px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.3)">
+    <div style="padding:1.5rem;border-bottom:1px solid var(--a-border);display:flex;align-items:center;justify-content:space-between">
+      <h2 style="font-size:1.1rem;font-weight:700" id="catModalTitle">Nouvelle catégorie</h2>
+      <button onclick="closeCatModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--a-text2)">✕</button>
+    </div>
+    <div style="padding:1.5rem">
+
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--a-text2);margin-bottom:0.45rem">Nom de la catégorie *</div>
+        <input id="catName" style="width:100%;padding:0.7rem 1rem;background:var(--a-bg);border:1.5px solid var(--a-border);border-radius:10px;color:var(--a-text);font-size:0.9rem;outline:none;font-family:inherit" placeholder="Ex: Mathématiques">
+      </div>
+
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--a-text2);margin-bottom:0.45rem">Emoji / Icône</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem" id="emojiPicker">
+          📐 ⚗️ 🔬 📖 🗺️ 📈 💻 🧠 ⚙️ 📜 🎒 🌍 🇬🇧 📚 ✏️ 📝
+        </div>
+        <input id="catEmoji" style="width:100%;padding:0.7rem 1rem;background:var(--a-bg);border:1.5px solid var(--a-border);border-radius:10px;color:var(--a-text);font-size:1.2rem;outline:none;font-family:inherit" placeholder="📐" value="📐">
+      </div>
+
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--a-text2);margin-bottom:0.45rem">Couleur</div>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <div style="width:40px;height:40px;border-radius:9px;overflow:hidden;border:1.5px solid var(--a-border);flex-shrink:0">
+            <input type="color" id="catColor" value="#1e40af" style="width:100%;height:100%;border:none;cursor:pointer;padding:0">
+          </div>
+          <input id="catColorHex" style="flex:1;padding:0.55rem 0.85rem;background:var(--a-bg);border:1.5px solid var(--a-border);border-radius:9px;color:var(--a-text);font-size:0.85rem;outline:none;font-family:monospace" value="#1e40af">
+        </div>
+      </div>
+
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--a-text2);margin-bottom:0.45rem">Image de catégorie</div>
+        <div onclick="adminToast('📁','Upload','Fonctionnalité disponible en production')" style="border:2px dashed var(--a-border);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.25s" onmouseover="this.style.borderColor='var(--a-primary)'" onmouseout="this.style.borderColor='var(--a-border)'">
+          <div style="font-size:2rem;margin-bottom:0.4rem">🖼️</div>
+          <div style="font-size:0.82rem;color:var(--a-text2)">Cliquez pour importer une image</div>
+          <div style="font-size:0.72rem;color:var(--a-text2);margin-top:0.2rem">PNG, JPG (recommandé: 400×300px)</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem">
+        <button onclick="closeCatModal()" style="flex:1;padding:0.75rem;background:transparent;color:var(--a-text2);border:1.5px solid var(--a-border);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit">Annuler</button>
+        <button onclick="saveCat()" style="flex:2;padding:0.75rem;background:var(--a-primary);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../store.js"></script>
+<script src="admin.js"></script>
+<script>
+let editingCat = null;
+
+function renderCategories() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = ADMIN_CATEGORIES.map(c => `
+    <div class="cat-admin-card">
+      <div class="cat-admin-img" style="background:linear-gradient(135deg,${c.color}33,${c.color}11)">
+        <span style="font-size:2.8rem">${c.emoji}</span>
+        <div class="cat-admin-img-overlay" onclick="openCatModal(${c.id})">✏️</div>
+      </div>
+      <div class="cat-admin-body">
+        <div class="cat-admin-name">${c.name}</div>
+        <div class="cat-admin-count">${c.count} produit${c.count!==1?'s':''}</div>
+        <div class="cat-admin-actions">
+          <button class="btn-action" onclick="openCatModal(${c.id})" style="flex:1">✏️ Modifier</button>
+          <button class="btn-action btn-action-red" onclick="deleteCat(${c.id})">🗑️</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openCatModal(id = null) {
+  editingCat = id;
+  const cat = id ? ADMIN_CATEGORIES.find(c => c.id === id) : null;
+  document.getElementById('catModalTitle').textContent = cat ? `Modifier: ${cat.name}` : 'Nouvelle catégorie';
+  document.getElementById('catName').value = cat?.name || '';
+  document.getElementById('catEmoji').value = cat?.emoji || '📐';
+  document.getElementById('catColor').value = cat?.color || '#1e40af';
+  document.getElementById('catColorHex').value = cat?.color || '#1e40af';
+  document.getElementById('catModal').style.display = 'flex';
+}
+
+function closeCatModal() { document.getElementById('catModal').style.display = 'none'; }
+document.getElementById('catModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCatModal(); });
+
+// Color sync
+document.getElementById('catColor')?.addEventListener('input', e => { document.getElementById('catColorHex').value = e.target.value; });
+document.getElementById('catColorHex')?.addEventListener('input', e => {
+  if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) document.getElementById('catColor').value = e.target.value;
+});
+
+// Emoji picker
+document.getElementById('emojiPicker')?.querySelectorAll('*').forEach ? null : null;
+document.addEventListener('DOMContentLoaded', () => {
+  const picker = document.getElementById('emojiPicker');
+  const emojis = '📐 ⚗️ 🔬 📖 🗺️ 📈 💻 🧠 ⚙️ 📜 🎒 🌍 🇬🇧 📚 ✏️ 📝'.split(' ').filter(Boolean);
+  picker.innerHTML = emojis.map(e =>
+    `<button onclick="document.getElementById('catEmoji').value='${e}';this.style.background='rgba(37,99,235,0.2)'"
+     style="width:34px;height:34px;border:1.5px solid var(--a-border);border-radius:7px;cursor:pointer;font-size:1.1rem;background:var(--a-bg);transition:all 0.2s"
+     title="${e}">${e}</button>`
+  ).join('');
+  renderCategories();
+});
+
+async function saveCat() {
+  const name = document.getElementById('catName').value.trim();
+  const emoji = document.getElementById('catEmoji').value.trim() || '📚';
+  const color = document.getElementById('catColorHex').value.trim() || '#1e40af';
+  if (!name) { adminToast('⚠️','Erreur','Le nom est obligatoire'); return; }
+
+  if (typeof Store !== 'undefined') {
+    try {
+      const dto = { name, emoji, color };
+      if (editingCat) await Store.updateCategory(editingCat, dto);
+      else await Store.createCategory(dto);
+      const ac = Store.getCategories();
+      if (ac.length) { ADMIN_CATEGORIES.length = 0; ac.forEach(c => ADMIN_CATEGORIES.push(c)); }
+      adminToast('✅','Catégorie enregistrée!', name);
+      closeCatModal(); renderCategories(); return;
+    } catch (err) { console.warn('[Store] saveCat:', err.message); }
+  }
+  adminToast('✅','Catégorie enregistrée!', name);
+  closeCatModal();
+}
+
+async function deleteCat(id) {
+  const cat = ADMIN_CATEGORIES.find(c => c.id === id);
+  if (!cat) return;
+  if (!confirm(`Supprimer la catégorie "${cat.name}" ?`)) return;
+  if (typeof Store !== 'undefined') {
+    try {
+      await Store.deleteCategory(id);
+      const ac = Store.getCategories();
+      if (ac.length) { ADMIN_CATEGORIES.length = 0; ac.forEach(c => ADMIN_CATEGORIES.push(c)); }
+      adminToast('🗑️','Catégorie supprimée', cat.name); renderCategories(); return;
+    } catch (err) { console.warn('[Store] deleteCat:', err.message); }
+  }
+  adminToast('🗑️','Catégorie supprimée', cat.name);
+}
+</script>
+</body>
+</html>
