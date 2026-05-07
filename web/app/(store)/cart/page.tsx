@@ -1,65 +1,253 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-type CartItem = { key: string; id: number; title: string; variant: string; price: number; qty: number; emoji: string }
+type CartItem = {
+  key: string
+  productId: number
+  id: number
+  title: string
+  variant: string
+  price: number
+  qty: number
+  emoji?: string
+  image?: string
+}
 
 export default function CartPage() {
+  const router = useRouter()
   const [cart, setCart] = useState<CartItem[]>([])
+  const [coupon, setCoupon] = useState('')
+  const [discount, setDiscount] = useState(0)
+  const [shippingFee, setShippingFee] = useState(25)
+  const [freeShippingMin, setFreeShippingMin] = useState(499)
 
   useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem('proexcel_cart') || '[]'))
+    const loadedCart = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
+    const normalized = loadedCart.map((item: any) => ({
+      ...item,
+      qty: item.qty || item.quantity || 1
+    }))
+    setCart(normalized)
+    fetch('/api/settings').then(r => r.json()).then(data => {
+      if (data.delivery_fee) setShippingFee(Number(data.delivery_fee))
+      if (data.free_delivery_min) setFreeShippingMin(Number(data.free_delivery_min))
+    }).catch(() => {})
   }, [])
 
-  function save(updated: CartItem[]) {
+  const updateCart = (updated: CartItem[]) => {
     setCart(updated)
     localStorage.setItem('proexcel_cart', JSON.stringify(updated))
     window.dispatchEvent(new Event('cart-updated'))
   }
 
-  const total = cart.reduce((s, i) => s + i.price * i.qty, 0)
+  const changeQty = (key: string, amount: number) => {
+    const updated = cart.map(item => {
+      if (item.key === key || `${item.id}_${item.variant}` === key) {
+        return { ...item, qty: Math.max(1, item.qty + amount) }
+      }
+      return item
+    })
+    updateCart(updated)
+  }
 
-  if (cart.length === 0) return (
-    <div style={{ textAlign: 'center', padding: '6rem 1.5rem', color: '#8b96b0' }}>
-      <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🛒</div>
-      <h2 style={{ fontFamily: 'Playfair Display, serif', color: '#eef0f5', marginBottom: '1rem' }}>Panier vide</h2>
-      <Link href="/best-offers" style={{ background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', color: '#fff', padding: '.75rem 1.75rem', borderRadius: 9999, fontWeight: 600 }}>
-        Voir les livres
-      </Link>
-    </div>
-  )
+  const removeItem = (key: string) => {
+    const updated = cart.filter(item => item.key !== key && `${item.id}_${item.variant}` !== key)
+    updateCart(updated)
+  }
+
+  const emptyCart = () => {
+    if (confirm('Voulez-vous vraiment vider votre panier ?')) {
+      updateCart([])
+    }
+  }
+
+  const applyCoupon = () => {
+    if (coupon.trim().toUpperCase() === 'PROMO2026') {
+      setDiscount(0.1) // 10% discount
+      alert('Code promo appliqué avec succès (-10%) !')
+    } else {
+      alert('Code promo invalide.')
+      setDiscount(0)
+    }
+  }
+
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0)
+  const discountAmount = subtotal * discount
+  const shipping = subtotal >= freeShippingMin || subtotal === 0 ? 0 : shippingFee
+  const total = subtotal - discountAmount + shipping
+
+  if (cart.length === 0) {
+    return (
+      <>
+        <div className="page-hero">
+          <div className="page-hero-inner">
+            <div className="breadcrumb-nav">
+              <Link href="/">Accueil</Link>
+              <span>›</span>
+              <span>Mon Panier</span>
+            </div>
+            <h1>🛒 Mon Panier</h1>
+            <p>Vérifiez vos articles et procédez au paiement</p>
+          </div>
+        </div>
+
+        <div className="empty-cart" style={{ display: 'block', margin: '4rem auto', maxWidth: '600px' }}>
+          <div className="empty-icon">🛒</div>
+          <h3>Votre panier est vide</h3>
+          <p>Ajoutez des livres à votre panier pour commencer vos achats</p>
+          <Link href="/best-offers" className="btn-primary" style={{ display: 'inline-block', marginTop: '1.5rem', textDecoration: 'none' }}>
+            Parcourir le catalogue ›
+          </Link>
+        </div>
+      </>
+    )
+  }
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
-      <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2rem', color: '#eef0f5', marginBottom: '2rem' }}>Mon Panier</h1>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-        {cart.map(item => (
-          <div key={item.key} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(12,18,45,.65)', border: '1px solid rgba(59,130,246,.15)', borderRadius: 16, padding: '1rem 1.25rem' }}>
-            <div style={{ fontSize: '2rem', width: 48, textAlign: 'center' }}>{item.emoji || '📦'}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontWeight: 600, color: '#eef0f5', fontSize: '.9rem', marginBottom: '.2rem' }}>{item.title}</p>
-              <p style={{ color: '#8b96b0', fontSize: '.75rem' }}>{item.variant}</p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-              <button onClick={() => save(cart.map(i => i.key === item.key ? { ...i, qty: Math.max(1, i.qty - 1) } : i))} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(59,130,246,.1)', border: 'none', color: '#eef0f5', cursor: 'pointer' }}>-</button>
-              <span style={{ minWidth: 20, textAlign: 'center', color: '#eef0f5', fontWeight: 600 }}>{item.qty}</span>
-              <button onClick={() => save(cart.map(i => i.key === item.key ? { ...i, qty: i.qty + 1 } : i))} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(59,130,246,.1)', border: 'none', color: '#eef0f5', cursor: 'pointer' }}>+</button>
-            </div>
-            <div style={{ minWidth: 80, textAlign: 'right', color: '#3b82f6', fontWeight: 700 }}>{(item.price * item.qty).toFixed(2)} DH</div>
-            <button onClick={() => save(cart.filter(i => i.key !== item.key))} style={{ background: 'rgba(239,68,68,.1)', border: 'none', color: '#ef4444', cursor: 'pointer', borderRadius: 8, padding: '.3rem .6rem', fontSize: '.8rem' }}>✕</button>
+    <>
+      <div className="page-hero">
+        <div className="page-hero-inner">
+          <div className="breadcrumb-nav">
+            <Link href="/">Accueil</Link>
+            <span>›</span>
+            <span>Mon Panier</span>
           </div>
-        ))}
-      </div>
-      <div style={{ background: 'rgba(12,18,45,.65)', border: '1px solid rgba(59,130,246,.15)', borderRadius: 16, padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <p style={{ color: '#8b96b0', fontSize: '.85rem' }}>Total</p>
-          <p style={{ fontSize: '1.75rem', fontWeight: 700, color: '#3b82f6' }}>{total.toFixed(2)} DH</p>
-          {total >= 499 && <p style={{ color: '#22c55e', fontSize: '.78rem' }}>✓ Livraison gratuite !</p>}
+          <h1>🛒 Mon Panier</h1>
+          <p>Vérifiez vos articles et procédez au paiement</p>
         </div>
-        <Link href="/checkout" style={{ background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)', color: '#fff', padding: '.85rem 2rem', borderRadius: 9999, fontWeight: 600, fontSize: '.95rem' }}>
-          Commander →
-        </Link>
       </div>
-    </div>
+
+      <div className="cart-layout">
+        {/* Items */}
+        <div>
+          <div className="cart-items-head">
+            <h2>Articles</h2>
+            <span className="cart-count-text">
+              {cart.reduce((sum, i) => sum + i.qty, 0)} livre{cart.reduce((sum, i) => sum + i.qty, 0) > 1 && 's'}
+            </span>
+          </div>
+
+          <div id="cartItems">
+            {cart.map(item => (
+              <div className="cart-item" key={item.key || `${item.id}_${item.variant}`}>
+                {item.image ? (
+                  <div className="ci-img">
+                    <img src={item.image} alt={item.title} />
+                  </div>
+                ) : (
+                  <div className="ci-img-fallback">
+                    {item.emoji || '📦'}
+                  </div>
+                )}
+                
+                <div className="ci-details">
+                  <div className="ci-title">{item.title}</div>
+                  <div className="ci-variant">Format: {item.variant}</div>
+                  <div className="ci-price-mob">{item.price} DH</div>
+                </div>
+                
+                <div className="ci-controls">
+                  <div className="qty-wrap" style={{ margin: 0 }}>
+                    <button className="q-btn" onClick={() => changeQty(item.key || `${item.id}_${item.variant}`, -1)}>−</button>
+                    <input className="q-input" type="number" value={item.qty} readOnly />
+                    <button className="q-btn" onClick={() => changeQty(item.key || `${item.id}_${item.variant}`, 1)}>+</button>
+                  </div>
+  
+                  <div className="ci-total">
+                    {(item.price * item.qty).toFixed(2)} DH
+                  </div>
+  
+                  <button 
+                    className="ci-remove"
+                    onClick={() => removeItem(item.key || `${item.id}_${item.variant}`)}
+                    title="Supprimer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <Link href="/best-offers" className="btn-primary" style={{ padding: '.65rem 1.4rem', fontSize: '.9rem', fontWeight: 700, textDecoration: 'none' }}>
+              ‹ Continuer les achats
+            </Link>
+            <button 
+              className="btn-outline" 
+              onClick={emptyCart} 
+              style={{ padding: '.6rem 1.25rem', fontSize: '.85rem', borderColor: 'rgba(229,62,62,0.3)', color: '#fc8181' }}
+            >
+              🗑 Vider le panier
+            </button>
+          </div>
+        </div>
+
+        {/* Order Summary */}
+        <div className="order-summary">
+          <h3>Récapitulatif</h3>
+
+          <div className="sum-line">
+            <span className="sum-lbl">Sous-total</span>
+            <span className="sum-val">{subtotal.toFixed(2)} DH</span>
+          </div>
+
+          {discountAmount > 0 && (
+            <div className="sum-line" style={{ color: '#22c55e' }}>
+              <span className="sum-lbl">Remise (-10%)</span>
+              <span className="sum-val">-{discountAmount.toFixed(2)} DH</span>
+            </div>
+          )}
+
+          <div className="sum-line">
+            <span className="sum-lbl">Livraison</span>
+            <span className="sum-val">{shipping === 0 ? 'Gratuit 🎉' : `${shipping} DH`}</span>
+          </div>
+
+          {subtotal < freeShippingMin && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--text2)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', padding: '0.5rem', borderRadius: '8px', marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+              💡 Ajoutez <strong>{(freeShippingMin - subtotal).toFixed(2)} DH</strong> pour avoir la <strong>livraison gratuite</strong>!
+            </div>
+          )}
+
+          <div className="sum-total">
+            <span className="sum-total-lbl">Total à payer</span>
+            <span className="sum-total-val">{total.toFixed(2)} DH</span>
+          </div>
+
+          {/* Coupon */}
+          <div style={{ marginTop: '1rem' }}>
+            <div style={{ fontSize: '.75rem', fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '.5rem' }}>Code Promo</div>
+            <div className="coupon-row">
+              <input 
+                className="coupon-input" 
+                placeholder="PROMO2026" 
+                type="text" 
+                value={coupon}
+                onChange={e => setCoupon(e.target.value)}
+              />
+              <button className="btn-coupon" onClick={applyCoupon}>Appliquer</button>
+            </div>
+          </div>
+
+          <button className="btn-checkout" onClick={() => router.push('/checkout')}>
+            Valider la commande →
+          </button>
+          <button className="btn-continue" onClick={() => router.push('/best-offers')}>
+            ‹ Continuer les achats
+          </button>
+
+          {/* Trust badges */}
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
+            <div style={{ fontSize: '.72rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>🔒 Paiement 100% sécurisé</div>
+            <div style={{ fontSize: '.72rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>🚚 Livraison 24-48h au Maroc</div>
+            <div style={{ fontSize: '.72rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>🔄 Retour facile sous 7 jours</div>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }

@@ -29,11 +29,32 @@ export async function POST(req: NextRequest) {
   try {
     requireAuth(req)
     const dto = await req.json()
-    const product = await prisma.product.create({ data: dto })
+    const product = await prisma.product.create({
+      data: {
+        title: dto.title,
+        author: dto.author ?? null,
+        price: Number(dto.price),
+        compareAtPrice: dto.compareAtPrice ? Number(dto.compareAtPrice) : null,
+        category: dto.category ?? null,
+        emoji: dto.emoji ?? '📦',
+        g1: dto.g1 ?? '#1a237e',
+        g2: dto.g2 ?? '#3949ab',
+        stock: Number(dto.stock ?? 0),
+        isPromo: Boolean(dto.isPromo),
+        isBestOffer: Boolean(dto.isBestOffer),
+        isNew: Boolean(dto.isNew),
+        description: dto.description ?? null,
+        variants: dto.variants ?? [],
+        colors: dto.colors ?? [],
+        media: dto.media ?? [],
+      },
+    })
     return NextResponse.json(product, { status: 201 })
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    return NextResponse.json({ message: 'Server error' }, { status: 500 })
+    const msg = e instanceof Error ? e.message : 'Server error'
+    console.error('Product POST error:', e)
+    return NextResponse.json({ message: msg }, { status: 500 })
   }
 }

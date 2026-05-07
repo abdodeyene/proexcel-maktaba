@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server'
 const SECRET = process.env.JWT_SECRET!
 
 export function signToken(payload: { id: number; email: string; role: string }) {
-  return jwt.sign(payload, SECRET, { expiresIn: '7d' })
+  return jwt.sign(payload, SECRET, { expiresIn: '30d' })
 }
 
 export function verifyToken(token: string) {
@@ -20,5 +20,9 @@ export function getTokenFromRequest(req: NextRequest) {
 export function requireAuth(req: NextRequest) {
   const token = getTokenFromRequest(req)
   if (!token) throw new Error('Unauthorized')
-  return verifyToken(token)
+  try {
+    return verifyToken(token)
+  } catch {
+    throw new Error('Unauthorized')
+  }
 }

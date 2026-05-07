@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import BestOffersClient from './BestOffersClient'
+import { Suspense } from 'react'
 
 export const revalidate = 60
 
@@ -8,5 +9,11 @@ export default async function BestOffersPage() {
     prisma.product.findMany({ orderBy: { createdAt: 'desc' } }),
     prisma.category.findMany({ orderBy: { name: 'asc' } }),
   ])
-  return <BestOffersClient products={products} categories={categories} />
+  return (
+    <Suspense fallback={<div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text2)' }}>Chargement du catalogue...</div>}>
+      <BestOffersClient products={products as any} categories={categories as any} />
+    </Suspense>
+  )
 }
+
+

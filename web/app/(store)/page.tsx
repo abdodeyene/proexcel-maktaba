@@ -1,10 +1,15 @@
 import { prisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
+import HeroSlider from '@/components/HeroSlider'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 
 export const revalidate = 60
 
 export default async function HomePage() {
+  const cookieStore = await cookies()
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'fr'
+
   const [products, categories] = await Promise.all([
     prisma.product.findMany({ orderBy: { createdAt: 'desc' } }),
     prisma.category.findMany({ orderBy: { name: 'asc' } }),
@@ -13,173 +18,213 @@ export default async function HomePage() {
   const featured = products.filter(p => p.isBestOffer).slice(0, 8)
   const promos = products.filter(p => p.isPromo).slice(0, 8)
 
+  const t = {
+    fr: {
+      browse: 'Parcourir',
+      ourCat: 'Nos Catégories',
+      catSub: 'Des livres pour tous les niveaux et toutes les matières du système éducatif marocain',
+      lto: 'Offre Limitée',
+      freeShip: 'Livraison Gratuite',
+      from: 'dès',
+      shipSub: 'Commandez plus de livres et bénéficiez de la livraison gratuite partout au Maroc!',
+      titles: 'Titres disponibles',
+      clients: 'Clients satisfaits',
+      savings: 'Économies max',
+      seeAll: 'Voir toutes les offres ›',
+      trend: 'Tendances',
+      featBooks: 'Livres en Vedette',
+      featSub: 'Les manuels les plus demandés cette saison',
+      promoTag: 'Promotions',
+      specialOff: 'Offres Spéciales',
+      promoSub: 'Des prix réduits sur une sélection de livres scolaires',
+      findUs: 'Nous Trouver',
+      ourStore: 'Notre Boutique',
+      address: 'Adresse',
+      hours: 'Horaires',
+      openMap: 'Ouvrir dans Maps',
+      monFri: 'Lun – Ven',
+      sat: 'Samedi',
+      sun: 'Dimanche',
+      holidays: 'Jours fériés',
+      closed: 'Fermé',
+      realAddr: 'Bouznika, Maroc'
+    },
+    ar: {
+      browse: 'تصفح',
+      ourCat: 'فئاتنا',
+      catSub: 'كتب لجميع المستويات والمواد في النظام التعليمي المغربي',
+      lto: 'عرض محدود',
+      freeShip: 'توصيل مجاني',
+      from: 'ابتداءً من',
+      shipSub: 'اطلب المزيد من الكتب واستفد من التوصيل المجاني في جميع أنحاء المغرب!',
+      titles: 'عناوين متوفرة',
+      clients: 'عملاء راضون',
+      savings: 'أقصى توفير',
+      seeAll: 'عرض جميع العروض ›',
+      trend: 'رائج',
+      featBooks: 'كتب مميزة',
+      featSub: 'الكتب الأكثر طلباً هذا الموسم',
+      promoTag: 'تخفيضات',
+      specialOff: 'عروض خاصة',
+      promoSub: 'أسعار مخفضة على مجموعة مختارة من الكتب',
+      findUs: 'موقعنا',
+      ourStore: 'متجرنا',
+      address: 'العنوان',
+      hours: 'ساعات العمل',
+      openMap: 'فتح في الخرائط',
+      monFri: 'الاثنين - الجمعة',
+      sat: 'السبت',
+      sun: 'الأحد',
+      holidays: 'أيام العطل',
+      closed: 'مغلق',
+      realAddr: 'بوزنيقة، المغرب'
+    }
+  }
+
+  const currentT = t[locale as 'fr' | 'ar']
+
   return (
     <>
-      {/* HERO */}
-      <section style={{
-        minHeight: '85vh', display: 'flex', alignItems: 'center',
-        background: 'radial-gradient(ellipse at 70% 50%, #1a237e 0%, #06091a 65%)',
-        padding: '4rem 1.5rem',
-      }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-          <div style={{ maxWidth: 600 }}>
-            <div style={{ fontSize: '.75rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3b82f6', background: 'rgba(59,130,246,.1)', padding: '.25rem .75rem', borderRadius: 9999, display: 'inline-block', marginBottom: '1rem' }}>
-              Rentrée Scolaire 2026
-            </div>
-            <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(2rem,5vw,3.5rem)', fontWeight: 700, lineHeight: 1.15, marginBottom: '1.25rem', color: '#eef0f5' }}>
-              Tous vos manuels<br />
-              <span style={{ color: '#f59e0b' }}>en un seul endroit</span>
-            </h1>
-            <p style={{ color: '#8b96b0', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2rem' }}>
-              Découvrez notre sélection complète de livres scolaires pour le primaire, collège et lycée au Maroc.
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link href="/best-offers" style={{
-                background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)',
-                color: '#fff', padding: '.75rem 1.75rem', borderRadius: 9999,
-                fontWeight: 600, fontSize: '.95rem',
-              }}>
-                Explorer le catalogue ›
-              </Link>
-              <a href="#about" style={{
-                border: '1px solid rgba(59,130,246,.4)', color: '#3b82f6',
-                padding: '.75rem 1.75rem', borderRadius: 9999, fontWeight: 600, fontSize: '.95rem',
-              }}>
-                En savoir plus
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* HERO SLIDER */}
+      <HeroSlider />
 
       {/* CATEGORIES */}
-      {categories.length > 0 && (
-        <section style={{ padding: '4rem 1.5rem', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ fontSize: '.75rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3b82f6', background: 'rgba(59,130,246,.1)', padding: '.25rem .75rem', borderRadius: 9999, display: 'inline-block', marginBottom: '.75rem' }}>Parcourir</div>
-            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: '#eef0f5' }}>Nos Catégories</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
-            {categories.map(cat => (
-              <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} style={{
-                background: 'rgba(12,18,45,0.65)', backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(59,130,246,0.15)', borderRadius: 16,
-                padding: '1.25rem 1rem', textAlign: 'center', transition: 'transform .25s',
-                display: 'block',
-              }}
-                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.transform = 'translateY(-4px)')}
-                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.transform = '')}
-              >
-                <div style={{ fontSize: '2rem', marginBottom: '.5rem' }}>{cat.emoji}</div>
-                <div style={{ fontSize: '.82rem', fontWeight: 600, color: '#eef0f5' }}>{cat.name}</div>
-                {cat.count > 0 && <div style={{ fontSize: '.7rem', color: '#8b96b0', marginTop: '.25rem' }}>{cat.count} livres</div>}
+      <div className="section">
+        <div className="section-header">
+          <div className="section-tag">{currentT.browse}</div>
+          <h2 className="section-title">{currentT.ourCat}</h2>
+          <p className="section-sub">{currentT.catSub}</p>
+        </div>
+        <div className="categories-grid" id="categoriesGrid">
+          {categories.map((cat) => {
+            const count = products.filter(p => p.category === cat.name).length
+            return (
+              <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} className="category-card">
+                <div className="cat-circle" style={{
+                  width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden',
+                  background: cat.image ? 'transparent' : `linear-gradient(135deg, ${cat.color || '#c8102e'}55, ${cat.color || '#c8102e'}22)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  border: `2px solid ${cat.color || '#c8102e'}44`,
+                  boxShadow: `0 4px 20px ${cat.color || '#c8102e'}33`,
+                  position: 'relative'
+                }}>
+                  {cat.image
+                    ? <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: '2.8rem' }}>{cat.emoji || '📚'}</span>
+                  }
+                  <div className="cat-hover-overlay">
+                    {cat.name}
+                  </div>
+                </div>
               </Link>
-            ))}
-          </div>
-        </section>
-      )}
+            )
+          })}
+        </div>
+      </div>
 
       {/* PROMO BANNER */}
-      <section style={{ padding: '0 1.5rem 4rem', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(59,130,246,.15), rgba(139,92,246,.15))',
-          border: '1px solid rgba(59,130,246,.2)', borderRadius: 20,
-          padding: '2.5rem', display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center', justifyContent: 'space-between',
-        }}>
-          <div>
-            <div style={{ fontSize: '.75rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3b82f6', background: 'rgba(59,130,246,.1)', padding: '.25rem .75rem', borderRadius: 9999, display: 'inline-block', marginBottom: '.75rem' }}>Offre Limitée</div>
-            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.3rem,3vw,1.8rem)', color: '#eef0f5' }}>
-              Livraison Gratuite dès <span style={{ color: '#f59e0b' }}>499 DH</span>
-            </h2>
+      <div className="promo-wrap">
+        <div className="promo-banner">
+          <div className="promo-text">
+            <div className="section-tag">{currentT.lto}</div>
+            <h2>{currentT.freeShip}<br />{currentT.from} <span className="text-gold">499 DH</span></h2>
+            <p>{currentT.shipSub}</p>
           </div>
-          <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-            {[['1200+', 'Titres'], ['15K+', 'Clients'], ['30%', 'Économies']].map(([num, label]) => (
-              <div key={label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3b82f6' }}>{num}</div>
-                <div style={{ fontSize: '.75rem', color: '#8b96b0' }}>{label}</div>
-              </div>
-            ))}
+          <div className="promo-stats">
+            <div className="p-stat">
+              <div className="p-stat-num">1200+</div>
+              <div className="p-stat-label">{currentT.titles}</div>
+            </div>
+            <div className="p-stat">
+              <div className="p-stat-num">15K+</div>
+              <div className="p-stat-label">{currentT.clients}</div>
+            </div>
+            <div className="p-stat">
+              <div className="p-stat-num">30%</div>
+              <div className="p-stat-label">{currentT.savings}</div>
+            </div>
           </div>
-          <Link href="/best-offers" style={{
-            background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)',
-            color: '#fff', padding: '.75rem 1.5rem', borderRadius: 9999, fontWeight: 600, fontSize: '.9rem',
-          }}>
-            Voir toutes les offres ›
+          <Link href="/best-offers" className="btn-primary">
+            {currentT.seeAll}
           </Link>
         </div>
-      </section>
+      </div>
 
-      {/* FEATURED */}
+      {/* FEATURED PRODUCTS */}
       {featured.length > 0 && (
-        <section style={{ padding: '0 1.5rem 4rem', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: '.75rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3b82f6', background: 'rgba(59,130,246,.1)', padding: '.25rem .75rem', borderRadius: 9999, display: 'inline-block', marginBottom: '.75rem' }}>Tendances</div>
-            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: '#eef0f5' }}>Livres en Vedette</h2>
+        <div className="section">
+          <div className="section-header">
+            <div className="section-tag">{currentT.trend}</div>
+            <h2 className="section-title">{currentT.featBooks}</h2>
+            <p className="section-sub">{currentT.featSub}</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            {featured.map(p => <ProductCard key={p.id} product={p} />)}
+          <div>
+            <div className="products-grid">
+              {featured.map((p) => (
+                <ProductCard key={p.id} product={p as any} />
+              ))}
+            </div>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* PROMOS */}
+      {/* PROMO PRODUCTS */}
       {promos.length > 0 && (
-        <section style={{ padding: '0 1.5rem 4rem', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{ fontSize: '.75rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3b82f6', background: 'rgba(59,130,246,.1)', padding: '.25rem .75rem', borderRadius: 9999, display: 'inline-block', marginBottom: '.75rem' }}>Promotions</div>
-            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: '#eef0f5' }}>Offres Spéciales</h2>
+        <div className="section" style={{ paddingTop: 0 }}>
+          <div className="section-header">
+            <div className="section-tag">{currentT.promoTag}</div>
+            <h2 className="section-title">{currentT.specialOff}</h2>
+            <p className="section-sub">{currentT.promoSub}</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            {promos.map(p => <ProductCard key={p.id} product={p} />)}
+          <div className="scroll-wrap" style={{ padding: '0 1rem' }}>
+            <div className="products-grid">
+              {promos.map((p) => (
+                <ProductCard key={p.id} product={p as any} />
+              ))}
+            </div>
           </div>
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <Link href="/best-offers" style={{
-              background: 'linear-gradient(135deg,#3b82f6,#8b5cf6)',
-              color: '#fff', padding: '.75rem 1.75rem', borderRadius: 9999, fontWeight: 600,
-            }}>
-              Voir toutes les offres ›
+          <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+            <Link href="/best-offers" className="btn-primary">
+              {currentT.seeAll}
             </Link>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* ABOUT */}
-      <section id="about" style={{ padding: '4rem 1.5rem', background: '#0c1028' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', alignItems: 'start' }}>
-            <div>
-              <div style={{ fontSize: '.75rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: '#3b82f6', background: 'rgba(59,130,246,.1)', padding: '.25rem .75rem', borderRadius: 9999, display: 'inline-block', marginBottom: '.75rem' }}>Notre Histoire</div>
-              <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.5rem,3vw,2.2rem)', marginBottom: '1rem', color: '#eef0f5' }}>
-                ProExcel<br /><span style={{ color: '#f59e0b' }}>Votre Maktaba</span>
-              </h2>
-              <p style={{ color: '#8b96b0', lineHeight: 1.7, marginBottom: '1rem', fontSize: '.9rem' }}>
-                Depuis plus de 10 ans, ProExcel est la référence en matière de livres scolaires et parascolaires au Maroc.
+      {/* LOCATION & HOURS */}
+      <div style={{ background: 'var(--bg2)', borderTop: '1px solid var(--border)', padding: '5rem 2rem' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div className="section-header">
+            <div className="section-tag">{currentT.findUs}</div>
+            <h2 className="section-title">{currentT.ourStore}</h2>
+          </div>
+          <div className="location-grid" style={{ marginTop: '2.5rem' }}>
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem' }}>
+              <div style={{ fontWeight: 700, marginBottom: '1.25rem', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                {currentT.address}
+              </div>
+              <p style={{ color: 'var(--text2)', lineHeight: 1.8, fontSize: '0.9rem', marginBottom: '1rem' }}>
+                {currentT.realAddr}
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
-                {[['10+', 'Années'], ['1200+', 'Titres'], ['15K+', 'Clients'], ['48h', 'Livraison']].map(([n, l]) => (
-                  <div key={l} style={{ background: 'rgba(59,130,246,.07)', border: '1px solid rgba(59,130,246,.15)', borderRadius: 12, padding: '.75rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#3b82f6' }}>{n}</div>
-                    <div style={{ fontSize: '.72rem', color: '#8b96b0' }}>{l}</div>
+              <div style={{ borderRadius: '8px', overflow: 'hidden' }}>
+                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d207.26730226122532!2d-7.163565696074601!3d33.7793485957184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda7a61535e16707%3A0x99a79e97743e3a!2sBouznika!5e0!3m2!1sen!2sma!4v1777733390873!5m2!1sen!2sma" width="100%" height="200" style={{ border: 0 }} allowFullScreen={false} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+              </div>
+            </div>
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem' }}>
+              <div style={{ fontWeight: 700, marginBottom: '1.25rem', color: 'var(--primary)' }}>🕐 {currentT.hours}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.88rem' }}>
+                {[[currentT.monFri, '08:30 – 19:00'], [currentT.sat, '09:00 – 18:00'], [currentT.sun, '10:00 – 14:00'], [currentT.holidays, currentT.closed]].map(([day, time]) => (
+                  <div key={day} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ color: 'var(--text2)' }}>{day}</span>
+                    <span style={{ fontWeight: 600, color: time === currentT.closed ? 'var(--red)' : 'var(--text)' }}>{time}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div style={{ background: 'rgba(12,18,45,.65)', border: '1px solid rgba(59,130,246,.15)', borderRadius: 16, padding: '1.5rem' }}>
-              <h4 style={{ fontFamily: 'Inter, sans-serif', fontSize: '.9rem', fontWeight: 600, marginBottom: '1rem', color: '#eef0f5' }}>🕐 Horaires d&apos;Ouverture</h4>
-              {[['Lundi – Vendredi', '08:30 – 19:00'], ['Samedi', '09:00 – 18:00'], ['Dimanche', '10:00 – 14:00'], ['Jours fériés', 'Fermé']].map(([day, time]) => (
-                <div key={day} style={{ display: 'flex', justifyContent: 'space-between', padding: '.5rem 0', borderBottom: '1px solid rgba(59,130,246,.1)', fontSize: '.85rem' }}>
-                  <span style={{ color: '#8b96b0' }}>{day}</span>
-                  <span style={{ color: '#eef0f5', fontWeight: 500 }}>{time}</span>
-                </div>
-              ))}
-              <div style={{ marginTop: '1rem', fontSize: '.82rem', color: '#8b96b0', lineHeight: 1.7 }}>
-                📞 +212 6 12 34 56 78<br />
-                📧 contact@proexcel.ma
-              </div>
-            </div>
           </div>
         </div>
-      </section>
+      </div>
     </>
   )
 }
