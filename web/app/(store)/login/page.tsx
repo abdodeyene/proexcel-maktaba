@@ -8,8 +8,8 @@ export default async function LoginPage() {
     where: { key: { in: ['login_bg_image', 'site_logo'] } }
   })
   
-  const bgImage = settings.find(s => s.key === 'login_bg_image')?.value || ''
-  const siteLogo = settings.find(s => s.key === 'site_logo')?.value || '/logo.png'
+  const bgImage = settings.find((s: { key: string; value: string | null }) => s.key === 'login_bg_image')?.value ?? ''
+  const siteLogo = settings.find((s: { key: string; value: string | null }) => s.key === 'site_logo')?.value ?? '/logo.png'
 
   return <LoginClient initialBgImage={bgImage} initialLogoSrc={siteLogo} />
 }
