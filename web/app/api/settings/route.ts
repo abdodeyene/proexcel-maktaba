@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest) {
         create: { key, value: String(value) },
       })
     )
-    await Promise.all(ops)
+    await prisma.$transaction(ops)
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized')

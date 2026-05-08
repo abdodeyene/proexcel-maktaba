@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/auth'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
+export const maxDuration = 60
+
 async function uploadToSupabase(file: File): Promise<string> {
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
