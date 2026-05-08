@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function OrderReceiptPage({ params }: { params: { id: string } }) {
   const orderId = parseInt(params.id, 10)
   if (isNaN(orderId)) return notFound()
