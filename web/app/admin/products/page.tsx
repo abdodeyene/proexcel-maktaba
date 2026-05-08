@@ -115,7 +115,10 @@ function MediaUpload({ media, setMedia }: { media: MediaItem[]; setMedia: (m: Me
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       })
-      if (!res.ok) throw new Error('Upload échoué')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.message || `HTTP ${res.status}`)
+      }
       const { urls } = await res.json()
       const items: MediaItem[] = urls.map((url: string) => ({
         url,
@@ -123,7 +126,8 @@ function MediaUpload({ media, setMedia }: { media: MediaItem[]; setMedia: (m: Me
       }))
       setMedia([...media, ...items])
     } catch (e) {
-      setUploadError('Erreur upload. Réessayez.')
+      const msg = e instanceof Error ? e.message : 'Erreur upload'
+      setUploadError(msg)
       console.error('Upload error:', e)
     } finally {
       setUploading(false)
