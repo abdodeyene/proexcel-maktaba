@@ -27,8 +27,16 @@ export default function SettingsProvider() {
             root.style.setProperty('--home-bg-grad', `linear-gradient(135deg, ${data.home_bg1}, ${data.home_bg2})`)
         }
 
-        // Store them globally if needed by components without re-fetching
-        // (Like Header logo which we can update via event or just let it fetch itself)
+        // Dynamic favicon
+        if (data.site_favicon) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null
+          if (!link) {
+            link = document.createElement('link')
+            link.rel = 'icon'
+            document.head.appendChild(link)
+          }
+          link.href = data.site_favicon
+        }
 
         // Inject Pixels
         if (data.pixel_fb) {
