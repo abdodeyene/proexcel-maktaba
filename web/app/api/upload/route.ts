@@ -16,6 +16,7 @@ async function uploadToSupabase(file: File): Promise<string> {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
         'Content-Type': file.type || 'application/octet-stream',
         'x-upsert': 'true',
       },
