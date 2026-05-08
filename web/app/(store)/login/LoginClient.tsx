@@ -43,6 +43,8 @@ export default function LoginClient({
           setError('Connexion réussie mais aucun token reçu.')
         }
       } else {
+        const data = await res.json().catch(() => ({}))
+        // Try localStorage accounts (regular users)
         const accounts = JSON.parse(localStorage.getItem('proexcel_accounts') || '[]')
         const found = accounts.find((a: { email: string; password: string }) =>
           a.email === loginForm.email && a.password === loginForm.password
@@ -50,6 +52,8 @@ export default function LoginClient({
         if (found) {
           localStorage.setItem('proexcel_user', JSON.stringify({ email: found.email, name: found.name }))
           router.push('/')
+        } else if (res.status === 500) {
+          setError(`Erreur serveur: ${data.message || 'vérifiez les variables d\'environnement Vercel'}`)
         } else {
           setError('Email ou mot de passe incorrect.')
         }
