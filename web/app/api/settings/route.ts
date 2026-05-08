@@ -3,10 +3,14 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 
 export async function GET() {
-  const settings = await prisma.setting.findMany()
-  const map: Record<string, string | null> = {}
-  settings.forEach(s => { map[s.key] = s.value })
-  return NextResponse.json(map)
+  try {
+    const settings = await prisma.setting.findMany()
+    const map: Record<string, string | null> = {}
+    settings.forEach(s => { map[s.key] = s.value })
+    return NextResponse.json(map)
+  } catch {
+    return NextResponse.json({}, { status: 500 })
+  }
 }
 
 export async function PATCH(req: NextRequest) {

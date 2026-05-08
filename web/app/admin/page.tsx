@@ -136,7 +136,9 @@ export default function AdminDashboard() {
 
     const fetchStats = () =>
       fetch('/api/orders/stats', { headers: h })
-        .then(r => r.json()).then(setStats).catch(console.error)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data && typeof data.total === 'number') setStats(data) })
+        .catch(console.error)
 
     fetchStats()
 
@@ -257,7 +259,7 @@ export default function AdminDashboard() {
               <div className="stat-icon si-blue">💰</div>
             </div>
             <div className="stat-value">
-              {stats ? `${stats.revenue.toLocaleString('fr-FR')} DH` : '—'}
+              {stats?.revenue != null ? `${stats.revenue.toLocaleString('fr-FR')} DH` : '—'}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span className="stat-trend trend-up">▲ 4.2%</span>
