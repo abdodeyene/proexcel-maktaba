@@ -25,7 +25,8 @@ export async function GET() {
 
     return NextResponse.json({ message: 'Admin created successfully', email: user.email })
   } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
     console.error(e)
-    return NextResponse.json({ message: 'Error creating admin' }, { status: 500 })
+    return NextResponse.json({ message: msg }, { status: 500 })
   }
 }
