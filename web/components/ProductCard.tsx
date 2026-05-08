@@ -34,13 +34,13 @@ export default function ProductCard({ product }: { product: Product }) {
 
   let badge = null
   if (product.isPromo) {
-    badge = <span className="product-badge badge-promo">Promo</span>
+    badge = <span className="product-badge badge-promo">PROMO</span>
   } else if (product.isNew) {
     badge = <span className="product-badge badge-new">Nouveau</span>
   } else if (product.isBestOffer) {
-    badge = <span className="product-badge badge-best">Best</span>
+    badge = <span className="product-badge badge-best">Vedette</span>
   } else if (product.stock <= 5) {
-    badge = <span className="product-badge badge-stock">Stock</span>
+    badge = <span className="product-badge badge-stock">Stock limité</span>
   }
 
   const addToCart = (e: React.MouseEvent) => {
