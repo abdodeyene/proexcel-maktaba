@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 export async function GET() {
   const dbUrl = process.env.DATABASE_URL || process.env.DIRECT_URL || ''
-  const directUrl = process.env.DIRECT_URL || ''
 
   const envInfo = {
     DATABASE_URL: !!process.env.DATABASE_URL,
@@ -18,9 +18,8 @@ export async function GET() {
     return NextResponse.json({ message: 'DATABASE_URL and DIRECT_URL are both empty', envInfo }, { status: 500 })
   }
 
-  const prisma = new PrismaClient({
-    datasources: { db: { url: dbUrl } },
-  })
+  const adapter = new PrismaPg({ connectionString: dbUrl })
+  const prisma = new PrismaClient({ adapter })
 
   try {
     const existing = await prisma.user.findUnique({
