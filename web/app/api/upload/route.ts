@@ -5,11 +5,13 @@ import path from 'path'
 
 async function uploadToSupabase(file: File): Promise<string> {
   const bytes = await file.arrayBuffer()
+  const buffer = Buffer.from(bytes)
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const supabaseUrl = process.env.SUPABASE_URL!.replace(/\/$/, '')
 
   const res = await fetch(
-    `${process.env.SUPABASE_URL}/storage/v1/object/uploads/${filename}`,
+    `${supabaseUrl}/storage/v1/object/uploads/${filename}`,
     {
       method: 'POST',
       headers: {
@@ -17,11 +19,14 @@ async function uploadToSupabase(file: File): Promise<string> {
         'Content-Type': file.type || 'application/octet-stream',
         'x-upsert': 'true',
       },
-      body: bytes,
+      body: buffer,
     }
   )
-  if (!res.ok) throw new Error('Supabase upload failed')
-  return `${process.env.SUPABASE_URL}/storage/v1/object/public/uploads/${filename}`
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Supabase: ${res.status} – ${errText}`)
+  }
+  return `${supabaseUrl}/storage/v1/object/public/uploads/${filename}`
 }
 
 async function uploadToLocal(file: File): Promise<string> {
@@ -53,8 +58,8 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    if (e instanceof Error && e.message === 'Supabase upload failed')
-      return NextResponse.json({ message: 'Image upload failed' }, { status: 500 })
+    if (e instanceof Error && e.message.startsWith('Supabase:'))
+      return NextResponse.json({ message: e.message }, { status: 500 })
     return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
 }
