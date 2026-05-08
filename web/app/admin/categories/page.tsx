@@ -19,6 +19,7 @@ export default function AdminCategories() {
   const [form, setForm] = useState(EMPTY)
   const [loading, setLoading] = useState(false)
   const [imgUploading, setImgUploading] = useState(false)
+  const [imgError, setImgError] = useState('')
   const imgRef = useRef<HTMLInputElement>(null)
 
   function token() { return localStorage.getItem('proexcel_admin_token') || '' }
@@ -42,14 +43,18 @@ export default function AdminCategories() {
 
   async function uploadImage(file: File) {
     setImgUploading(true)
+    setImgError('')
     try {
       const fd = new FormData()
       fd.append('files', file)
       const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.message || `HTTP ${res.status}`)
+      }
       const { urls } = await res.json()
       if (urls[0]) setForm(f => ({ ...f, image: urls[0] }))
-    } catch { /* ignore */ }
+    } catch (e) { setImgError(e instanceof Error ? e.message : 'Erreur upload') }
     finally { setImgUploading(false) }
   }
 
@@ -154,6 +159,7 @@ export default function AdminCategories() {
                         {imgUploading ? '⏳ Upload…' : '📷 Choisir image'}
                       </span>
                     </label>
+                    {imgError && <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.25rem' }}>{imgError}</div>}
                     {form.image && (
                       <button className="btn-action btn-action-red" style={{ fontSize: '0.78rem' }} onClick={() => setForm(f => ({ ...f, image: '' }))}>
                         Supprimer

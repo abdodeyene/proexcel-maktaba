@@ -55,6 +55,7 @@ export default function AdminSettings() {
   const [slideUploading, setSlideUploading] = useState<number | null>(null)
   const slideImgRef = useRef<HTMLInputElement>(null)
   const [uploadingSlideIdx, setUploadingSlideIdx] = useState<number | null>(null)
+  const [uploadError, setUploadError] = useState('')
   const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES)
 
   // Combined settings state
@@ -166,6 +167,7 @@ export default function AdminSettings() {
 
   async function uploadSlideImage(idx: number, file: File, field: 'image' | 'imageMobile' | 'productImage' = 'image') {
     setSlideUploading(idx)
+    setUploadError('')
     try {
       const formData = new FormData()
       formData.append('files', file)
@@ -174,13 +176,16 @@ export default function AdminSettings() {
         headers: { Authorization: `Bearer ${token()}` },
         body: formData,
       })
-      if (!res.ok) throw new Error('Upload failed')
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.message || `HTTP ${res.status}`)
+      }
       const { urls } = await res.json()
       if (urls[0]) {
         const updated = slides.map((s, i) => i === idx ? { ...s, [field]: urls[0] } : s)
         setSlides(updated)
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { setUploadError(e instanceof Error ? e.message : 'Erreur upload') }
     finally { setSlideUploading(null) }
   }
 
@@ -215,6 +220,7 @@ export default function AdminSettings() {
       <div className="admin-topbar">
         <div className="topbar-title">Paramètres <span>Configuration globale</span></div>
         <div className="topbar-actions">
+          {uploadError && <span style={{ color: '#ef4444', fontSize: '0.8rem', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>⚠ {uploadError}</span>}
           <button className="btn-new" onClick={saveSettings} disabled={loading}>
             {loading ? 'Enregistrement…' : saved ? '💾 Enregistré !' : '💾 Sauvegarder tout'}
           </button>
@@ -348,13 +354,18 @@ export default function AdminSettings() {
                                   onChange={async e => {
                                     const file = e.target.files?.[0]
                                     if (!file) return
+                                    setUploadError('')
                                     const fd = new FormData()
                                     fd.append('files', file)
-                                    const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd })
-                                    if (res.ok) {
+                                    try {
+                                      const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd })
+                                      if (!res.ok) {
+                                        const data = await res.json().catch(() => ({}))
+                                        throw new Error(data.message || `HTTP ${res.status}`)
+                                      }
                                       const { urls } = await res.json()
                                       if (urls[0]) updateKey(item.settingKey, urls[0])
-                                    }
+                                    } catch (err) { setUploadError(err instanceof Error ? err.message : 'Erreur upload') }
                                     e.target.value = ''
                                   }}
                                 />
@@ -744,13 +755,18 @@ export default function AdminSettings() {
                                   onChange={async e => {
                                     const file = e.target.files?.[0]
                                     if (!file) return
+                                    setUploadError('')
                                     const fd = new FormData()
                                     fd.append('files', file)
-                                    const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd })
-                                    if (res.ok) {
+                                    try {
+                                      const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd })
+                                      if (!res.ok) {
+                                        const data = await res.json().catch(() => ({}))
+                                        throw new Error(data.message || `HTTP ${res.status}`)
+                                      }
                                       const { urls } = await res.json()
                                       if (urls[0]) updateKey(item.settingKey, urls[0])
-                                    }
+                                    } catch (err) { setUploadError(err instanceof Error ? err.message : 'Erreur upload') }
                                     e.target.value = ''
                                   }}
                                 />
