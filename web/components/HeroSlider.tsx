@@ -283,7 +283,7 @@ function PromoScene() {
   )
 }
 
-const SCENES = [BackpackScene, PrinterScene, PromoScene]
+const SCENES: Array<(() => JSX.Element) | null> = [BackpackScene, PrinterScene, PromoScene]
 
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0)
