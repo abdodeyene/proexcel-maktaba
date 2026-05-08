@@ -106,7 +106,7 @@ export default function LoginClient({
     }}>
       {/* Overlay for better readability if there is an image */}
       {bgImage && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 0 }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.62)', zIndex: 0 }} />
       )}
       
       {/* Brand above card */}
@@ -140,14 +140,14 @@ export default function LoginClient({
         animate={{ opacity: 1, scale: 1, rotateX: 0 }}
         transition={{ duration: 0.7, type: "spring", bounce: 0.4 }}
         style={{
-          background: 'rgba(10, 18, 40, 0.75)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          background: bgImage ? 'rgba(6, 10, 24, 0.92)' : 'rgba(10, 18, 40, 0.75)',
+          backdropFilter: bgImage ? 'blur(8px)' : 'blur(20px)',
+          WebkitBackdropFilter: bgImage ? 'blur(8px)' : 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
           borderRadius: '20px',
           padding: '2.25rem 2rem',
           width: '100%', maxWidth: '420px',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
           position: 'relative',
           zIndex: 1
         }}

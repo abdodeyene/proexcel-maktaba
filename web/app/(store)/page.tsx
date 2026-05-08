@@ -1,19 +1,79 @@
-import { prisma } from '@/lib/prisma'
+'use client'
+
+import { useState, useEffect } from 'react'
 import ProductCard from '@/components/ProductCard'
 import HeroSlider from '@/components/HeroSlider'
 import Link from 'next/link'
-import { cookies } from 'next/headers'
+import { useLang } from '@/components/LangContext'
 
-export const revalidate = 60
+type Feature = {
+  icon: string
+  titleFr: string
+  titleAr: string
+  subFr: string
+  subAr: string
+}
 
-export default async function HomePage() {
-  const cookieStore = await cookies()
-  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'fr'
+const DEFAULT_FEATURES: Feature[] = [
+  { icon: '🚚', titleFr: 'Livraison 48h', titleAr: 'توصيل خلال 48 ساعة', subFr: 'Partout au Maroc', subAr: 'في جميع أنحاء المغرب' },
+  { icon: '🔒', titleFr: 'Paiement Sécurisé', titleAr: 'دفع آمن', subFr: 'Transactions protégées', subAr: 'معاملات محمية' },
+  { icon: '📚', titleFr: '1200+ Titres', titleAr: '+1200 عنوان', subFr: 'Catalogue complet', subAr: 'كتالوج شامل' },
+  { icon: '⭐', titleFr: '15K+ Clients', titleAr: '+15000 عميل', subFr: 'Clients satisfaits', subAr: 'عملاء راضون' },
+]
 
-  const [products, categories] = await Promise.all([
-    prisma.product.findMany({ orderBy: { createdAt: 'desc' } }),
-    prisma.category.findMany({ orderBy: { name: 'asc' } }),
-  ])
+type Product = {
+  id: number
+  title: string
+  titleAr?: string | null
+  author?: string | null
+  price: number
+  compareAtPrice?: number | null
+  category?: string | null
+  g1?: string | null
+  g2?: string | null
+  emoji?: string | null
+  stock: number
+  rating?: number | null
+  reviewCount?: number | null
+  isPromo?: boolean | null
+  isNew?: boolean | null
+  isBestOffer?: boolean | null
+  description?: string | null
+  variants?: unknown | null
+  media?: unknown | null
+  reviews?: unknown | null
+}
+
+type Category = {
+  id: number
+  name: string
+  emoji?: string | null
+  color?: string | null
+  image?: string | null
+}
+
+export default function HomePage() {
+  const { lang } = useLang()
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES)
+
+  useEffect(() => {
+    fetch('/api/products').then(r => r.json()).then(d => {
+      if (Array.isArray(d)) setProducts(d)
+    }).catch(() => {})
+    fetch('/api/categories').then(r => r.json()).then(d => {
+      if (Array.isArray(d)) setCategories(d)
+    }).catch(() => {})
+    fetch('/api/settings').then(r => r.json()).then(d => {
+      if (d?.features_strip) {
+        try {
+          const parsed = JSON.parse(d.features_strip)
+          if (Array.isArray(parsed) && parsed.length > 0) setFeatures(parsed)
+        } catch { /* keep defaults */ }
+      }
+    }).catch(() => {})
+  }, [])
 
   const featured = products.filter(p => p.isBestOffer).slice(0, 8)
   const promos = products.filter(p => p.isPromo).slice(0, 8)
@@ -81,12 +141,27 @@ export default async function HomePage() {
     }
   }
 
-  const currentT = t[locale as 'fr' | 'ar']
+  const currentT = t[lang]
 
   return (
     <>
       {/* HERO SLIDER */}
       <HeroSlider />
+
+      {/* FEATURES STRIP */}
+      <div className="features-strip">
+        <div className="features-inner">
+          {features.map((f, i) => (
+            <div key={i} className="feature-item">
+              <span className="feature-icon">{f.icon}</span>
+              <div>
+                <div className="feature-title">{lang === 'ar' ? f.titleAr : f.titleFr}</div>
+                <div className="feature-sub">{lang === 'ar' ? f.subAr : f.subFr}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* CATEGORIES */}
       <div className="section">
@@ -95,27 +170,22 @@ export default async function HomePage() {
           <h2 className="section-title">{currentT.ourCat}</h2>
           <p className="section-sub">{currentT.catSub}</p>
         </div>
-        <div className="categories-grid" id="categoriesGrid">
+        <div className="cats-grid" id="categoriesGrid">
           {categories.map((cat) => {
             const count = products.filter(p => p.category === cat.name).length
             return (
-              <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} className="category-card">
-                <div className="cat-circle" style={{
-                  width: '120px', height: '120px', borderRadius: '50%', overflow: 'hidden',
-                  background: cat.image ? 'transparent' : `linear-gradient(135deg, ${cat.color || '#c8102e'}55, ${cat.color || '#c8102e'}22)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  border: `2px solid ${cat.color || '#c8102e'}44`,
-                  boxShadow: `0 4px 20px ${cat.color || '#c8102e'}33`,
-                  position: 'relative'
-                }}>
+              <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} className="cat-card">
+                <div className="cat-card-icon">
                   {cat.image
-                    ? <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ fontSize: '2.8rem' }}>{cat.emoji || '📚'}</span>
+                    ? <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                    : <span>{cat.emoji || '📚'}</span>
                   }
-                  <div className="cat-hover-overlay">
-                    {cat.name}
-                  </div>
                 </div>
+                <div className="cat-card-body">
+                  <div className="cat-card-name">{cat.name}</div>
+                  <div className="cat-card-count">{count} {lang === 'fr' ? 'articles' : 'منتج'}</div>
+                </div>
+                <div className="cat-card-chevron">{lang === 'ar' ? '‹' : '›'}</div>
               </Link>
             )
           })}
@@ -208,7 +278,7 @@ export default async function HomePage() {
                 {currentT.realAddr}
               </p>
               <div style={{ borderRadius: '8px', overflow: 'hidden' }}>
-                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d207.26730226122532!2d-7.163565696074601!3d33.7793485957184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda7a61535e16707%3A0x99a79e97743e3a!2sBouznika!5e0!3m2!1sen!2sma!4v1777733390873!5m2!1sen!2sma" width="100%" height="200" style={{ border: 0 }} allowFullScreen={false} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d207.26730226122532!2d-7.163565696074601!3d33.7793485957184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xda7a61535e16707%3A0x99a79e97743e3a!2sBouznika!5e0!3m2!1sen!2sma!4v1777733390873!5m2!1sen!2sma" width="100%" height="200" style={{ border: 0 }} allowFullScreen={false} loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
               </div>
             </div>
             <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem' }}>

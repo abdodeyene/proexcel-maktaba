@@ -5,6 +5,7 @@ const TABS = [
   { id: 'tab-colors', icon: '🎨', title: 'Couleurs', sub: 'Thème & boutons' },
   { id: 'tab-store', icon: '🏪', title: 'Informations', sub: 'Logo, nom, contact' },
   { id: 'tab-slider', icon: '🖼️', title: 'Hero Slider', sub: 'Images & diapositives' },
+  { id: 'tab-features', icon: '✨', title: 'Bandelette', sub: 'Icônes & textes sous slider' },
   { id: 'tab-home', icon: '🏠', title: 'Page d\'accueil', sub: 'Titres des sections' },
   { id: 'tab-about', icon: '📄', title: 'À Propos', sub: 'Images de la section histoire' },
   { id: 'tab-map', icon: '📍', title: 'Horaires', sub: 'Adresse & ouverture' },
@@ -25,7 +26,23 @@ type Slide = {
   imageMobile?: string
   bgColor1: string
   bgColor2: string
+  productImage?: string
 }
+
+type Feature = {
+  icon: string
+  titleFr: string
+  titleAr: string
+  subFr: string
+  subAr: string
+}
+
+const DEFAULT_FEATURES: Feature[] = [
+  { icon: '🚚', titleFr: 'Livraison 48h', titleAr: 'توصيل خلال 48 ساعة', subFr: 'Partout au Maroc', subAr: 'في جميع أنحاء المغرب' },
+  { icon: '🔒', titleFr: 'Paiement Sécurisé', titleAr: 'دفع آمن', subFr: 'Transactions protégées', subAr: 'معاملات محمية' },
+  { icon: '📚', titleFr: '1200+ Titres', titleAr: '+1200 عنوان', subFr: 'Catalogue complet', subAr: 'كتالوج شامل' },
+  { icon: '⭐', titleFr: '15K+ Clients', titleAr: '+15000 عميل', subFr: 'Clients satisfaits', subAr: 'عملاء راضون' },
+]
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState('tab-colors')
@@ -38,6 +55,7 @@ export default function AdminSettings() {
   const [slideUploading, setSlideUploading] = useState<number | null>(null)
   const slideImgRef = useRef<HTMLInputElement>(null)
   const [uploadingSlideIdx, setUploadingSlideIdx] = useState<number | null>(null)
+  const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES)
 
   // Combined settings state
   const [settings, setSettings] = useState({
@@ -113,6 +131,12 @@ export default function AdminSettings() {
               if (Array.isArray(parsed)) setSlides(parsed)
             } catch { /* keep defaults */ }
           }
+          if (data.features_strip) {
+            try {
+              const parsed = JSON.parse(data.features_strip)
+              if (Array.isArray(parsed)) setFeatures(parsed)
+            } catch { /* keep defaults */ }
+          }
         }
       })
       .catch(console.error)
@@ -127,7 +151,7 @@ export default function AdminSettings() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token()}`
         },
-        body: JSON.stringify({ ...settings, hero_slides: JSON.stringify(slides) })
+        body: JSON.stringify({ ...settings, hero_slides: JSON.stringify(slides), features_strip: JSON.stringify(features) })
       })
       if (res.ok) {
         setSaved(true)
@@ -140,7 +164,7 @@ export default function AdminSettings() {
     }
   }
 
-  async function uploadSlideImage(idx: number, file: File, field: 'image' | 'imageMobile' = 'image') {
+  async function uploadSlideImage(idx: number, file: File, field: 'image' | 'imageMobile' | 'productImage' = 'image') {
     setSlideUploading(idx)
     try {
       const formData = new FormData()
@@ -477,6 +501,38 @@ export default function AdminSettings() {
                       </div>
                     </div>
 
+                    {/* Product Image (right-side visual) */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <div className="s-label" style={{ marginBottom: '0.4rem' }}>
+                        🖼️ Image produit (visuel côté droit) — PNG fond transparent recommandé
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        {slide.productImage ? (
+                          <div style={{ width: '130px', height: '80px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--a-border)', flexShrink: 0, background: 'repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 0 0 / 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <img src={slide.productImage} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                          </div>
+                        ) : (
+                          <div style={{ width: '130px', height: '80px', borderRadius: '8px', border: '2px dashed var(--a-border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--a-text2)', fontSize: '0.75rem', textAlign: 'center', padding: '0.5rem' }}>
+                            Aucune image
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                          <label style={{ cursor: 'pointer' }}>
+                            <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) uploadSlideImage(idx, e.target.files[0], 'productImage'); e.target.value = '' }} />
+                            <span className="btn-action" style={{ display: 'inline-block', cursor: 'pointer' }}>
+                              {slideUploading === idx ? '⏳ Upload…' : '🏷️ Image produit'}
+                            </span>
+                          </label>
+                          {slide.productImage && (
+                            <button className="btn-action btn-action-red" onClick={() => updateSlide(idx, 'productImage', '')}>✕ Supprimer</button>
+                          )}
+                          <div style={{ fontSize: '0.7rem', color: 'var(--a-text2)', maxWidth: '200px', lineHeight: 1.4 }}>
+                            Remplace l&apos;illustration automatique. PNG transparent recommandé.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Gradient colors (shown when no image) */}
                     {!slide.image && (
                       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
@@ -541,6 +597,83 @@ export default function AdminSettings() {
                 >
                   + Ajouter une diapositive
                 </button>
+              </div>
+            )}
+
+            {/* TAB: FEATURES STRIP */}
+            {activeTab === 'tab-features' && (
+              <div className="settings-panel active">
+                <div className="sp-section-title">Bandelette sous le slider</div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--a-text2)', marginBottom: '1.5rem' }}>
+                  Configurez les 4 éléments affichés dans la bandelette sous le slider (icône, titre FR/AR, sous-titre FR/AR).
+                </p>
+                {features.map((f, idx) => (
+                  <div key={idx} style={{ background: 'var(--a-bg)', border: '1px solid var(--a-border)', borderRadius: '10px', padding: '1.25rem', marginBottom: '1rem' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--a-text)' }}>
+                      Élément {idx + 1}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Icône</label>
+                        <input
+                          type="text"
+                          value={f.icon}
+                          onChange={e => setFeatures(features.map((x, i) => i === idx ? { ...x, icon: e.target.value } : x))}
+                          placeholder="🚚"
+                          style={{ width: '100%', padding: '0.5rem', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '6px', color: 'var(--a-text)', fontSize: '1.2rem', textAlign: 'center', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Titre (FR)</label>
+                        <input
+                          type="text"
+                          value={f.titleFr}
+                          onChange={e => setFeatures(features.map((x, i) => i === idx ? { ...x, titleFr: e.target.value } : x))}
+                          placeholder="Livraison 48h"
+                          style={{ width: '100%', padding: '0.5rem', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '6px', color: 'var(--a-text)', fontSize: '0.85rem', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Titre (AR)</label>
+                        <input
+                          type="text"
+                          value={f.titleAr}
+                          onChange={e => setFeatures(features.map((x, i) => i === idx ? { ...x, titleAr: e.target.value } : x))}
+                          placeholder="توصيل خلال 48 ساعة"
+                          dir="rtl"
+                          style={{ width: '100%', padding: '0.5rem', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '6px', color: 'var(--a-text)', fontSize: '0.85rem', outline: 'none', direction: 'rtl' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr', gap: '0.75rem' }}>
+                      <div />
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sous-titre (FR)</label>
+                        <input
+                          type="text"
+                          value={f.subFr}
+                          onChange={e => setFeatures(features.map((x, i) => i === idx ? { ...x, subFr: e.target.value } : x))}
+                          placeholder="Partout au Maroc"
+                          style={{ width: '100%', padding: '0.5rem', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '6px', color: 'var(--a-text)', fontSize: '0.85rem', outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sous-titre (AR)</label>
+                        <input
+                          type="text"
+                          value={f.subAr}
+                          onChange={e => setFeatures(features.map((x, i) => i === idx ? { ...x, subAr: e.target.value } : x))}
+                          placeholder="في جميع أنحاء المغرب"
+                          dir="rtl"
+                          style={{ width: '100%', padding: '0.5rem', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '6px', color: 'var(--a-text)', fontSize: '0.85rem', outline: 'none', direction: 'rtl' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ fontSize: '0.78rem', color: 'var(--a-text2)', marginTop: '0.5rem' }}>
+                  💡 Utilisez des emojis comme icônes (ex: 🚚, 🔒, 📚, ⭐). Cliquez sur "Enregistrer" pour appliquer.
+                </div>
               </div>
             )}
 

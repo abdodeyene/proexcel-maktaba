@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import { LangProvider } from '@/components/LangContext'
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -12,12 +13,14 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Header />
-      <div style={{ paddingTop: '68px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {children}
+    <LangProvider>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Header />
+        <div style={{ paddingTop: '68px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {children}
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </LangProvider>
   )
 }

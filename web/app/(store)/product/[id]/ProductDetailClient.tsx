@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
 import ProductCard from '@/components/ProductCard'
+import { useLang } from '@/components/LangContext'
 
 type Review = {
   id: string
@@ -17,6 +17,7 @@ type Review = {
 type Product = {
   id: number
   title: string
+  titleAr?: string | null
   author?: string | null
   price: number
   compareAtPrice?: number | null
@@ -31,32 +32,33 @@ type Product = {
   isNew?: boolean | null
   isBestOffer?: boolean | null
   description?: string | null
+  descriptionAr?: string | null
   variants?: string[] | any
   media?: unknown | null
   reviews?: unknown | null
 }
 
-export default function ProductDetailClient({ 
-  product, 
-  relatedProducts = [] 
-}: { 
+export default function ProductDetailClient({
+  product,
+  relatedProducts = []
+}: {
   product: Product
-  relatedProducts: Product[] 
+  relatedProducts: Product[]
 }) {
   const router = useRouter()
-  
+  const { lang } = useLang()
+
   // Format variants
-  const parsedVariants = Array.isArray(product.variants) 
-    ? product.variants 
-    : typeof product.variants === 'string' 
-      ? JSON.parse(product.variants) 
+  const parsedVariants = Array.isArray(product.variants)
+    ? product.variants
+    : typeof product.variants === 'string'
+      ? JSON.parse(product.variants)
       : ['Brochée', 'Reliée', 'Numérique']
 
   const [selectedVariant, setSelectedVariant] = useState(parsedVariants[0] || 'Standard')
   const [qty, setQty] = useState(1)
   const [activeTab, setActiveTab] = useState<'desc' | 'reviews'>('desc')
   const [activeImg, setActiveImg] = useState(0)
-  const [dir, setDir] = useState(0)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [reviewForm, setReviewForm] = useState({ name: '', rating: 5, comment: '' })
   const [submitting, setSubmitting] = useState(false)
@@ -69,8 +71,8 @@ export default function ProductDetailClient({
     ? (product.media as string[]).filter(url => url && !url.match(/\.(mp4|webm|mov|avi)$/i))
     : []
 
-  const nextImg = () => { setDir(1); setActiveImg((prev) => (prev + 1) % mediaImages.length); }
-  const prevImg = () => { setDir(-1); setActiveImg((prev) => (prev - 1 + mediaImages.length) % mediaImages.length); }
+  const nextImg = () => setActiveImg((prev) => (prev + 1) % mediaImages.length)
+  const prevImg = () => setActiveImg((prev) => (prev - 1 + mediaImages.length) % mediaImages.length)
 
   const disc = product.compareAtPrice && product.compareAtPrice > product.price
     ? Math.round((1 - product.price / product.compareAtPrice) * 100)
@@ -79,7 +81,6 @@ export default function ProductDetailClient({
   const addToCart = () => {
     const cart = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
     const key = `${product.id}_${selectedVariant}`
-    
     const existingIdx = cart.findIndex((i: any) => i.key === key)
     if (existingIdx >= 0) {
       cart[existingIdx].qty += qty
@@ -96,11 +97,8 @@ export default function ProductDetailClient({
         image: mediaImages.length > 0 ? mediaImages[0] : null
       })
     }
-    
     localStorage.setItem('proexcel_cart', JSON.stringify(cart))
     window.dispatchEvent(new Event('cart-updated'))
-    
-    // Smooth scroll to cart or redirect?
     router.push('/cart')
   }
 
@@ -124,22 +122,67 @@ export default function ProductDetailClient({
     setSubmitting(false)
   }
 
+  // Bilingual content
+  const isAr = lang === 'ar'
+  const displayTitle = isAr && product.titleAr ? product.titleAr : product.title
+  const displayDesc = isAr && product.descriptionAr ? product.descriptionAr : product.description
+
+  const ui = {
+    fr: {
+      home: 'Accueil', format: 'Format', qty: 'Quantité',
+      atc: '+ Ajouter au panier', buyNow: 'Acheter maintenant',
+      stock: 'Stock', inStock: `En stock (${product.stock})`, outStock: 'Rupture de stock',
+      delivery: 'Livraison', deliveryVal: '24-48h partout au Maroc',
+      returns: 'Retour', returnsVal: '7 jours satisfait ou remboursé',
+      payment: 'Paiement', paymentVal: 'Sécurisé – CMI / Virement / Cash',
+      desc: 'Description', reviews: 'Avis clients',
+      noDesc: 'Aucune description disponible.',
+      noReviews: 'Aucun avis pour ce produit. Soyez le premier !',
+      writeReview: '✍️ Écrire un avis', yourReview: 'Votre avis',
+      yourName: 'Votre nom', rating: 'Note', comment: 'Commentaire',
+      namePlaceholder: 'Ex: Youssef M.',
+      commentPlaceholder: 'Partagez votre expérience…',
+      publish: 'Publier', publishing: 'Envoi…', cancel: 'Annuler',
+      related: 'Produits similaires', relatedTag: 'Vous pourriez aimer',
+      reviews_count: (n: number) => `${n} avis`
+    },
+    ar: {
+      home: 'الرئيسية', format: 'النوع', qty: 'الكمية',
+      atc: '+ إضافة للسلة', buyNow: 'اشتري الآن',
+      stock: 'المخزون', inStock: `متوفر (${product.stock})`, outStock: 'نفد المخزون',
+      delivery: 'التوصيل', deliveryVal: '24-48 ساعة في جميع أنحاء المغرب',
+      returns: 'الإرجاع', returnsVal: '7 أيام مع استرداد كامل',
+      payment: 'الدفع', paymentVal: 'آمن – بطاقة / تحويل / نقداً',
+      desc: 'الوصف', reviews: 'آراء العملاء',
+      noDesc: 'لا يوجد وصف متاح لهذا المنتج.',
+      noReviews: 'لا توجد آراء بعد. كن أول من يشارك تجربته!',
+      writeReview: '✍️ كتابة رأي', yourReview: 'رأيك',
+      yourName: 'اسمك', rating: 'التقييم', comment: 'التعليق',
+      namePlaceholder: 'مثال: محمد أ.',
+      commentPlaceholder: 'شارك تجربتك مع هذا المنتج…',
+      publish: 'نشر', publishing: 'جارٍ الإرسال…', cancel: 'إلغاء',
+      related: 'منتجات مشابهة', relatedTag: 'قد يعجبك أيضاً',
+      reviews_count: (n: number) => `${n} آراء`
+    }
+  }
+  const T = ui[lang]
+
   return (
     <div>
       <div className="product-page-wrap">
-        
+
         {/* Breadcrumb */}
         <div className="breadcrumb-nav" style={{ marginBottom: '1.5rem' }}>
-          <Link href="/" style={{ color: 'var(--text2)' }}>Accueil</Link>
+          <Link href="/" style={{ color: 'var(--text2)' }}>{T.home}</Link>
           <span>›</span>
-          <span style={{ color: 'var(--text2)' }}>{product.category || 'Livre'}</span>
+          <span style={{ color: 'var(--text2)' }}>{product.category || (isAr ? 'كتاب' : 'Livre')}</span>
           <span>›</span>
-          <span style={{ color: 'var(--text2)' }}>{product.title}</span>
+          <span style={{ color: 'var(--text2)' }}>{displayTitle}</span>
         </div>
 
         {/* Layout */}
         <div className="product-layout">
-          
+
           {/* Gallery */}
           <div className="gallery-sticky">
             <div className="product-gallery-flex">
@@ -162,7 +205,7 @@ export default function ProductDetailClient({
                     <img
                       key={activeImg}
                       src={mediaImages[activeImg]}
-                      alt={product.title}
+                      alt={displayTitle}
                       style={{ width: '100%', height: 'auto', maxHeight: '500px', objectFit: 'contain', display: 'block' }}
                     />
                     {mediaImages.length > 1 && (
@@ -182,7 +225,7 @@ export default function ProductDetailClient({
                     }}
                   >
                     <div className="book-spine"></div>
-                    <div className="book-title-cover" style={{ fontSize: '1.4rem' }}>{product.title}</div>
+                    <div className="book-title-cover" style={{ fontSize: '1.4rem' }}>{displayTitle}</div>
                     <div className="book-author-cover" style={{ fontSize: '0.9rem' }}>{product.author}</div>
                   </div>
                 )}
@@ -192,7 +235,26 @@ export default function ProductDetailClient({
 
           {/* Info */}
           <div className="detail-info">
-            <h1 className="product-detail-title" style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '0.5rem', lineHeight: 1.1 }}>{product.title}</h1>
+
+            {/* Bilingual Title */}
+            <div style={{ marginBottom: '0.5rem' }}>
+              <h1 className="product-detail-title" style={{ fontSize: '2.2rem', fontWeight: 800, lineHeight: 1.1, marginBottom: isAr ? 0 : '0.25rem' }}>
+                {displayTitle}
+              </h1>
+              {/* Show the other language title as subtitle */}
+              {product.titleAr && product.title && (
+                <p style={{
+                  fontSize: '1rem',
+                  color: 'var(--text2)',
+                  fontFamily: isAr ? 'var(--font-latin)' : 'var(--font-arabic)',
+                  marginTop: '0.25rem',
+                  fontWeight: 500,
+                  letterSpacing: isAr ? '0.01em' : 0
+                }}>
+                  {isAr ? product.title : product.titleAr}
+                </p>
+              )}
+            </div>
 
             {/* Rating */}
             <div className="rating-row" style={{ marginBottom: '1rem' }}>
@@ -203,7 +265,7 @@ export default function ProductDetailClient({
                 {product.rating || '5.0'}
               </span>
               <span className="r-count" style={{ color: 'var(--text2)', marginLeft: '0.5rem', fontSize: '0.85rem' }}>
-                ({liveReviews.length > 0 ? liveReviews.length : (product.reviewCount || 0)} avis)
+                ({T.reviews_count(liveReviews.length > 0 ? liveReviews.length : (product.reviewCount || 0))})
               </span>
             </div>
 
@@ -218,20 +280,23 @@ export default function ProductDetailClient({
               )}
             </div>
 
-            {/* Description */}
-            {product.description && (
-              <p style={{ color: 'var(--text2)', lineHeight: 1.6, fontSize: '0.95rem', marginBottom: '2rem' }}>
-                {product.description}
+            {/* Description (short) */}
+            {displayDesc && (
+              <p style={{
+                color: 'var(--text2)', lineHeight: 1.7, fontSize: '0.95rem', marginBottom: '2rem',
+                fontFamily: isAr ? 'var(--font-arabic)' : 'var(--font-latin)'
+              }}>
+                {displayDesc.replace(/<[^>]+>/g, '').slice(0, 200)}{displayDesc.length > 200 ? '…' : ''}
               </p>
             )}
 
             {/* Variants */}
             {parsedVariants.length > 0 && (
               <div className="variant-group" style={{ marginBottom: '1.5rem' }}>
-                <div className="v-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.8rem' }}>Format</div>
+                <div className="v-label" style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.8rem' }}>{T.format}</div>
                 <div className="v-opts" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {parsedVariants.map((v: string) => (
-                    <button 
+                    <button
                       key={v}
                       className={`v-opt ${selectedVariant === v ? 'active' : ''}`}
                       onClick={() => setSelectedVariant(v)}
@@ -243,9 +308,9 @@ export default function ProductDetailClient({
               </div>
             )}
 
-            {/* Quantity + ATC side by side */}
+            {/* Quantity + ATC */}
             <div style={{ marginBottom: '1rem' }}>
-              <div className="v-label" style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '0.6rem', color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Quantité</div>
+              <div className="v-label" style={{ fontWeight: 700, fontSize: '0.75rem', marginBottom: '0.6rem', color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '1.5px' }}>{T.qty}</div>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div className="qty-wrap" style={{ width: '126px', flexShrink: 0, margin: 0, background: 'transparent', border: '1px solid var(--border)' }}>
                   <button className="q-btn" onClick={() => setQty(prev => Math.max(1, prev - 1))} style={{ background: 'transparent' }}>−</button>
@@ -253,7 +318,7 @@ export default function ProductDetailClient({
                   <button className="q-btn" onClick={() => setQty(prev => prev + 1)} style={{ background: 'transparent' }}>+</button>
                 </div>
                 <button className="btn-atc" onClick={addToCart} style={{ flex: 1, minWidth: '160px', height: '44px', fontSize: '0.9rem' }}>
-                  + Ajouter au panier
+                  {T.atc}
                 </button>
               </div>
             </div>
@@ -261,19 +326,19 @@ export default function ProductDetailClient({
             {/* Buy Now */}
             <div style={{ marginBottom: '2rem' }}>
               <button className="btn-buy" onClick={() => { addToCart(); router.push('/checkout'); }}>
-                Acheter maintenant
+                {T.buyNow}
               </button>
             </div>
 
             {/* Meta */}
             <div className="product-meta">
               <div className="meta-row">
-                <span>Stock:</span>
-                <strong>{product.stock > 0 ? `En stock (${product.stock})` : 'Rupture de stock'}</strong>
+                <span>{T.stock}:</span>
+                <strong>{product.stock > 0 ? T.inStock : T.outStock}</strong>
               </div>
-              <div className="meta-row"><span>Livraison:</span> <strong>24-48h</strong> partout au Maroc</div>
-              <div className="meta-row"><span>Retour:</span> <strong>7 jours</strong> satisfait ou remboursé</div>
-              <div className="meta-row"><span>Paiement:</span> <strong>Sécurisé</strong> – CMI / Virement / Cash</div>
+              <div className="meta-row"><span>{T.delivery}:</span> <strong>24-48h</strong> {isAr ? 'في المغرب' : 'partout au Maroc'}</div>
+              <div className="meta-row"><span>{T.returns}:</span> <strong>7 {isAr ? 'أيام' : 'jours'}</strong> {isAr ? 'مع استرداد كامل' : 'satisfait ou remboursé'}</div>
+              <div className="meta-row"><span>{T.payment}:</span> <strong>{isAr ? 'آمن' : 'Sécurisé'}</strong> – CMI / {isAr ? 'تحويل / نقداً' : 'Virement / Cash'}</div>
             </div>
           </div>
 
@@ -282,38 +347,76 @@ export default function ProductDetailClient({
         {/* TABS: Description, Reviews */}
         <div className="tabs-section">
           <div className="tab-nav">
-            <button 
-              className={`tab-btn ${activeTab === 'desc' ? 'active' : ''}`} 
+            <button
+              className={`tab-btn ${activeTab === 'desc' ? 'active' : ''}`}
               onClick={() => setActiveTab('desc')}
             >
-              Description
+              {T.desc}
             </button>
-            <button 
-              className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`} 
+            <button
+              className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
               onClick={() => setActiveTab('reviews')}
             >
-              Avis clients
+              {T.reviews}
             </button>
           </div>
-          
+
           {activeTab === 'desc' && (
             <div className="tab-pane active" id="tabDesc">
-              {product.description ? (
-                <div dangerouslySetInnerHTML={{ __html: product.description }} />
+              {/* Show both languages */}
+              {product.description || product.titleAr ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                  {/* French description */}
+                  {product.description && (
+                    <div style={{ direction: 'ltr' }}>
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                        fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
+                        color: 'var(--primary)', marginBottom: '0.75rem',
+                        padding: '0.2rem 0.6rem', border: '1px solid var(--border)', borderRadius: '4px'
+                      }}>
+                        🇫🇷 Français
+                      </div>
+                      <div
+                        className="desc-content"
+                        style={{ fontFamily: 'var(--font-latin)' }}
+                        dangerouslySetInnerHTML={{ __html: product.description }}
+                      />
+                    </div>
+                  )}
+                  {/* Arabic description */}
+                  {product.descriptionAr && (
+                    <div style={{ direction: 'rtl', borderTop: product.description ? '1px solid var(--border)' : 'none', paddingTop: product.description ? '2rem' : 0 }}>
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                        fontSize: '0.68rem', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
+                        color: 'var(--primary)', marginBottom: '0.75rem',
+                        padding: '0.2rem 0.6rem', border: '1px solid var(--border)', borderRadius: '4px',
+                        fontFamily: 'var(--font-arabic)'
+                      }}>
+                        🇲🇦 العربية
+                      </div>
+                      <div
+                        className="desc-content"
+                        style={{ fontFamily: 'var(--font-arabic)', lineHeight: 2 }}
+                        dangerouslySetInnerHTML={{ __html: product.descriptionAr }}
+                      />
+                    </div>
+                  )}
+                  {!product.description && !product.descriptionAr && (
+                    <p style={{ color: 'var(--text2)' }}>{T.noDesc}</p>
+                  )}
+                </div>
               ) : (
-                <p>Aucune description détaillée disponible pour cet ouvrage.</p>
+                <p>{T.noDesc}</p>
               )}
             </div>
           )}
 
           {activeTab === 'reviews' && (
             <div className="tab-pane active" id="tabReviews">
-
-              {/* Reviews list */}
               {liveReviews.length === 0 && !submitted && (
-                <p style={{ color: 'var(--text2)', marginBottom: '1.5rem' }}>
-                  Aucun avis pour ce produit. Soyez le premier à partager votre expérience !
-                </p>
+                <p style={{ color: 'var(--text2)', marginBottom: '1.5rem' }}>{T.noReviews}</p>
               )}
               {liveReviews.map((rev) => (
                 <div key={rev.id} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1rem', marginBottom: '1rem' }}>
@@ -328,7 +431,6 @@ export default function ProductDetailClient({
                 </div>
               ))}
 
-              {/* Add review button */}
               {!showReviewForm && (
                 <button
                   onClick={() => setShowReviewForm(true)}
@@ -340,48 +442,28 @@ export default function ProductDetailClient({
                     cursor: 'pointer', transition: 'all 0.3s ease',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 20px rgba(230,200,0,0.5)'
-                    ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#c8a400'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'
-                    ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#d0d0d0'
-                  }}
                 >
-                  ✍️ Écrire un avis
+                  {T.writeReview}
                 </button>
               )}
 
-              {/* Review form */}
               {showReviewForm && (
-                <div style={{
-                  background: 'var(--card)', border: '1px solid var(--border)',
-                  borderRadius: '12px', padding: '1.25rem', marginTop: '1rem'
-                }}>
-                  <div style={{ fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem' }}>Votre avis</div>
+                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem', marginTop: '1rem' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem' }}>{T.yourReview}</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text2)', display: 'block', marginBottom: '0.3rem' }}>Votre nom</label>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text2)', display: 'block', marginBottom: '0.3rem' }}>{T.yourName}</label>
                       <input
-                        style={{
-                          width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
-                          border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)',
-                          fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box'
-                        }}
-                        placeholder="Ex: Youssef M."
+                        style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box' }}
+                        placeholder={T.namePlaceholder}
                         value={reviewForm.name}
                         onChange={e => setReviewForm(f => ({ ...f, name: e.target.value }))}
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '0.78rem', color: 'var(--text2)', display: 'block', marginBottom: '0.3rem' }}>Note</label>
+                      <label style={{ fontSize: '0.78rem', color: 'var(--text2)', display: 'block', marginBottom: '0.3rem' }}>{T.rating}</label>
                       <select
-                        style={{
-                          width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
-                          border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)',
-                          fontSize: '0.88rem', outline: 'none', cursor: 'pointer'
-                        }}
+                        style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.88rem', outline: 'none', cursor: 'pointer' }}
                         value={reviewForm.rating}
                         onChange={e => setReviewForm(f => ({ ...f, rating: Number(e.target.value) }))}
                       >
@@ -392,15 +474,11 @@ export default function ProductDetailClient({
                     </div>
                   </div>
                   <div style={{ marginBottom: '0.75rem' }}>
-                    <label style={{ fontSize: '0.78rem', color: 'var(--text2)', display: 'block', marginBottom: '0.3rem' }}>Commentaire</label>
+                    <label style={{ fontSize: '0.78rem', color: 'var(--text2)', display: 'block', marginBottom: '0.3rem' }}>{T.comment}</label>
                     <textarea
                       rows={3}
-                      style={{
-                        width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
-                        border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)',
-                        fontSize: '0.88rem', outline: 'none', resize: 'vertical', boxSizing: 'border-box'
-                      }}
-                      placeholder="Partagez votre expérience avec ce produit…"
+                      style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.88rem', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
+                      placeholder={T.commentPlaceholder}
                       value={reviewForm.comment}
                       onChange={e => setReviewForm(f => ({ ...f, comment: e.target.value }))}
                     />
@@ -409,25 +487,15 @@ export default function ProductDetailClient({
                     <button
                       disabled={submitting || !reviewForm.name.trim() || !reviewForm.comment.trim()}
                       onClick={submitReview}
-                      style={{
-                        padding: '0.6rem 1.25rem',
-                        background: 'var(--primary)', color: '#fff',
-                        border: 'none', borderRadius: '8px', fontWeight: 700,
-                        fontSize: '0.88rem', cursor: 'pointer',
-                        opacity: submitting ? 0.7 : 1
-                      }}
+                      style={{ padding: '0.6rem 1.25rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}
                     >
-                      {submitting ? 'Envoi…' : 'Publier'}
+                      {submitting ? T.publishing : T.publish}
                     </button>
                     <button
                       onClick={() => { setShowReviewForm(false); setReviewForm({ name: '', rating: 5, comment: '' }) }}
-                      style={{
-                        padding: '0.6rem 1rem', background: 'transparent',
-                        border: '1px solid var(--border)', borderRadius: '8px',
-                        fontSize: '0.88rem', cursor: 'pointer', color: 'var(--text2)'
-                      }}
+                      style={{ padding: '0.6rem 1rem', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.88rem', cursor: 'pointer', color: 'var(--text2)' }}
                     >
-                      Annuler
+                      {T.cancel}
                     </button>
                   </div>
                 </div>
@@ -441,8 +509,8 @@ export default function ProductDetailClient({
           <div className="related-wrap">
             <div className="related-inner">
               <div className="section-header" style={{ textAlign: 'left', marginBottom: '2rem' }}>
-                <div className="section-tag">Vous pourriez aimer</div>
-                <h2 className="section-title">Produits similaires</h2>
+                <div className="section-tag">{T.relatedTag}</div>
+                <h2 className="section-title">{T.related}</h2>
               </div>
               <div className="products-grid">
                 {relatedProducts.map(p => (

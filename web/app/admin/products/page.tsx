@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 type Product = {
   id: number
   title: string
+  titleAr?: string | null
   price: number
   compareAtPrice?: number | null
   author?: string | null
@@ -16,6 +17,7 @@ type Product = {
   g1?: string | null
   g2?: string | null
   description?: string | null
+  descriptionAr?: string | null
   variants?: unknown | null
   media?: unknown | null
   colors?: unknown | null
@@ -24,9 +26,10 @@ type Product = {
 type MediaItem = { url: string; type: 'image' | 'video' }
 
 const EMPTY = {
-  title: '', author: '', price: '', compareAtPrice: '',
+  title: '', titleAr: '', author: '', price: '', compareAtPrice: '',
   category: '', emoji: '📦', g1: '#1a237e', g2: '#3949ab',
-  stock: '0', isPromo: false, isBestOffer: false, isNew: false, description: '',
+  stock: '0', isPromo: false, isBestOffer: false, isNew: false,
+  description: '', descriptionAr: '',
   variants: [] as string[],
   colors: [] as string[],
 }
@@ -263,13 +266,13 @@ export default function AdminProducts() {
     const images = Array.isArray(p.media) ? (p.media as string[]) : []
 
     setForm({
-      title: p.title, author: p.author || '', price: String(p.price),
+      title: p.title, titleAr: p.titleAr || '', author: p.author || '', price: String(p.price),
       compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '',
       category: p.category || '', emoji: p.emoji || '📦',
       g1: p.g1 || '#1a237e', g2: p.g2 || '#3949ab',
       stock: String(p.stock), isPromo: !!p.isPromo,
       isBestOffer: !!p.isBestOffer, isNew: !!p.isNew,
-      description: p.description || '',
+      description: p.description || '', descriptionAr: (p as any).descriptionAr || '',
       variants,
       colors,
     })
@@ -283,6 +286,7 @@ export default function AdminProducts() {
     setSaveError('')
     const body = {
       title: form.title,
+      titleAr: form.titleAr || null,
       author: form.author || null,
       price: Number(form.price),
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
@@ -295,6 +299,7 @@ export default function AdminProducts() {
       isBestOffer: form.isBestOffer,
       isNew: form.isNew,
       description: form.description || null,
+      descriptionAr: form.descriptionAr || null,
       variants: form.variants,
       colors: form.colors,
       media: media.map(m => m.url),
@@ -468,9 +473,17 @@ export default function AdminProducts() {
               <div className="a-card" style={{ padding: '1.25rem' }}>
                 <input
                   className="cp-title-input"
-                  placeholder="Titre du produit"
+                  placeholder="Titre du produit (Français)"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
+                />
+                <input
+                  className="cp-title-input"
+                  placeholder="عنوان المنتج (بالعربية)"
+                  dir="rtl"
+                  style={{ marginTop: '0.6rem', fontFamily: "'Noto Kufi Arabic', 'Cairo', sans-serif", fontSize: '1rem' }}
+                  value={form.titleAr}
+                  onChange={e => setForm({ ...form, titleAr: e.target.value })}
                 />
                 <select
                   className="cp-cat-select"
@@ -501,15 +514,28 @@ export default function AdminProducts() {
                 </div>
               </div>
 
-              {/* Description */}
+              {/* Description FR */}
               <div className="a-card">
                 <div className="a-card-header">
-                  <span className="a-card-title">Description</span>
+                  <span className="a-card-title">🇫🇷 Description (Français)</span>
                 </div>
                 <div style={{ padding: '1rem' }}>
                   <RichEditor
                     value={form.description}
                     onChange={v => setForm({ ...form, description: v })}
+                  />
+                </div>
+              </div>
+
+              {/* Description AR */}
+              <div className="a-card">
+                <div className="a-card-header">
+                  <span className="a-card-title">🇲🇦 الوصف (بالعربية)</span>
+                </div>
+                <div style={{ padding: '1rem', direction: 'rtl' }}>
+                  <RichEditor
+                    value={form.descriptionAr}
+                    onChange={v => setForm({ ...form, descriptionAr: v })}
                   />
                 </div>
               </div>

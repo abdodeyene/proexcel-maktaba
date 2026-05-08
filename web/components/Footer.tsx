@@ -2,28 +2,32 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useLang } from '@/components/LangContext'
 
 export default function Footer() {
-  const [lang, setLang] = useState<'fr' | 'ar'>('fr')
+  const { lang } = useLang()
   const [logoSrc, setLogoSrc] = useState('/logo.png')
-
+  const [logoLoaded, setLogoLoaded] = useState(false)
   const [socials, setSocials] = useState({ fb: '', ig: '', tw: '', yt: '' })
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('proexcel_lang') as 'fr' | 'ar' | null
-    if (savedLang) setLang(savedLang)
-    fetch('/api/settings').then(r => r.json()).then(d => { 
-      if(d?.site_logo) setLogoSrc(d.site_logo)
+    fetch('/api/settings').then(r => r.json()).then(d => {
+      if (d?.site_logo) {
+        const img = new Image()
+        img.onload = () => { setLogoSrc(d.site_logo); setLogoLoaded(true) }
+        img.onerror = () => setLogoLoaded(true)
+        img.src = d.site_logo
+      } else {
+        setLogoLoaded(true)
+      }
       setSocials({
         fb: d?.store_facebook || '',
         ig: d?.store_instagram || '',
         tw: d?.store_twitter || '',
         yt: d?.store_youtube || ''
       })
-    }).catch(()=>{})
+    }).catch(() => setLogoLoaded(true))
   }, [])
-
-  const locale = lang
 
   const t = {
     fr: {
@@ -33,12 +37,6 @@ export default function Footer() {
       offers: 'Meilleures Offres',
       about: 'À Propos',
       contact: 'Contact',
-      cat: 'Catégories',
-      math: 'Mathématiques',
-      sci: 'Sciences',
-      lang: 'Langues',
-      info: 'Informatique',
-      pack: 'Packs',
       infoTitle: 'Infos',
       return: 'Politique de retour',
       terms: "Conditions d'utilisation",
@@ -68,12 +66,22 @@ export default function Footer() {
     }
   }
 
-  const currentT = t[locale as 'fr' | 'ar']
+  const currentT = t[lang]
+
   return (
     <footer>
       <div className="footer-grid" style={{ gridTemplateColumns: '2fr 1fr 1fr' }}>
         <div className="f-brand">
-          <img src={logoSrc} alt="ProExcel" style={{ height: '45px', objectFit: 'contain', marginBottom: '1rem', display: 'block' }} />
+          {logoLoaded ? (
+            <img
+              src={logoSrc}
+              alt="ProExcel"
+              style={{ height: '45px', objectFit: 'contain', marginBottom: '1rem', display: 'block' }}
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          ) : (
+            <div style={{ height: '45px', marginBottom: '1rem' }} />
+          )}
           <p className="f-desc">{currentT.desc}</p>
           <div className="f-socials">
             {socials.fb && (
@@ -122,11 +130,11 @@ export default function Footer() {
         <div className="f-col">
           <h4>{currentT.infoTitle}</h4>
           <ul className="f-links">
-            <li><a href="#">{currentT.return}</a></li>
-            <li><a href="#">{currentT.terms}</a></li>
-            <li><a href="#">{currentT.privacy}</a></li>
-            <li><a href="#">{currentT.shipping}</a></li>
-            <li><a href="#">{currentT.faq}</a></li>
+            <li><Link href="/terms#retour">{currentT.return}</Link></li>
+            <li><Link href="/terms">{currentT.terms}</Link></li>
+            <li><Link href="/terms#confidentialite">{currentT.privacy}</Link></li>
+            <li><Link href="/terms#livraison">{currentT.shipping}</Link></li>
+            <li><Link href="/terms#faq">{currentT.faq}</Link></li>
           </ul>
         </div>
       </div>

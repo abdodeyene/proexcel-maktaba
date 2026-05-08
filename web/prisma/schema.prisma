@@ -33,6 +33,8 @@ model Product {
   isBestOffer    Boolean  @default(false)
   isNew          Boolean  @default(false)
   description    String?
+  titleAr        String?
+  descriptionAr  String?
   variants       Json?
   media          Json?
   colors         Json?

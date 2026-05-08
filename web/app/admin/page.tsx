@@ -134,8 +134,11 @@ export default function AdminDashboard() {
     const t = localStorage.getItem('proexcel_admin_token')
     const h = { Authorization: `Bearer ${t}` }
 
-    fetch('/api/orders/stats', { headers: h })
-      .then(r => r.json()).then(setStats).catch(console.error)
+    const fetchStats = () =>
+      fetch('/api/orders/stats', { headers: h })
+        .then(r => r.json()).then(setStats).catch(console.error)
+
+    fetchStats()
 
     fetch('/api/orders', { headers: h })
       .then(r => r.json())
@@ -148,6 +151,9 @@ export default function AdminDashboard() {
       .catch(console.error)
 
     setVisitors(Array.from({ length: 14 }, () => Math.floor(Math.random() * 80 + 20)))
+
+    const interval = setInterval(fetchStats, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   const chartData = useMemo(
@@ -177,9 +183,23 @@ export default function AdminDashboard() {
           <input placeholder="Rechercher…" />
         </div>
         <div className="topbar-actions">
-          <div className="topbar-btn topbar-notif" title="Notifications">
-            🔔 <span className="notif-dot"></span>
-          </div>
+          <Link href="/admin/orders" className="topbar-btn topbar-notif" title={`${stats?.pending ?? 0} commandes en attente`} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            {(stats?.pending ?? 0) > 0 && (
+              <span style={{
+                position: 'absolute', top: '-7px', right: '-7px',
+                background: '#e8352a', color: '#fff', fontSize: '0.62rem', fontWeight: 800,
+                minWidth: '18px', height: '18px', borderRadius: '9px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px',
+                lineHeight: 1, boxShadow: '0 2px 8px rgba(232,53,42,0.5)'
+              }}>
+                {stats?.pending}
+              </span>
+            )}
+          </Link>
           <Link href="/admin/products" className="btn-new">
             + Nouveau produit
           </Link>

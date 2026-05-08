@@ -1,18 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import { useLang } from '@/components/LangContext'
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
-  const [lang, setLang] = useState<'fr' | 'ar'>('fr')
   const [logoSrc, setLogoSrc] = useState('/logo.png')
+  const [logoLoaded, setLogoLoaded] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
+  const { lang, setLang } = useLang()
+  const imgRef = useRef<HTMLImageElement>(null)
 
   useEffect(() => {
     const updateCart = () => {
@@ -32,17 +34,23 @@ export default function Header() {
       document.documentElement.setAttribute('data-theme', 'dark')
     }
 
-    const savedLang = localStorage.getItem('proexcel_lang') as 'fr' | 'ar' | null
-    if (savedLang) {
-      setLang(savedLang)
-      document.documentElement.setAttribute('dir', savedLang === 'ar' ? 'rtl' : 'ltr')
-      document.documentElement.setAttribute('lang', savedLang)
-    }
-
+    // Load logo from API - silent background fetch
     fetch('/api/settings')
       .then(r => r.json())
-      .then(d => { if (d?.site_logo) setLogoSrc(d.site_logo) })
-      .catch(() => {})
+      .then(d => {
+        if (d?.site_logo) {
+          const img = new Image()
+          img.onload = () => {
+            setLogoSrc(d.site_logo)
+            setLogoLoaded(true)
+          }
+          img.onerror = () => setLogoLoaded(true)
+          img.src = d.site_logo
+        } else {
+          setLogoLoaded(true)
+        }
+      })
+      .catch(() => setLogoLoaded(true))
 
     return () => {
       window.removeEventListener('cart-updated', updateCart)
@@ -58,13 +66,8 @@ export default function Header() {
   }
 
   const toggleLang = () => {
-    const newLang = lang === 'fr' ? 'ar' : 'fr'
-    setLang(newLang)
-    localStorage.setItem('proexcel_lang', newLang)
-    document.cookie = `NEXT_LOCALE=${newLang}; path=/; max-age=31536000`
-    document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr')
-    document.documentElement.setAttribute('lang', newLang)
-    window.location.reload()
+    setLang(lang === 'fr' ? 'ar' : 'fr')
+    setMenuOpen(false)
   }
 
   const t = {
@@ -85,10 +88,20 @@ export default function Header() {
 
           <Link href="/" className="logo">
             <img
+              ref={imgRef}
               src={logoSrc}
               alt="ProExcel Maktaba"
               className="logo-img"
+              style={{ opacity: logoLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
+              onLoad={() => setLogoLoaded(true)}
+              onError={() => {
+                setLogoLoaded(true)
+                if (imgRef.current) imgRef.current.style.display = 'none'
+              }}
             />
+            {!logoLoaded && (
+              <span style={{ fontFamily: 'inherit', fontSize: '1.3rem', fontWeight: 800 }}>ProExcel</span>
+            )}
           </Link>
 
           <nav className="header-nav-center">
@@ -111,12 +124,22 @@ export default function Header() {
               )}
             </button>
 
-            <button className="btn-icon desk-only" title="Langue" onClick={toggleLang}>
-               {lang === 'fr' ? (
-                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-               ) : (
-                 <span style={{ fontSize: '11px', fontWeight: 'bold' }}>AR</span>
-               )}
+            {/* Language Toggle - No Reload */}
+            <button
+              className="btn-lang desk-only"
+              title="Changer de langue"
+              onClick={toggleLang}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                padding: '0 0.8rem', height: '38px', borderRadius: '8px',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)',
+                cursor: 'pointer', transition: 'all 0.3s', color: 'var(--text2)',
+                fontWeight: 700, fontSize: lang === 'ar' ? '0.78rem' : '0.7rem',
+                fontFamily: lang === 'ar' ? "'IBM Plex Arabic', sans-serif" : 'inherit'
+              }}
+            >
+              <span style={{ fontSize: '0.95rem' }}>🌐</span>
+              {currentT.lang}
             </button>
 
             <Link href="/cart" className="btn-icon" title="Panier">
@@ -146,7 +169,9 @@ export default function Header() {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             )}
           </button>
-          <button className="btn-lang btn-lang-mob" onClick={() => { toggleLang(); setMenuOpen(false) }}>{currentT.lang}</button>
+          <button className="btn-lang btn-lang-mob" onClick={toggleLang}>
+            {currentT.lang}
+          </button>
           <Link href="/login" className="btn-icon" style={{ display: 'flex', marginLeft: 'auto' }} onClick={() => setMenuOpen(false)} title={currentT.login}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '15px', height: '15px' }}>
               <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>

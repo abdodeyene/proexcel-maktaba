@@ -184,7 +184,6 @@ export default function BestOffersClient({ products, categories }: { products: P
 
         <div>
           <div className="offers-content-head">
-            <span className="offers-count">{filtered.length} livre{filtered.length !== 1 && 's'} trouvé{filtered.length !== 1 && 's'}</span>
             <select className="sort-select" value={sort} onChange={e => setSort(e.target.value)}>
               <option value="default">Trier par défaut</option>
               <option value="price-asc">Prix croissant</option>

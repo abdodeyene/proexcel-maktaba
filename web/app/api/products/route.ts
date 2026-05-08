@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const product = await prisma.product.create({
       data: {
         title: dto.title,
+        titleAr: dto.titleAr ?? null,
         author: dto.author ?? null,
         price: Number(dto.price),
         compareAtPrice: dto.compareAtPrice ? Number(dto.compareAtPrice) : null,
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
         isBestOffer: Boolean(dto.isBestOffer),
         isNew: Boolean(dto.isNew),
         description: dto.description ?? null,
+        descriptionAr: dto.descriptionAr ?? null,
         variants: dto.variants ?? [],
         colors: dto.colors ?? [],
         media: dto.media ?? [],
