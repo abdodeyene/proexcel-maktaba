@@ -3,22 +3,25 @@ import { requireAuth } from '@/lib/auth'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
-async function uploadToCloudinary(file: File): Promise<string> {
+async function uploadToSupabase(file: File): Promise<string> {
   const bytes = await file.arrayBuffer()
-  const blob = new Blob([bytes], { type: file.type })
-
-  const fd = new FormData()
-  fd.append('file', blob, file.name)
-  fd.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET!)
-  fd.append('folder', 'proexcel')
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
   const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
-    { method: 'POST', body: fd }
+    `${process.env.SUPABASE_URL}/storage/v1/object/uploads/${filename}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        'Content-Type': file.type || 'application/octet-stream',
+        'x-upsert': 'true',
+      },
+      body: bytes,
+    }
   )
-  if (!res.ok) throw new Error('Cloudinary upload failed')
-  const data = await res.json()
-  return data.secure_url as string
+  if (!res.ok) throw new Error('Supabase upload failed')
+  return `${process.env.SUPABASE_URL}/storage/v1/object/public/uploads/${filename}`
 }
 
 async function uploadToLocal(file: File): Promise<string> {
@@ -40,8 +43,8 @@ export async function POST(req: NextRequest) {
 
     const urls: string[] = []
     for (const file of files) {
-      const url = process.env.CLOUDINARY_CLOUD_NAME
-        ? await uploadToCloudinary(file)
+      const url = process.env.SUPABASE_URL
+        ? await uploadToSupabase(file)
         : await uploadToLocal(file)
       urls.push(url)
     }
@@ -50,7 +53,7 @@ export async function POST(req: NextRequest) {
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    if (e instanceof Error && e.message === 'Cloudinary upload failed')
+    if (e instanceof Error && e.message === 'Supabase upload failed')
       return NextResponse.json({ message: 'Image upload failed' }, { status: 500 })
     return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
