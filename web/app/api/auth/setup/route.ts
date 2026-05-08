@@ -1,17 +1,34 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 
-// Creates the admin user if it doesn't exist yet.
-// Call once: GET /api/auth/setup
 export async function GET() {
+  const dbUrl = process.env.DATABASE_URL || process.env.DIRECT_URL || ''
+  const directUrl = process.env.DIRECT_URL || ''
+
+  const envInfo = {
+    DATABASE_URL: !!process.env.DATABASE_URL,
+    DIRECT_URL: !!process.env.DIRECT_URL,
+    JWT_SECRET: !!process.env.JWT_SECRET,
+    SUPABASE_URL: !!process.env.SUPABASE_URL,
+    NODE_ENV: process.env.NODE_ENV,
+  }
+
+  if (!dbUrl) {
+    return NextResponse.json({ message: 'DATABASE_URL and DIRECT_URL are both empty', envInfo }, { status: 500 })
+  }
+
+  const prisma = new PrismaClient({
+    datasources: { db: { url: dbUrl } },
+  })
+
   try {
     const existing = await prisma.user.findUnique({
       where: { email: 'proexcel2026@gmail.com' },
     })
 
     if (existing) {
-      return NextResponse.json({ message: 'Admin already exists', email: existing.email })
+      return NextResponse.json({ message: 'Admin already exists', email: existing.email, envInfo })
     }
 
     const hash = await bcrypt.hash('proexcel2026@@', 10)
@@ -23,10 +40,12 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ message: 'Admin created successfully', email: user.email })
+    return NextResponse.json({ message: 'Admin created successfully', email: user.email, envInfo })
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e)
     console.error(e)
-    return NextResponse.json({ message: msg }, { status: 500 })
+    return NextResponse.json({ message: msg, envInfo }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
