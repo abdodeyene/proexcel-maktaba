@@ -29,6 +29,8 @@ export async function PATCH(req: NextRequest) {
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-    return NextResponse.json({ message: 'Server error' }, { status: 500 })
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('Settings PATCH error:', e)
+    return NextResponse.json({ message: msg }, { status: 500 })
   }
 }
