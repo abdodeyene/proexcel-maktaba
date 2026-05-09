@@ -6,6 +6,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const category = searchParams.get('category')
+    const niveau = searchParams.get('niveau')
     const isPromo = searchParams.get('isPromo')
     const isBestOffer = searchParams.get('isBestOffer')
     const isNew = searchParams.get('isNew')
@@ -13,6 +14,7 @@ export async function GET(req: NextRequest) {
 
     const where: Record<string, unknown> = {}
     if (category) where.category = category
+    if (niveau) where.niveau = niveau
     if (isPromo === 'true') where.isPromo = true
     if (isBestOffer === 'true') where.isBestOffer = true
     if (isNew === 'true') where.isNew = true
@@ -37,6 +39,7 @@ export async function POST(req: NextRequest) {
         price: Number(dto.price),
         compareAtPrice: dto.compareAtPrice ? Number(dto.compareAtPrice) : null,
         category: dto.category ?? null,
+        niveau: dto.niveau ?? null,
         emoji: dto.emoji ?? '📦',
         g1: dto.g1 ?? '#1a237e',
         g2: dto.g2 ?? '#3949ab',

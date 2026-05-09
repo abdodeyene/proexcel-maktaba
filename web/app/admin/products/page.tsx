@@ -9,6 +9,7 @@ type Product = {
   compareAtPrice?: number | null
   author?: string | null
   category?: string | null
+  niveau?: string | null
   stock: number
   isPromo: boolean
   isBestOffer: boolean
@@ -27,7 +28,7 @@ type MediaItem = { url: string; type: 'image' | 'video' }
 
 const EMPTY = {
   title: '', titleAr: '', author: '', price: '', compareAtPrice: '',
-  category: '', emoji: '📦', g1: '#1a237e', g2: '#3949ab',
+  category: '', niveau: '', emoji: '📦', g1: '#1a237e', g2: '#3949ab',
   stock: '0', isPromo: false, isBestOffer: false, isNew: false,
   description: '', descriptionAr: '',
   variants: [] as string[],
@@ -272,7 +273,7 @@ export default function AdminProducts() {
     setForm({
       title: p.title, titleAr: p.titleAr || '', author: p.author || '', price: String(p.price),
       compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '',
-      category: p.category || '', emoji: p.emoji || '📦',
+      category: p.category || '', niveau: p.niveau || '', emoji: p.emoji || '📦',
       g1: p.g1 || '#1a237e', g2: p.g2 || '#3949ab',
       stock: String(p.stock), isPromo: !!p.isPromo,
       isBestOffer: !!p.isBestOffer, isNew: !!p.isNew,
@@ -295,6 +296,7 @@ export default function AdminProducts() {
       price: Number(form.price),
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
       category: form.category || null,
+      niveau: form.niveau || null,
       emoji: form.emoji || '📦',
       g1: form.g1,
       g2: form.g2,
@@ -497,6 +499,17 @@ export default function AdminProducts() {
                 >
                   <option value="">Sélectionner une catégorie</option>
                   {cats.map(c => <option key={c}>{c}</option>)}
+                </select>
+                <select
+                  className="cp-cat-select"
+                  style={{ marginTop: '0.6rem' }}
+                  value={form.niveau}
+                  onChange={e => setForm({ ...form, niveau: e.target.value })}
+                >
+                  <option value="">Niveau scolaire (optionnel)</option>
+                  <option value="Primaire">Primaire</option>
+                  <option value="College">Collège</option>
+                  <option value="Lycee">Lycée</option>
                 </select>
                 <input
                   className="cp-title-input"

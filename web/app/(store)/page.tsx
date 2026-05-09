@@ -6,6 +6,7 @@ import HeroSlider from '@/components/HeroSlider'
 import Link from 'next/link'
 import { useLang } from '@/components/LangContext'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { usePathname } from 'next/navigation'
 
 type Feature = {
   icon: string
@@ -80,6 +81,7 @@ const STAGGER = ['', 'reveal-d1', 'reveal-d2', 'reveal-d3', 'reveal-d4', 'reveal
 
 export default function HomePage() {
   const { lang } = useLang()
+  const pathname = usePathname()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES)
@@ -87,21 +89,38 @@ export default function HomePage() {
   useScrollAnimation()
 
   useEffect(() => {
-    fetch('/api/products').then(r => r.json()).then(d => {
-      if (Array.isArray(d)) setProducts(d)
-    }).catch(() => {})
-    fetch('/api/categories').then(r => r.json()).then(d => {
-      if (Array.isArray(d)) setCategories(d)
-    }).catch(() => {})
-    fetch('/api/settings').then(r => r.json()).then(d => {
-      if (d?.features_strip) {
-        try {
-          const parsed = JSON.parse(d.features_strip)
-          if (Array.isArray(parsed) && parsed.length > 0) setFeatures(parsed)
-        } catch { /* keep defaults */ }
-      }
-    }).catch(() => {})
-  }, [])
+    let alive = true
+
+    const loadData = () => {
+      fetch('/api/products').then(r => r.json()).then(d => {
+        if (alive && Array.isArray(d)) setProducts(d)
+      }).catch(() => {})
+      fetch('/api/categories').then(r => r.json()).then(d => {
+        if (alive && Array.isArray(d)) setCategories(d)
+      }).catch(() => {})
+      fetch('/api/settings').then(r => r.json()).then(d => {
+        if (!alive) return
+        if (d?.features_strip) {
+          try {
+            const parsed = JSON.parse(d.features_strip)
+            if (Array.isArray(parsed) && parsed.length > 0) setFeatures(parsed)
+          } catch { /* keep defaults */ }
+        }
+      }).catch(() => {})
+    }
+
+    loadData()
+
+    const onVisible = () => { if (document.visibilityState === 'visible') loadData() }
+    window.addEventListener('focus', loadData)
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      alive = false
+      window.removeEventListener('focus', loadData)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [pathname])
 
   const featured = products.filter(p => p.isBestOffer).slice(0, 8)
   const promos = products.filter(p => p.isPromo).slice(0, 6)
@@ -213,7 +232,7 @@ export default function HomePage() {
       name: T.primaire,
       years: T.primaireYears,
       desc: T.primaireDesc,
-      href: '/best-offers?cat=Primaire',
+      href: '/primaire',
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
@@ -225,7 +244,7 @@ export default function HomePage() {
       name: T.college,
       years: T.collegeYears,
       desc: T.collegeDesc,
-      href: '/best-offers?cat=College',
+      href: '/college',
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -238,7 +257,7 @@ export default function HomePage() {
       name: T.lycee,
       years: T.lyceeYears,
       desc: T.lyceeDesc,
-      href: '/best-offers?cat=Lycee',
+      href: '/lycee',
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
@@ -360,21 +379,23 @@ export default function HomePage() {
             const count = products.filter(p => p.category === cat.name).length
             return (
               <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} className={`cat-card scroll-reveal ${STAGGER[Math.min(idx, 6)]}`}>
-                <div className="cat-card-icon">
+                <div className="cat-card-bg">
                   {cat.image
-                    ? <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
-                    : (
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                      </svg>
-                    )
+                    ? <img src={cat.image} alt={cat.name} />
+                    : <div className="cat-card-bg-fallback" />
                   }
                 </div>
-                <div className="cat-card-body">
-                  <div className="cat-card-name">{cat.name}</div>
-                  <div className="cat-card-count">{count} {lang === 'fr' ? 'articles' : 'منتج'}</div>
+                <div className="cat-card-overlay" />
+                <div className="cat-card-content">
+                  <div className="cat-card-name">
+                    <span className="cat-dot" />
+                    {cat.name}
+                  </div>
+                  <div className="cat-card-footer">
+                    <span className="cat-card-count">{count} {lang === 'fr' ? 'articles' : 'منتج'}</span>
+                    <span className="cat-card-arrow">{lang === 'ar' ? '‹' : '›'}</span>
+                  </div>
                 </div>
-                <div className="cat-card-chevron">{lang === 'ar' ? '‹' : '›'}</div>
               </Link>
             )
           })}

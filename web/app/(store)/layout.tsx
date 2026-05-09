@@ -16,7 +16,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
     <LangProvider>
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header />
-        <div style={{ paddingTop: '68px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div key={pathname} style={{ paddingTop: '68px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
         <Footer />

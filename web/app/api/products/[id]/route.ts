@@ -23,6 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         price: Number(dto.price),
         compareAtPrice: dto.compareAtPrice ? Number(dto.compareAtPrice) : null,
         category: dto.category ?? null,
+        niveau: dto.niveau ?? null,
         emoji: dto.emoji ?? '📦',
         g1: dto.g1 ?? '#1a237e',
         g2: dto.g2 ?? '#3949ab',

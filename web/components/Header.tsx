@@ -71,8 +71,8 @@ export default function Header() {
   }
 
   const t = {
-    fr: { home: 'Accueil', offers: 'Meilleures Offres', about: 'À Propos', contact: 'Contact', login: 'Connexion', search: 'Rechercher...', lang: 'عربي' },
-    ar: { home: 'الرئيسية', offers: 'أفضل العروض', about: 'من نحن', contact: 'اتصل بنا', login: 'دخول', search: 'بحث...', lang: 'Français' }
+    fr: { home: 'Accueil', offers: 'Meilleures Offres', levels: 'Niveaux', primaire: 'Primaire', college: 'Collège', lycee: 'Lycée', about: 'À Propos', contact: 'Contact', login: 'Connexion', search: 'Rechercher...', lang: 'عربي' },
+    ar: { home: 'الرئيسية', offers: 'أفضل العروض', levels: 'المستويات', primaire: 'ابتدائي', college: 'إعدادي', lycee: 'ثانوي', about: 'من نحن', contact: 'اتصل بنا', login: 'دخول', search: 'بحث...', lang: 'Français' }
   }
   const currentT = t[lang]
 
@@ -107,6 +107,23 @@ export default function Header() {
           <nav className="header-nav-center">
             <Link href="/" className={pathname === '/' ? 'active' : ''}>{currentT.home}</Link>
             <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>{currentT.offers}</Link>
+            <div className={`nav-dropdown-wrap ${['/primaire','/college','/lycee'].includes(pathname) ? 'active' : ''}`}>
+              <button className="nav-dropdown-btn">
+                {currentT.levels}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div className="nav-dropdown-menu">
+                <Link href="/primaire" className={pathname === '/primaire' ? 'active' : ''}>
+                  <span className="nav-dropdown-icon">🎒</span>{currentT.primaire}
+                </Link>
+                <Link href="/college" className={pathname === '/college' ? 'active' : ''}>
+                  <span className="nav-dropdown-icon">📚</span>{currentT.college}
+                </Link>
+                <Link href="/lycee" className={pathname === '/lycee' ? 'active' : ''}>
+                  <span className="nav-dropdown-icon">🎓</span>{currentT.lycee}
+                </Link>
+              </div>
+            </div>
             <Link href="/about" className={pathname === '/about' ? 'active' : ''}>{currentT.about}</Link>
             <Link href="/contact" className={pathname === '/contact' ? 'active' : ''}>{currentT.contact}</Link>
           </nav>
@@ -127,19 +144,10 @@ export default function Header() {
             {/* Language Toggle - No Reload */}
             <button
               className="btn-lang desk-only"
-              title="Changer de langue"
+              title={currentT.lang}
               onClick={toggleLang}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.3rem',
-                padding: '0 0.8rem', height: '38px', borderRadius: '8px',
-                background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)',
-                cursor: 'pointer', transition: 'all 0.3s', color: 'var(--text2)',
-                fontWeight: 700, fontSize: lang === 'ar' ? '0.78rem' : '0.7rem',
-                fontFamily: lang === 'ar' ? "'IBM Plex Arabic', sans-serif" : 'inherit'
-              }}
             >
-              <span style={{ fontSize: '0.95rem' }}>🌐</span>
-              {currentT.lang}
+              🌐
             </button>
 
             <Link href="/cart" className="btn-icon" title="Panier">
@@ -159,6 +167,10 @@ export default function Header() {
       <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`} id="mobileNav">
         <Link href="/" onClick={() => setMenuOpen(false)}>{currentT.home}</Link>
         <Link href="/best-offers" onClick={() => setMenuOpen(false)}>{currentT.offers}</Link>
+        <div className="mobile-nav-section">{currentT.levels}</div>
+        <Link href="/primaire" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎒 {currentT.primaire}</Link>
+        <Link href="/college" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>📚 {currentT.college}</Link>
+        <Link href="/lycee" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎓 {currentT.lycee}</Link>
         <Link href="/about" onClick={() => setMenuOpen(false)}>{currentT.about}</Link>
         <Link href="/contact" onClick={() => setMenuOpen(false)}>{currentT.contact}</Link>
         <div className="mobile-nav-extras">
@@ -169,8 +181,8 @@ export default function Header() {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             )}
           </button>
-          <button className="btn-lang btn-lang-mob" onClick={toggleLang}>
-            {currentT.lang}
+          <button className="btn-lang btn-lang-mob" onClick={toggleLang} title={currentT.lang}>
+            🌐
           </button>
           <Link href="/login" className="btn-icon" style={{ display: 'flex', marginLeft: 'auto' }} onClick={() => setMenuOpen(false)} title={currentT.login}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '15px', height: '15px' }}>

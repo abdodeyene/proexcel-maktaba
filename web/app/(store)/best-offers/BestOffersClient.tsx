@@ -25,7 +25,7 @@ type Product = {
 
 type Category = { id: number; name: string; emoji?: string | null; image?: string | null }
 
-export default function BestOffersClient({ products, categories }: { products: Product[]; categories: Category[] }) {
+export default function BestOffersClient({ products, categories, pageTitle, pageSubtitle }: { products: Product[]; categories: Category[]; pageTitle?: string; pageSubtitle?: string }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   
@@ -112,10 +112,10 @@ export default function BestOffersClient({ products, categories }: { products: P
           <div className="breadcrumb-nav">
             <Link href="/">Accueil</Link>
             <span>›</span>
-            <span>Meilleures Offres</span>
+            <span>{pageTitle || 'Meilleures Offres'}</span>
           </div>
-          <h1>Meilleures Offres</h1>
-          <p>Découvrez toute notre sélection de livres scolaires avec les meilleurs prix</p>
+          <h1>{pageTitle || 'Meilleures Offres'}</h1>
+          <p>{pageSubtitle || 'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}</p>
         </div>
       </div>
 

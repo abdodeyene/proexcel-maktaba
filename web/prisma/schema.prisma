@@ -23,6 +23,7 @@ model Product {
   price          Float
   compareAtPrice Float?
   category       String?
+  niveau         String?
   g1             String?  @default("#1a237e")
   g2             String?  @default("#3949ab")
   emoji          String?  @default("📦")

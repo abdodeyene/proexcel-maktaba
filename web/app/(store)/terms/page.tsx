@@ -277,10 +277,10 @@ export default function TermsPage() {
       </div>
 
       {/* Main Layout */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '3rem 2rem', display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2.5rem', alignItems: 'start' }}>
+      <div className="terms-layout">
 
         {/* Sidebar Nav */}
-        <div style={{ position: 'sticky', top: '88px' }}>
+        <div className="terms-sidebar">
           <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
             {currentSections.map((s) => (
               <button
@@ -324,6 +324,7 @@ export default function TermsPage() {
           {activeData && (
             <div
               key={activeData.id}
+              className="terms-content-card"
               style={{
                 background: 'var(--card)', border: '1px solid var(--border)',
                 borderRadius: '20px', padding: '2.5rem',
@@ -396,17 +397,6 @@ export default function TermsPage() {
         </div>
       </div>
 
-      {/* Mobile: stack sidebar below on small screens */}
-      <style>{`
-        @media (max-width: 768px) {
-          div[style*="gridTemplateColumns: 280px 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
-          div[style*="position: sticky"][style*="top: 88px"] {
-            position: static !important;
-          }
-        }
-      `}</style>
     </>
   )
 }
