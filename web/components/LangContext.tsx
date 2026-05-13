@@ -23,7 +23,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem('proexcel_lang') as Lang | null
-    if (saved === 'ar' || saved === 'fr') {
+    if (saved === 'ar' || saved === 'fr' || saved === 'en') {
       setLangState(saved)
       document.documentElement.setAttribute('dir', saved === 'ar' ? 'rtl' : 'ltr')
       document.documentElement.setAttribute('lang', saved)

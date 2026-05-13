@@ -202,7 +202,7 @@ export default function AdminDashboard() {
               </span>
             )}
           </Link>
-          <Link href="/admin/products" className="btn-new">
+          <Link href="/admin/products" className="btn-new proexcel-btn-admin-primary-action">
             + Nouveau produit
           </Link>
         </div>
@@ -501,7 +501,7 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td>
-                        <Link href="/admin/orders" className="btn-action">Voir</Link>
+                        <Link href="/admin/orders" className="btn-action proexcel-btn-admin-secondary-action">Voir</Link>
                       </td>
                     </tr>
                   ))}

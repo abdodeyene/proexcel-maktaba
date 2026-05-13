@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useLang } from '@/components/LangContext'
 
 export default function ThankYouClient() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { lang, t, isRTL } = useLang()
   const [orderNum, setOrderNum] = useState('#PE000001')
 
   useEffect(() => {
@@ -53,6 +55,21 @@ export default function ThankYouClient() {
     }
   }, [searchParams])
 
+  const T = {
+    badge: t('Commande confirmée', 'تم تأكيد الطلب'),
+    thanks: t('Merci pour votre commande !', 'شكراً جزيلاً لطلبك!'),
+    order: t('Commande n°', 'رقم الطلب'),
+    message: t(
+      'Votre commande a été reçue et est en cours de traitement. Vous serez contacté sous 24h pour la confirmation de livraison.',
+      'تم استلام طلبك وهو قيد المعالجة حالياً. سنتصل بك خلال 24 ساعة لتأكيد موعد التسليم.'
+    ),
+    step1: t('Commande reçue', 'تم الاستلام'),
+    step2: t('En préparation', 'قيد التحضير'),
+    step3: t('Livraison sous 48h', 'توصيل في 48 ساعة'),
+    btnHome: t("Retour à l'accueil", 'العودة للرئيسية'),
+    btnShop: t('Continuer mes achats', 'متابعة التسوق'),
+  }
+
   return (
     <>
       {/* Floating bg circles */}
@@ -65,7 +82,7 @@ export default function ThankYouClient() {
       {/* Confetti container */}
       <div className="ty-confetti-container" id="confettiContainer"></div>
 
-      <div className="thankyou-page">
+      <div className="thankyou-page" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="ty-card">
 
           {/* Animated checkmark */}
@@ -79,43 +96,43 @@ export default function ThankYouClient() {
           </div>
 
           <div className="ty-badge">
-            ✨ <span>Commande confirmée</span>
+            ✨ <span>{T.badge}</span>
           </div>
 
-          <h1 className="ty-title">Merci pour votre commande !</h1>
+          <h1 className="ty-title">{T.thanks}</h1>
 
           <p className="ty-order-num">
-            <span>Commande n°</span>
+            <span>{T.order}</span>{' '}
             <strong id="tyOrderNum">{orderNum}</strong>
           </p>
 
           <p className="ty-message">
-            Votre commande a été reçue et est en cours de traitement. Vous serez contacté sous 24h pour la confirmation de livraison.
+            {T.message}
           </p>
 
           {/* Steps */}
           <div className="ty-steps">
             <div className="ty-step">
               <div className="ty-step-icon">📦</div>
-              <div className="ty-step-label">Commande reçue</div>
+              <div className="ty-step-label">{T.step1}</div>
             </div>
             <div className="ty-step">
               <div className="ty-step-icon">⚙️</div>
-              <div className="ty-step-label">En préparation</div>
+              <div className="ty-step-label">{T.step2}</div>
             </div>
             <div className="ty-step">
               <div className="ty-step-icon">🚚</div>
-              <div className="ty-step-label">Livraison sous 48h</div>
+              <div className="ty-step-label">{T.step3}</div>
             </div>
           </div>
 
           {/* Buttons */}
           <div className="ty-btns">
             <button className="ty-btn-primary" onClick={() => router.push('/')}>
-              <span>Retour à l&apos;accueil</span>
+              <span>{T.btnHome}</span>
             </button>
             <button className="ty-btn-outline" onClick={() => router.push('/best-offers')}>
-              <span>Continuer mes achats</span>
+              <span>{T.btnShop}</span>
             </button>
           </div>
 
@@ -124,3 +141,4 @@ export default function ThankYouClient() {
     </>
   )
 }
+

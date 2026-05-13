@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const settings = await prisma.setting.findMany()
@@ -17,6 +19,16 @@ export async function PATCH(req: NextRequest) {
   try {
     requireAuth(req)
     const dto = await req.json()
+
+    if (Object.keys(dto).length === 1 && dto.button_styles !== undefined) {
+      const savedSetting = await prisma.setting.upsert({
+        where: { key: "button_styles" },
+        update: { value: String(dto.button_styles) },
+        create: { key: "button_styles", value: String(dto.button_styles) },
+      })
+      return NextResponse.json({ ok: true, savedSetting })
+    }
+
     const ops = Object.entries(dto).map(([key, value]) =>
       prisma.setting.upsert({
         where: { key },
@@ -24,7 +36,7 @@ export async function PATCH(req: NextRequest) {
         create: { key, value: String(value) },
       })
     )
-    await prisma.$transaction(ops)
+    await Promise.all(ops)
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized')

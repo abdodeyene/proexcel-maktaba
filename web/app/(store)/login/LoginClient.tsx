@@ -161,11 +161,12 @@ export default function LoginClient({
           {(['login', 'register'] as const).map(m => (
             <button
               key={m}
+              className="proexcel-btn-account-tab"
               onClick={() => { setMode(m); setError('') }}
               style={{
                 flex: 1, padding: '0.6rem', borderRadius: '7px', border: 'none',
-                background: mode === m ? 'var(--btn-normal, #c8102e)' : 'transparent',
-                color: mode === m ? 'var(--btn-text, #fff)' : 'rgba(255,255,255,0.55)',
+                background: mode === m ? 'var(--primary, #c8102e)' : 'transparent',
+                color: mode === m ? '#fff' : 'rgba(255,255,255,0.55)',
                 fontWeight: mode === m ? 700 : 500, fontSize: '0.88rem', cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
@@ -204,8 +205,8 @@ export default function LoginClient({
                 Mot de passe oublié ?
               </a>
             </div>
-            <button type="submit" disabled={loading} style={{
-              padding: '0.9rem', background: 'var(--btn-normal, #c8102e)', color: 'var(--btn-text, #fff)', border: 'none',
+            <button type="submit" className="proexcel-btn-account-login" disabled={loading} style={{
+              padding: '0.9rem', background: 'var(--primary, #c8102e)', color: '#fff', border: 'none',
               borderRadius: '10px', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer',
               transition: 'background 0.2s', letterSpacing: '0.5px', opacity: loading ? 0.7 : 1,
             }}>
@@ -233,8 +234,8 @@ export default function LoginClient({
                 />
               </div>
             ))}
-            <button type="submit" disabled={loading} style={{
-              padding: '0.9rem', background: 'var(--btn-normal, #c8102e)', color: 'var(--btn-text, #fff)', border: 'none',
+            <button type="submit" className="proexcel-btn-account-register" disabled={loading} style={{
+              padding: '0.9rem', background: 'var(--primary, #c8102e)', color: '#fff', border: 'none',
               borderRadius: '10px', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer',
               marginTop: '0.25rem', opacity: loading ? 0.7 : 1, transition: 'background 0.2s',
             }}>
@@ -255,7 +256,7 @@ export default function LoginClient({
         transition={{ delay: 0.5, duration: 0.5 }}
         style={{ position: 'relative', zIndex: 1 }}
       >
-        <Link href="/" style={{ display: 'block', marginTop: '1.5rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+        <Link href="/" className="proexcel-btn-account-back-home" style={{ display: 'block', marginTop: '1.5rem', fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
           ← Retour à la boutique
         </Link>
       </motion.div>

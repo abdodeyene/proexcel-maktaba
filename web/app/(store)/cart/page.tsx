@@ -3,6 +3,18 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { 
+  ShoppingBag, 
+  Trash2, 
+  Plus, 
+  Minus, 
+  ChevronLeft, 
+  ChevronRight,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  Sparkles
+} from '@/components/LucideIcons'
 
 type CartItem = {
   key: string
@@ -19,8 +31,6 @@ type CartItem = {
 export default function CartPage() {
   const router = useRouter()
   const [cart, setCart] = useState<CartItem[]>([])
-  const [coupon, setCoupon] = useState('')
-  const [discount, setDiscount] = useState(0)
   const [shippingFee, setShippingFee] = useState(25)
   const [freeShippingMin, setFreeShippingMin] = useState(499)
 
@@ -64,20 +74,11 @@ export default function CartPage() {
     }
   }
 
-  const applyCoupon = () => {
-    if (coupon.trim().toUpperCase() === 'PROMO2026') {
-      setDiscount(0.1) // 10% discount
-      alert('Code promo appliqué avec succès (-10%) !')
-    } else {
-      alert('Code promo invalide.')
-      setDiscount(0)
-    }
-  }
+
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0)
-  const discountAmount = subtotal * discount
   const shipping = subtotal >= freeShippingMin || subtotal === 0 ? 0 : shippingFee
-  const total = subtotal - discountAmount + shipping
+  const total = subtotal + shipping
 
   if (cart.length === 0) {
     return (
@@ -89,16 +90,16 @@ export default function CartPage() {
               <span>›</span>
               <span>Mon Panier</span>
             </div>
-            <h1>🛒 Mon Panier</h1>
+            <h1><ShoppingBag size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '10px' }} /> Mon Panier</h1>
             <p>Vérifiez vos articles et procédez au paiement</p>
           </div>
         </div>
 
         <div className="empty-cart" style={{ display: 'block', margin: '4rem auto', maxWidth: '600px' }}>
-          <div className="empty-icon">🛒</div>
+          <div className="empty-icon"><ShoppingBag size={64} /></div>
           <h3>Votre panier est vide</h3>
           <p>Ajoutez des livres à votre panier pour commencer vos achats</p>
-          <Link href="/best-offers" className="btn-primary" style={{ display: 'inline-block', marginTop: '1.5rem', textDecoration: 'none' }}>
+          <Link href="/best-offers" className="btn-primary proexcel-btn-cart-empty-browse" style={{ display: 'inline-block', marginTop: '1.5rem', textDecoration: 'none' }}>
             Parcourir le catalogue ›
           </Link>
         </div>
@@ -115,7 +116,7 @@ export default function CartPage() {
             <span>›</span>
             <span>Mon Panier</span>
           </div>
-          <h1>🛒 Mon Panier</h1>
+          <h1><ShoppingBag size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '10px' }} /> Mon Panier</h1>
           <p>Vérifiez vos articles et procédez au paiement</p>
         </div>
       </div>
@@ -151,9 +152,9 @@ export default function CartPage() {
                 
                 <div className="ci-controls">
                   <div className="qty-wrap" style={{ margin: 0 }}>
-                    <button className="q-btn" onClick={() => changeQty(item.key || `${item.id}_${item.variant}`, -1)}>−</button>
+                    <button className="q-btn proexcel-btn-cart-quantity" onClick={() => changeQty(item.key || `${item.id}_${item.variant}`, -1)}><Minus size={14} /></button>
                     <input className="q-input" type="number" value={item.qty} readOnly />
-                    <button className="q-btn" onClick={() => changeQty(item.key || `${item.id}_${item.variant}`, 1)}>+</button>
+                    <button className="q-btn proexcel-btn-cart-quantity" onClick={() => changeQty(item.key || `${item.id}_${item.variant}`, 1)}><Plus size={14} /></button>
                   </div>
   
                   <div className="ci-total">
@@ -161,11 +162,11 @@ export default function CartPage() {
                   </div>
   
                   <button 
-                    className="ci-remove"
+                    className="ci-remove proexcel-btn-cart-remove"
                     onClick={() => removeItem(item.key || `${item.id}_${item.variant}`)}
                     title="Supprimer"
                   >
-                    ✕
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
@@ -173,15 +174,17 @@ export default function CartPage() {
           </div>
 
           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <Link href="/best-offers" className="btn-primary" style={{ padding: '.65rem 1.4rem', fontSize: '.9rem', fontWeight: 700, textDecoration: 'none' }}>
-              ‹ Continuer les achats
+            <Link href="/best-offers" className="btn-primary proexcel-btn-cart-continue" style={{ padding: '.65rem 1.4rem', fontSize: '.9rem', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ChevronLeft size={18} />
+              Continuer les achats
             </Link>
             <button 
-              className="btn-outline" 
+              className="btn-outline proexcel-btn-cart-empty" 
               onClick={emptyCart} 
-              style={{ padding: '.6rem 1.25rem', fontSize: '.85rem', borderColor: 'rgba(229,62,62,0.3)', color: '#fc8181' }}
+              style={{ padding: '.6rem 1.25rem', fontSize: '.85rem', borderColor: 'rgba(229,62,62,0.3)', color: '#fc8181', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              🗑 Vider le panier
+              <Trash2 size={16} />
+              Vider le panier
             </button>
           </div>
         </div>
@@ -195,16 +198,10 @@ export default function CartPage() {
             <span className="sum-val">{subtotal.toFixed(2)} DH</span>
           </div>
 
-          {discountAmount > 0 && (
-            <div className="sum-line" style={{ color: '#22c55e' }}>
-              <span className="sum-lbl">Remise (-10%)</span>
-              <span className="sum-val">-{discountAmount.toFixed(2)} DH</span>
-            </div>
-          )}
 
           <div className="sum-line">
             <span className="sum-lbl">Livraison</span>
-            <span className="sum-val">{shipping === 0 ? 'Gratuit 🎉' : `${shipping} DH`}</span>
+            <span className="sum-val">{shipping === 0 ? <span style={{ color: 'var(--green)' }}>Gratuit <Sparkles size={14} style={{ display: 'inline', marginLeft: '4px' }} /></span> : `${shipping} DH`}</span>
           </div>
 
           {subtotal < freeShippingMin && (
@@ -218,33 +215,30 @@ export default function CartPage() {
             <span className="sum-total-val">{total.toFixed(2)} DH</span>
           </div>
 
-          {/* Coupon */}
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ fontSize: '.75rem', fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '.5rem' }}>Code Promo</div>
-            <div className="coupon-row">
-              <input 
-                className="coupon-input" 
-                placeholder="PROMO2026" 
-                type="text" 
-                value={coupon}
-                onChange={e => setCoupon(e.target.value)}
-              />
-              <button className="btn-coupon" onClick={applyCoupon}>Appliquer</button>
-            </div>
-          </div>
 
-          <button className="btn-checkout" onClick={() => router.push('/checkout')}>
-            Valider la commande →
+
+          <button className="btn-checkout proexcel-btn-cart-checkout" onClick={() => router.push('/checkout')} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+            <span>Valider la commande</span>
+            <ChevronRight size={18} />
           </button>
-          <button className="btn-continue" onClick={() => router.push('/best-offers')}>
+          <button className="btn-continue proexcel-btn-cart-summary-continue" onClick={() => router.push('/best-offers')}>
             ‹ Continuer les achats
           </button>
 
           {/* Trust badges */}
-          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
-            <div style={{ fontSize: '.72rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>🔒 Paiement 100% sécurisé</div>
-            <div style={{ fontSize: '.72rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>🚚 Livraison 24-48h au Maroc</div>
-            <div style={{ fontSize: '.72rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>🔄 Retour facile sous 7 jours</div>
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ fontSize: '.75rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.6rem' }}>
+              <ShieldCheck size={16} style={{ color: 'var(--green)' }} />
+              Paiement 100% sécurisé
+            </div>
+            <div style={{ fontSize: '.75rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.6rem' }}>
+              <Truck size={16} style={{ color: 'var(--primary)' }} />
+              Livraison 24-48h au Maroc
+            </div>
+            <div style={{ fontSize: '.75rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '.6rem' }}>
+              <RotateCcw size={16} style={{ color: 'var(--primary)' }} />
+              Retour facile sous 7 jours
+            </div>
           </div>
         </div>
       </div>

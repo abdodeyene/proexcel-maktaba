@@ -1,9 +1,24 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLang } from '@/components/LangContext'
+import { 
+  Search, 
+  ShoppingCart, 
+  User, 
+  Globe, 
+  Moon, 
+  Sun, 
+  Menu, 
+  X, 
+  ChevronDown, 
+  Check,
+  Backpack,
+  BookOpen,
+  GraduationCap
+} from '@/components/LucideIcons'
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0)
@@ -12,9 +27,16 @@ export default function Header() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
   const [logoSrc, setLogoSrc] = useState('/logo.png')
   const [logoLoaded, setLogoLoaded] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   const { lang, setLang } = useLang()
   const imgRef = useRef<HTMLImageElement>(null)
+  const langRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const updateCart = () => {
@@ -34,16 +56,12 @@ export default function Header() {
       document.documentElement.setAttribute('data-theme', 'dark')
     }
 
-    // Load logo from API - silent background fetch
     fetch('/api/settings')
       .then(r => r.json())
       .then(d => {
         if (d?.site_logo) {
           const img = new Image()
-          img.onload = () => {
-            setLogoSrc(d.site_logo)
-            setLogoLoaded(true)
-          }
+          img.onload = () => { setLogoSrc(d.site_logo); setLogoLoaded(true) }
           img.onerror = () => setLogoLoaded(true)
           img.src = d.site_logo
         } else {
@@ -58,6 +76,55 @@ export default function Header() {
     }
   }, [])
 
+  // Close lang dropdown on outside click
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false)
+    }
+    document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [])
+
+  // Focus search input when panel opens
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 80)
+    } else {
+      setSearchQuery('')
+      setSearchResults([])
+    }
+  }, [searchOpen])
+
+  // Close search on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSearchOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+  
+  // Search effect
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+    const timer = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const res = await fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setSearchResults(data)
+        }
+      } catch (err) {
+        console.error('Search error:', err)
+      } finally {
+        setIsSearching(false)
+      }
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(newTheme)
@@ -65,26 +132,27 @@ export default function Header() {
     document.documentElement.setAttribute('data-theme', newTheme)
   }
 
-  const toggleLang = () => {
-    setLang(lang === 'fr' ? 'ar' : 'fr')
-    setMenuOpen(false)
-  }
+  const LANGS = [
+    { code: 'fr' as const, label: 'Français', flag: '🇫🇷' },
+    { code: 'ar' as const, label: 'العربية', flag: '🇲🇦' },
+  ]
 
   const t = {
-    fr: { home: 'Accueil', offers: 'Meilleures Offres', levels: 'Niveaux', primaire: 'Primaire', college: 'Collège', lycee: 'Lycée', about: 'À Propos', contact: 'Contact', login: 'Connexion', search: 'Rechercher...', lang: 'عربي' },
-    ar: { home: 'الرئيسية', offers: 'أفضل العروض', levels: 'المستويات', primaire: 'ابتدائي', college: 'إعدادي', lycee: 'ثانوي', about: 'من نحن', contact: 'اتصل بنا', login: 'دخول', search: 'بحث...', lang: 'Français' }
+    fr: { home: 'Accueil', offers: 'Meilleures Offres', levels: 'Niveaux', primaire: 'Primaire', college: 'Collège', lycee: 'Lycée', about: 'À Propos', contact: 'Contact', login: 'Connexion', search: 'Rechercher...' },
+    ar: { home: 'الرئيسية', offers: 'أفضل العروض', levels: 'المستويات', primaire: 'ابتدائي', college: 'إعدادي', lycee: 'ثانوي', about: 'من نحن', contact: 'اتصل بنا', login: 'دخول', search: 'بحث...' },
   }
-  const currentT = t[lang]
+  const currentT = t[lang as keyof typeof t] ?? t.fr
+  const isAr = lang === 'ar'
 
   return (
     <>
       <header>
         <div className="header-inner">
-          <button className="mobile-menu-btn" aria-label="Menu" onClick={() => setMenuOpen(!menuOpen)}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
+          {/* Mobile: cart on left */}
+          <Link href="/cart" className="btn-icon mob-only" title="Panier" style={{ position: 'relative' }}>
+            <ShoppingCart size={20} />
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+          </Link>
 
           <Link href="/" className="logo">
             <img
@@ -94,33 +162,31 @@ export default function Header() {
               className="logo-img"
               style={{ opacity: logoLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
               onLoad={() => setLogoLoaded(true)}
-              onError={() => {
-                setLogoLoaded(true)
-                if (imgRef.current) imgRef.current.style.display = 'none'
-              }}
+              onError={() => { setLogoLoaded(true); if (imgRef.current) imgRef.current.style.display = 'none' }}
             />
-            {!logoLoaded && (
-              <span style={{ fontFamily: 'inherit', fontSize: '1.3rem', fontWeight: 800 }}>ProExcel</span>
-            )}
+            {!logoLoaded && <span style={{ fontFamily: 'inherit', fontSize: '1.3rem', fontWeight: 800 }}>ProExcel</span>}
           </Link>
 
           <nav className="header-nav-center">
             <Link href="/" className={pathname === '/' ? 'active' : ''}>{currentT.home}</Link>
             <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>{currentT.offers}</Link>
-            <div className={`nav-dropdown-wrap ${['/primaire','/college','/lycee'].includes(pathname) ? 'active' : ''}`}>
+            <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee'].includes(pathname) ? 'active' : ''}`}>
               <button className="nav-dropdown-btn">
                 {currentT.levels}
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                <ChevronDown size={14} style={{ marginLeft: '4px' }} />
               </button>
               <div className="nav-dropdown-menu">
                 <Link href="/primaire" className={pathname === '/primaire' ? 'active' : ''}>
-                  <span className="nav-dropdown-icon">🎒</span>{currentT.primaire}
+                  <span className="nav-dropdown-icon"><Backpack size={18} /></span>
+                  {currentT.primaire}
                 </Link>
                 <Link href="/college" className={pathname === '/college' ? 'active' : ''}>
-                  <span className="nav-dropdown-icon">📚</span>{currentT.college}
+                  <span className="nav-dropdown-icon"><BookOpen size={18} /></span>
+                  {currentT.college}
                 </Link>
                 <Link href="/lycee" className={pathname === '/lycee' ? 'active' : ''}>
-                  <span className="nav-dropdown-icon">🎓</span>{currentT.lycee}
+                  <span className="nav-dropdown-icon"><GraduationCap size={18} /></span>
+                  {currentT.lycee}
                 </Link>
               </div>
             </div>
@@ -129,37 +195,53 @@ export default function Header() {
           </nav>
 
           <div className="header-actions">
-            <button className="btn-icon" title="Rechercher" onClick={() => setSearchOpen(true)}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <button className="btn-icon proexcel-btn-home-search-btn" title="Rechercher" onClick={() => setSearchOpen(v => !v)}>
+              <Search size={20} />
             </button>
 
-            <button className="btn-icon desk-only" title="Thème" onClick={toggleTheme}>
-              {theme === 'dark' ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-              )}
+            <button className="btn-icon" title="Thème" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            {/* Language Toggle - No Reload */}
-            <button
-              className="btn-lang desk-only"
-              title={currentT.lang}
-              onClick={toggleLang}
-            >
-              🌐
-            </button>
+            {/* Premium Language Switcher */}
+            <div className="lang-switcher desk-only" ref={langRef}>
+              <button
+                className={`lang-btn ${langOpen ? 'open' : ''}`}
+                onClick={() => setLangOpen(v => !v)}
+                title="Langue / اللغة / Language"
+              >
+                <Globe size={18} className="lang-globe-icon" />
+                <span className="lang-current">{lang.toUpperCase()}</span>
+                <ChevronDown size={14} className="lang-chevron" />
+              </button>
+              <div className={`lang-dropdown ${langOpen ? 'open' : ''}`}>
+                {LANGS.map(opt => (
+                  <button
+                    key={opt.code}
+                    className={`lang-option ${lang === opt.code ? 'active' : ''}`}
+                    onClick={() => { setLang(opt.code); setLangOpen(false); setMenuOpen(false) }}
+                  >
+                    <span className="lang-flag">{opt.flag}</span>
+                    {opt.label}
+                    {lang === opt.code && <Check size={14} className="lang-check" />}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-            <Link href="/cart" className="btn-icon" title="Panier">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <Link href="/cart" className="btn-icon desk-only" title="Panier">
+              <ShoppingCart size={20} />
               {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
             </Link>
 
             <Link href="/login" className="btn-icon desk-only" title={currentT.login}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '17px', height: '17px', flexShrink: 0 }}>
-                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-              </svg>
+              <User size={20} />
             </Link>
+
+            {/* Mobile: hamburger on right */}
+            <button className="mobile-menu-btn" aria-label="Menu" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
       </header>
@@ -175,36 +257,169 @@ export default function Header() {
         <Link href="/contact" onClick={() => setMenuOpen(false)}>{currentT.contact}</Link>
         <div className="mobile-nav-extras">
           <button className="btn-theme btn-theme-mob" onClick={toggleTheme}>
-            {theme === 'dark' ? (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            ) : (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            )}
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <button className="btn-lang btn-lang-mob" onClick={toggleLang} title={currentT.lang}>
-            🌐
-          </button>
+
+          {/* Mobile lang buttons */}
+          <div style={{ display: 'flex', gap: '0.3rem' }}>
+            {LANGS.map(opt => (
+              <button
+                key={opt.code}
+                className={`lang-mob-btn ${lang === opt.code ? 'active' : ''}`}
+                onClick={() => { setLang(opt.code); setMenuOpen(false) }}
+              >
+                {opt.flag} {opt.code.toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           <Link href="/login" className="btn-icon" style={{ display: 'flex', marginLeft: 'auto' }} onClick={() => setMenuOpen(false)} title={currentT.login}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '15px', height: '15px' }}>
-              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-            </svg>
+            <User size={18} />
           </Link>
         </div>
       </nav>
 
-      <div className={`search-overlay ${searchOpen ? 'open' : ''}`}>
-        <div className="search-modal">
-           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-             <button onClick={() => setSearchOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-             </button>
-           </div>
-           <input type="text" className="search-modal-input" placeholder={currentT.search} autoFocus={searchOpen} />
-           <div className="search-results">
-             {/* Dynamic search results can go here */}
-           </div>
+      {/* Search backdrop */}
+      {searchOpen && (
+        <div
+          onClick={() => setSearchOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, top: '68px', zIndex: 9997,
+            background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)',
+            animation: 'sdFadeIn 0.2s ease',
+          }}
+        />
+      )}
+
+      {/* Search dropdown — slides down from navbar */}
+      <div
+        ref={searchPanelRef}
+        style={{
+          position: 'fixed', top: '68px', left: 0, right: 0, zIndex: 9998,
+          background: 'var(--card)',
+          borderBottom: '1px solid var(--border)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          transform: searchOpen ? 'translateY(0)' : 'translateY(-12px)',
+          opacity: searchOpen ? 1 : 0,
+          pointerEvents: searchOpen ? 'all' : 'none',
+          transition: 'transform 0.28s cubic-bezier(0.16,1,0.3,1), opacity 0.22s ease',
+          maxHeight: 'calc(100vh - 68px)',
+          overflowY: 'auto',
+        }}
+      >
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '1.25rem 1.5rem 1.5rem' }}>
+          {/* Input row */}
+          <div style={{ position: 'relative', marginBottom: '1rem' }}>
+            <Search size={20} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)', pointerEvents: 'none' }} />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder={isAr ? 'ابحث عن منتج...' : 'Rechercher un produit…'}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              dir={isAr ? 'rtl' : 'ltr'}
+              style={{
+                width: '100%', background: 'var(--bg2)',
+                border: '2px solid var(--border)', borderRadius: '14px',
+                padding: isAr ? '0.9rem 2.8rem 0.9rem 1rem' : '0.9rem 2.8rem 0.9rem 3rem',
+                fontSize: '1rem', color: 'var(--text)',
+                outline: 'none', fontWeight: 600, fontFamily: 'inherit',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={e => { e.target.style.borderColor = 'var(--primary)' }}
+              onBlur={e => { e.target.style.borderColor = 'var(--border)' }}
+            />
+            {searchQuery ? (
+              <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+                <X size={16} />
+              </button>
+            ) : (
+              <button onClick={() => setSearchOpen(false)} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text2)', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Results */}
+          {isSearching && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text2)' }}>
+              <div style={{ width: '32px', height: '32px', border: '3px solid rgba(232,53,42,0.15)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 0.75rem', animation: 'sdSpin 0.8s linear infinite' }} />
+              <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{isAr ? 'جاري البحث...' : 'Recherche en cours…'}</div>
+            </div>
+          )}
+
+          {!isSearching && searchQuery && searchResults.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text2)' }}>
+              <Search size={36} style={{ opacity: 0.18, display: 'block', margin: '0 auto 0.75rem' }} />
+              <div style={{ fontWeight: 700, color: 'var(--text)', marginBottom: '0.25rem' }}>{isAr ? 'لا توجد نتائج' : 'Aucun produit trouvé'}</div>
+              <div style={{ fontSize: '0.85rem' }}>{isAr ? 'جرب كلمة مختلفة' : 'Essayez avec d\'autres mots'}</div>
+            </div>
+          )}
+
+          {!isSearching && !searchQuery && (
+            <div style={{ textAlign: 'center', padding: '1.5rem 0 0.5rem', color: 'var(--text2)', fontSize: '0.88rem' }}>
+              {isAr ? 'اكتب للبحث في الكتالوج…' : 'Tapez pour rechercher dans le catalogue…'}
+            </div>
+          )}
+
+          {!isSearching && searchResults.length > 0 && (
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.75rem' }}>
+                {searchResults.length} {isAr ? 'نتيجة' : 'résultat(s)'}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {searchResults.slice(0, 8).map(p => (
+                  <Link
+                    key={p.id}
+                    href={`/product/${p.id}`}
+                    onClick={() => setSearchOpen(false)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '1rem',
+                      padding: '0.75rem', borderRadius: '12px',
+                      border: '1px solid var(--border)', background: 'var(--bg)',
+                      textDecoration: 'none', transition: 'border-color 0.18s, background 0.18s',
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--card)' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg)' }}
+                  >
+                    <div style={{ width: '52px', height: '64px', borderRadius: '8px', overflow: 'hidden', background: 'var(--card)', flexShrink: 0, border: '1px solid var(--border)' }}>
+                      {Array.isArray(p.media) && p.media[0] ? (
+                        <img src={p.media[0]} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>{p.emoji || '📚'}</div>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)', marginBottom: '0.25rem', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        {lang === 'ar' && p.titleAr ? p.titleAr : p.title}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        {p.category && (
+                          <span style={{ fontSize: '0.68rem', color: 'var(--primary)', fontWeight: 700, background: 'rgba(232,53,42,0.08)', padding: '0.1rem 0.45rem', borderRadius: '5px' }}>
+                            {p.category}
+                          </span>
+                        )}
+                        {p.author && <span style={{ fontSize: '0.72rem', color: 'var(--text2)' }}>{p.author}</span>}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: '1rem', fontWeight: 900, color: 'var(--primary)', whiteSpace: 'nowrap' }}>{p.price} DH</div>
+                      {p.compareAtPrice > p.price && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text2)', textDecoration: 'line-through' }}>{p.compareAtPrice} DH</div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes sdFadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes sdSpin { to { transform: rotate(360deg) } }
+      `}</style>
     </>
   )
 }

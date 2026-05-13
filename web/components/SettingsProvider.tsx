@@ -1,9 +1,47 @@
 'use client'
 
 import { useEffect } from 'react'
+import { buildButtonStyleSheet, sanitizeButtonStyles } from '@/lib/buttonStyles'
+
+function applyButtonStyles(rawStyles: unknown) {
+  const css = buildButtonStyleSheet(sanitizeButtonStyles(rawStyles))
+  let el = document.getElementById('proexcel-btn-custom') as HTMLStyleElement | null
+  if (!el) {
+    el = document.createElement('style')
+    el.id = 'proexcel-btn-custom'
+    document.head.appendChild(el)
+  }
+  el.textContent = css
+}
 
 export default function SettingsProvider() {
   useEffect(() => {
+    try {
+      const cached = localStorage.getItem('proexcel_button_styles')
+      if (cached) applyButtonStyles(JSON.parse(cached))
+    } catch { /* ignore cached styles */ }
+
+    const onLocalUpdate = (event: Event) => {
+      const detail = (event as CustomEvent).detail
+      applyButtonStyles(detail)
+    }
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== 'proexcel_button_styles' || !event.newValue) return
+      try { applyButtonStyles(JSON.parse(event.newValue)) } catch { /* ignore */ }
+    }
+
+    const channel = typeof BroadcastChannel !== 'undefined'
+      ? new BroadcastChannel('proexcel-button-styles')
+      : null
+
+    if (channel) {
+      channel.onmessage = event => applyButtonStyles(event.data)
+    }
+
+    window.addEventListener('proexcel-button-styles:update', onLocalUpdate)
+    window.addEventListener('storage', onStorage)
+
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
@@ -16,15 +54,27 @@ export default function SettingsProvider() {
         if (data.col_secondary) root.style.setProperty('--purple', data.col_secondary)
         if (data.col_promo) root.style.setProperty('--red', data.col_promo)
         if (data.col_success) root.style.setProperty('--green', data.col_success)
-        
-        // Button colors
-        if (data.btn_normal) root.style.setProperty('--btn-normal', data.btn_normal)
-        if (data.btn_hover) root.style.setProperty('--btn-hover', data.btn_hover)
-        if (data.btn_text) root.style.setProperty('--btn-text', data.btn_text)
 
-        // Home backgrounds
         if (data.home_bg1 && data.home_bg2) {
-            root.style.setProperty('--home-bg-grad', `linear-gradient(135deg, ${data.home_bg1}, ${data.home_bg2})`)
+          root.style.setProperty('--home-bg-grad', `linear-gradient(135deg, ${data.home_bg1}, ${data.home_bg2})`)
+        }
+
+        // Product page specific styles
+        if (data.pp_btn_radius) root.style.setProperty('--pp-btn-radius', data.pp_btn_radius)
+        if (data.pp_btn_shadow) root.style.setProperty('--pp-btn-shadow', data.pp_btn_shadow)
+        if (data.pp_btn_hover_col) root.style.setProperty('--pp-btn-hover-col', data.pp_btn_hover_col)
+        if (data.pp_cta_bg) root.style.setProperty('--pp-cta-bg', data.pp_cta_bg)
+        if (data.pp_cta_text) root.style.setProperty('--pp-cta-text', data.pp_cta_text)
+        if (data.pp_outline_col) root.style.setProperty('--pp-outline-col', data.pp_outline_col)
+        if (data.pp_price_color) root.style.setProperty('--pp-price-col', data.pp_price_color)
+
+        // Per-button custom styles
+        if (data.button_styles) {
+          try {
+            const btnStyles = sanitizeButtonStyles(JSON.parse(data.button_styles))
+            localStorage.setItem('proexcel_button_styles', JSON.stringify(btnStyles))
+            applyButtonStyles(btnStyles)
+          } catch { /* ignore */ }
         }
 
         // Dynamic favicon
@@ -83,6 +133,12 @@ export default function SettingsProvider() {
         }
       })
       .catch(console.error)
+
+    return () => {
+      window.removeEventListener('proexcel-button-styles:update', onLocalUpdate)
+      window.removeEventListener('storage', onStorage)
+      channel?.close()
+    }
   }, [])
 
   return null

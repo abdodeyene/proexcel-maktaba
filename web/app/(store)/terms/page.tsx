@@ -207,7 +207,7 @@ export default function TermsPage() {
   const { lang } = useLang()
   const [activeSection, setActiveSection] = useState('utilisation')
 
-  const currentSections = sections[lang]
+  const currentSections = sections[lang as keyof typeof sections] ?? sections.fr
   const activeData = currentSections.find(s => s.id === activeSection)
 
   const labels = {
@@ -228,7 +228,7 @@ export default function TermsPage() {
       contactBtn: 'اتصل بنا'
     }
   }
-  const L = labels[lang]
+  const L = labels[lang as keyof typeof labels] ?? labels.fr
 
   const formatContent = (text: string) => {
     const lines = text.split('\n')

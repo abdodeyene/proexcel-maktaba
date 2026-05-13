@@ -22,6 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         author: dto.author ?? null,
         price: Number(dto.price),
         compareAtPrice: dto.compareAtPrice ? Number(dto.compareAtPrice) : null,
+        costPrice: dto.costPrice ? Number(dto.costPrice) : null,
         category: dto.category ?? null,
         niveau: dto.niveau ?? null,
         emoji: dto.emoji ?? '📦',

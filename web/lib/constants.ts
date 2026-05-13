@@ -1,0 +1,20 @@
+export const MOROCCAN_CITIES = Array.from(new Set([
+  "Agadir", "Afourar", "Ahfir", "Aït Ishaq", "Aït Melloul", "Aït Ourir", "Ajemmou", "Akka", "Al Hoceima", "Amizmiz",
+  "Aoulouz", "Arfoud", "Asilah", "Azemmour", "Azilal", "Azrou", "Ben Guerir", "Béni Mellal", "Berkane", "Berrechid",
+  "Bni Bouayach", "Bni Drar", "Bouarfa", "Boujdour", "Bouskoura", "Bouznika", "Casablanca", "Chefchaouen", "Chichaoua", "Dakhla",
+  "Dar Bouazza", "Dcheira El Jihadia", "Demnate", "El Hajeb", "El Jadida", "El Kelaâ des Sraghna", "El Mansouria", "Er-Rich", "Errachidia", "Essaouira",
+  "Fès", "Figuig", "Fnideq", "Fquih Ben Salah", "Ghafsai", "Guelmim", "Guercif", "Had Kourt", "Inezgane", "Imouzzer Kandar",
+  "Imouzzer Marmoucha", "Imzouren", "Itzer", "Jerada", "Jorf El Melha", "Kalaat M'Gouna", "Kasba Tadla", "Kattara", "Kénitra", "Khemisset",
+  "Khénifra", "Khenichet", "Khouribga", "Ksar El Kebir", "Ksar Sghir", "Laayoune", "Lalla Takerkoust", "Larache", "Lixus", "Lqliaa",
+  "Madagh", "Marrakech", "Martil", "M'diq", "Mediouna", "Mehdya", "Meknès", "Midelt", "Missour", "Mohammédia",
+  "Moulay Ali Cherif", "Moulay Bousselham", "Moulay Idriss Zerhoun", "Moulay Yaâcoub", "Mzouda", "Nador", "N'Zalat Bni Amar", "Oualidia", "Ouarzazate", "Ouezzane",
+  "Oujda", "Oulad Abbou", "Oulad Amrane", "Oulad Ayad", "Oulad Berhil", "Oulad Frej", "Oulad Ghadbane", "Oulad M'Barek", "Oulad M'Rah", "Oulad Saïd",
+  "Oulad Teïma", "Oulad Zbair", "Ouled Tayeb", "Ounagha", "Outat El Haj", "Rabat", "Ribate El Kheir", "Rissani", "Sabaa Aiyoun", "Safi",
+  "Saïdia", "Salé", "Sebt Gzoula", "Sebt Jahjouh", "Sefrou", "Selouane", "Settat", "Sidi Abdallah Ghiat", "Sidi Addi", "Sidi Ali",
+  "Sidi Allal el Bahraoui", "Sidi Allal Tazi", "Sidi Bennour", "Sidi Bou Othmane", "Sidi Boubker", "Sidi Bouknadel", "Sidi Ifni", "Sidi Jaber", "Sidi Kacem", "Sidi Lyamani",
+  "Sidi Mohamed Lahcen", "Sidi Rahhal", "Sidi Slimane", "Sidi Smaïl", "Sidi Yahya el Gharb", "Skhirat", "Smara", "Souk El Arbaâ", "Souk Sebt Oulad Nemma", "Tahannaout",
+  "Taliouine", "Talmest", "Tamanar", "Tameslouht", "Tanger", "Tan-Tan", "Taounate", "Taourirt", "Tarfaya", "Taroudant",
+  "Tata", "Taza", "Taznakht", "Témara", "Temsia", "Tétouan", "Thar Es-Souk", "Tiddas", "Tifelt", "Tighassaline",
+  "Tighza", "Timahdite", "Tinejdad", "Tinghir", "Tissa", "Tiznit", "Tiztoutine", "Touissit", "Tounfite", "Youssoufia",
+  "Zagora", "Zaïda", "Zaïo", "Zaouiat Cheikh", "Zeghanghane", "Zemamra", "Zirara"
+])).sort()

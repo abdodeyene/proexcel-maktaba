@@ -25,10 +25,24 @@ type Product = {
 
 type Category = { id: number; name: string; emoji?: string | null; image?: string | null }
 
-export default function BestOffersClient({ products, categories, pageTitle, pageSubtitle }: { products: Product[]; categories: Category[]; pageTitle?: string; pageSubtitle?: string }) {
+export default function BestOffersClient({ products: initialProducts, categories: initialCategories, pageTitle, pageSubtitle }: { products: Product[]; categories: Category[]; pageTitle?: string; pageSubtitle?: string }) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  
+
+  // Always fetch fresh data from API (bypasses Next.js router cache)
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [categories, setCategories] = useState<Category[]>(initialCategories)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/products').then(r => r.json()),
+      fetch('/api/categories').then(r => r.json()),
+    ]).then(([prods, cats]) => {
+      if (Array.isArray(prods)) setProducts(prods)
+      if (Array.isArray(cats)) setCategories(cats)
+    }).catch(() => {})
+  }, [])
+
   // States
   const [search, setSearch] = useState('')
   const [selectedCats, setSelectedCats] = useState<string[]>([])
@@ -47,10 +61,13 @@ export default function BestOffersClient({ products, categories, pageTitle, page
     }
   }, [searchParams])
 
+  const isCatSelected = (name: string) =>
+    selectedCats.some(c => c.toLowerCase() === name.toLowerCase())
+
   const toggleCategory = (catName: string) => {
-    setSelectedCats(prev => 
-      prev.includes(catName) 
-        ? prev.filter(c => c !== catName) 
+    setSelectedCats(prev =>
+      isCatSelected(catName)
+        ? prev.filter(c => c.toLowerCase() !== catName.toLowerCase())
         : [...prev, catName]
     )
   }
@@ -67,9 +84,13 @@ export default function BestOffersClient({ products, categories, pageTitle, page
   const filtered = useMemo(() => {
     let list = [...products]
 
-    // Category
+    // Category — case-insensitive + trim match
     if (selectedCats.length > 0) {
-      list = list.filter(p => p.category && selectedCats.includes(p.category))
+      list = list.filter(p =>
+        p.category && selectedCats.some(cat =>
+          cat.trim().toLowerCase() === p.category!.trim().toLowerCase()
+        )
+      )
     }
 
     // In Stock
@@ -146,7 +167,7 @@ export default function BestOffersClient({ products, categories, pageTitle, page
                 <label key={cat.id} className="f-opt">
                   <input
                     type="checkbox"
-                    checked={selectedCats.includes(cat.name)}
+                    checked={isCatSelected(cat.name)}
                     onChange={() => toggleCategory(cat.name)}
                   />
                   {cat.image && (
@@ -199,8 +220,8 @@ export default function BestOffersClient({ products, categories, pageTitle, page
             </div>
           ) : (
             <div className="products-grid">
-              {filtered.map(p => (
-                <ProductCard key={p.id} product={p as any} />
+              {filtered.map((p, i) => (
+                <ProductCard key={p.id} product={p as any} index={i} />
               ))}
             </div>
           )}

@@ -1,6 +1,9 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { formatMoroccanPrice } from '@/lib/format'
+import { ShoppingCart } from '@/components/LucideIcons'
 
 type Product = {
   id: number
@@ -22,117 +25,114 @@ type Product = {
   colors?: unknown | null
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const router = useRouter()
+  const cardRef = useRef<HTMLDivElement>(null)
+
   const disc = product.compareAtPrice && product.compareAtPrice > product.price
     ? Math.round((1 - product.price / product.compareAtPrice) * 100)
     : 0
 
   const images = Array.isArray(product.media) ? (product.media as string[]) : []
-  const colors = Array.isArray(product.colors) ? (product.colors as string[]) : []
   const mainImage = images[0] || null
 
-  let badge = null
-  if (product.isPromo) {
-    badge = <span className="product-badge badge-promo">PROMO</span>
-  } else if (product.isNew) {
-    badge = <span className="product-badge badge-new">Nouveau</span>
-  } else if (product.isBestOffer) {
-    badge = <span className="product-badge badge-best">Vedette</span>
-  } else if (product.stock <= 5) {
-    badge = <span className="product-badge badge-stock">Stock limité</span>
-  }
+  // Scroll-in animation with stagger
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+
+    const show = () => {
+      el.style.transitionDelay = `${index * 80}ms`
+      el.classList.add('card-visible')
+      setTimeout(() => { if (el) el.style.transitionDelay = '0ms' }, 450 + index * 80)
+    }
+
+    // If already in viewport (e.g. page load), show immediately
+    const rect = el.getBoundingClientRect()
+    if (rect.top < window.innerHeight + 100) {
+      show()
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          show()
+          observer.unobserve(el)
+        }
+      },
+      { threshold: 0.05, rootMargin: '0px 0px 80px 0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [index])
+
+  let badgeText: string | null = null
+  if (disc > 0) badgeText = `-${disc}%`
+  else if (product.isNew) badgeText = 'NOUVEAUTÉ'
+  else if (product.isBestOffer) badgeText = 'PREMIUM'
+  else if (product.isPromo) badgeText = 'PROMO'
 
   const addToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
-
     const cart = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
     const variants = Array.isArray(product.variants) ? (product.variants as string[]) : []
     const variant = variants.length > 0 ? variants[0] : 'Standard'
     const key = `${product.id}_${variant}`
-
-    const existingIdx = cart.findIndex((i: { key: string; id: number; variant: string }) => i.key === key || (i.id === product.id && i.variant === variant))
+    const existingIdx = cart.findIndex((i: { key: string; id: number; variant: string }) =>
+      i.key === key || (i.id === product.id && i.variant === variant)
+    )
     if (existingIdx >= 0) {
       cart[existingIdx].qty += 1
     } else {
-      cart.push({
-        key,
-        productId: product.id,
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        qty: 1,
-        variant,
-        image: mainImage || null
-      })
+      cart.push({ key, productId: product.id, id: product.id, title: product.title, price: product.price, qty: 1, variant, image: mainImage || null })
     }
-
     localStorage.setItem('proexcel_cart', JSON.stringify(cart))
     window.dispatchEvent(new Event('cart-updated'))
   }
 
   return (
-    <div className="product-card" onClick={() => router.push(`/product/${product.id}`)}>
-      {badge}
-      <div className="product-img-wrap">
-        <div
-          className="book-cover"
-          style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}
-        >
-          {mainImage ? (
-            <img
-              src={mainImage}
-              alt={product.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          ) : (
-            <div style={{
-              width: '100%', height: '100%',
-              background: `linear-gradient(145deg, ${product.g1 || '#1a237e'}, ${product.g2 || '#3949ab'})`,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              padding: '8px', position: 'relative',
-            }}>
-              <div style={{
-                position: 'absolute', left: 0, top: 0, bottom: 0,
-                width: '7px', background: 'rgba(0,0,0,0.25)',
-                borderRadius: '4px 0 0 4px'
-              }} />
-              <div style={{
-                color: 'white', fontWeight: 700, fontSize: '0.72rem',
-                textAlign: 'center', zIndex: 1, lineHeight: 1.35, padding: '0 12px'
-              }}>{product.title}</div>
-              {product.author && (
-                <div style={{
-                  color: 'rgba(255,255,255,0.65)', fontSize: '0.62rem',
-                  textAlign: 'center', marginTop: '6px', zIndex: 1
-                }}>{product.author}</div>
-              )}
-            </div>
-          )}
-        </div>
-        {/* Cart icon — fades in on hover, bottom-right of image */}
-        <div className="quick-add">
-          <button className="btn-quick" onClick={addToCart} title="Ajouter au panier">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div className="product-info">
-        <div className="product-name">{product.title}</div>
-        <div className="product-prices">
-          <span className="p-current">{product.price} DH</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="p-compare">{product.compareAtPrice} DH</span>
-            )}
-            {disc > 0 && <span className="p-discount">-{disc}%</span>}
-            {!disc && <span className="product-cat">{product.category}</span>}
+    <div
+      ref={cardRef}
+      className="pcard product-card-anim"
+      onClick={() => router.push(`/product/${product.id}`)}
+    >
+      {/* Image section — edge-to-edge */}
+      <div className="pcard-img">
+        {mainImage ? (
+          <img src={mainImage} alt={product.title} className="pcard-img-el" />
+        ) : (
+          <div
+            className="pcard-img-fallback"
+            style={{ background: `linear-gradient(145deg, ${product.g1 || '#1a237e'}, ${product.g2 || '#3949ab'})` }}
+          >
+            <div className="pcard-fallback-spine" />
+            <div className="pcard-fallback-title">{product.title}</div>
+            {product.author && <div className="pcard-fallback-author">{product.author}</div>}
           </div>
+        )}
+        {badgeText && <span className="pcard-badge">{badgeText}</span>}
+      </div>
+
+      {/* Card body */}
+      <div className="pcard-body">
+        {product.category && <div className="pcard-cat">{product.category}</div>}
+        <div className="pcard-name">{product.title}</div>
+        <div className="pcard-price-row">
+          <div className="pcard-prices">
+            <span className="pcard-price">{formatMoroccanPrice(product.price)}</span>
+            {disc > 0 && product.compareAtPrice && (
+              <span className="pcard-compare">{formatMoroccanPrice(product.compareAtPrice)}</span>
+            )}
+          </div>
+          <button
+            className="pcard-cart-btn proexcel-btn-home-product-card-add"
+            onClick={addToCart}
+            title="Ajouter au panier"
+          >
+            <ShoppingCart size={16} />
+          </button>
         </div>
       </div>
     </div>

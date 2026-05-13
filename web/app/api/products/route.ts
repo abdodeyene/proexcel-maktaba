@@ -11,14 +11,32 @@ export async function GET(req: NextRequest) {
     const isBestOffer = searchParams.get('isBestOffer')
     const isNew = searchParams.get('isNew')
     const search = searchParams.get('search')
+    const ids = searchParams.get('ids')
 
     const where: Record<string, unknown> = {}
+    if (ids) {
+      where.id = { in: ids.split(',').map(id => parseInt(id)).filter(id => !isNaN(id)) }
+    }
     if (category) where.category = category
     if (niveau) where.niveau = niveau
     if (isPromo === 'true') where.isPromo = true
     if (isBestOffer === 'true') where.isBestOffer = true
     if (isNew === 'true') where.isNew = true
-    if (search) where.title = { contains: search, mode: 'insensitive' }
+    if (search) {
+      const searchNum = parseFloat(search)
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { titleAr: { contains: search, mode: 'insensitive' } },
+        { category: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { descriptionAr: { contains: search, mode: 'insensitive' } },
+        { author: { contains: search, mode: 'insensitive' } },
+        ...(isNaN(searchNum) ? [] : [
+          { price: { gte: searchNum - 5, lte: searchNum + 5 } },
+          { id: isNaN(parseInt(search)) ? undefined : { equals: parseInt(search) } }
+        ].filter(x => x !== undefined))
+      ]
+    }
 
     const products = await prisma.product.findMany({ where, orderBy: { createdAt: 'desc' } })
     return NextResponse.json(products)
@@ -38,6 +56,7 @@ export async function POST(req: NextRequest) {
         author: dto.author ?? null,
         price: Number(dto.price),
         compareAtPrice: dto.compareAtPrice ? Number(dto.compareAtPrice) : null,
+        costPrice: dto.costPrice ? Number(dto.costPrice) : null,
         category: dto.category ?? null,
         niveau: dto.niveau ?? null,
         emoji: dto.emoji ?? '📦',

@@ -8,6 +8,7 @@ type Review = {
   rating: number
   comment: string
   date: string
+  approved?: boolean
 }
 
 // GET /api/reviews?productId=X  (admin: all, or by product)
@@ -59,18 +60,57 @@ export async function POST(req: NextRequest) {
       name: String(name).slice(0, 80),
       rating: Math.min(5, Math.max(1, Number(rating))),
       comment: String(comment).slice(0, 500),
-      date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+      date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }),
+      approved: true,
     }
     const updated = [...existing, newReview]
 
-    const newAvg = updated.reduce((s, r) => s + r.rating, 0) / updated.length
+    const visible = updated.filter(r => r.approved !== false)
+    const newAvg = visible.length > 0 ? visible.reduce((s, r) => s + r.rating, 0) / visible.length : 0
     await prisma.product.update({
       where: { id: Number(productId) },
-      data: { reviews: updated, rating: Math.round(newAvg * 10) / 10, reviewCount: updated.length }
+      data: { reviews: updated, rating: Math.round(newAvg * 10) / 10, reviewCount: visible.length },
     })
 
     return NextResponse.json(newReview, { status: 201 })
   } catch {
+    return NextResponse.json({ message: 'Server error' }, { status: 500 })
+  }
+}
+
+// PATCH /api/reviews  { productId, reviewId, name?, rating?, comment?, approved? }  (admin only)
+export async function PATCH(req: NextRequest) {
+  try {
+    requireAuth(req)
+    const { productId, reviewId, name, rating, comment, approved } = await req.json()
+    if (!productId || !reviewId)
+      return NextResponse.json({ message: 'Missing fields' }, { status: 400 })
+
+    const product = await prisma.product.findUnique({ where: { id: Number(productId) } })
+    if (!product) return NextResponse.json({ message: 'Not found' }, { status: 404 })
+
+    const existing: Review[] = Array.isArray(product.reviews) ? (product.reviews as Review[]) : []
+    const updated = existing.map(r => {
+      if (r.id !== reviewId) return r
+      return {
+        ...r,
+        ...(name !== undefined && { name: String(name).slice(0, 80) }),
+        ...(rating !== undefined && { rating: Math.min(5, Math.max(1, Number(rating))) }),
+        ...(comment !== undefined && { comment: String(comment).slice(0, 500) }),
+        ...(approved !== undefined && { approved: Boolean(approved) }),
+      }
+    })
+
+    const visible = updated.filter(r => r.approved !== false)
+    const newAvg = visible.length > 0 ? visible.reduce((s, r) => s + r.rating, 0) / visible.length : 0
+    await prisma.product.update({
+      where: { id: Number(productId) },
+      data: { reviews: updated, rating: Math.round(newAvg * 10) / 10, reviewCount: visible.length },
+    })
+    return NextResponse.json({ ok: true })
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === 'Unauthorized')
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
 }

@@ -235,9 +235,9 @@ export default function AdminOrders() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn-action" onClick={() => setSelectedOrder(o)}>👁️ Voir</button>
-                        <button className="btn-action" onClick={() => window.open(`/admin/orders/${o.id}/receipt`, '_blank')}>🖨️ Bon</button>
-                        <button className="btn-action btn-action-red" onClick={() => delOrder(o.id)}>🗑️</button>
+                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => setSelectedOrder(o)}>👁️ Voir</button>
+                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => window.open(`/admin/orders/${o.id}/receipt`, '_blank')}>🖨️ Bon</button>
+                        <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => delOrder(o.id)}>🗑️</button>
                       </div>
                     </td>
                   </tr>
@@ -300,21 +300,21 @@ export default function AdminOrders() {
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <button 
-                  className="btn-action" 
+                  className="btn-action proexcel-btn-admin-secondary-action" 
                   style={{ flex: 1, padding: '0.7rem', borderRadius: '9px', background: 'var(--a-card)', border: '1px solid var(--a-border)' }}
                   onClick={() => window.open(`/admin/orders/${selectedOrder.id}/receipt`, '_blank')}
                 >
                   🖨️ Imprimer Bon
                 </button>
                 <button 
-                  className="btn-save" 
+                  className="btn-save proexcel-btn-admin-save-action" 
                   style={{ flex: 1, position: 'static', padding: '0.7rem', background: 'var(--a-green)', borderRadius: '9px', boxShadow: 'none' }}
                   onClick={() => { updateStatus(selectedOrder.id, 'completed'); setSelectedOrder(null) }}
                 >
                   ✅ Marquer complété
                 </button>
                 <button 
-                  className="btn-action btn-action-red" 
+                  className="btn-action btn-action-red proexcel-btn-admin-danger-action" 
                   style={{ flex: 1, padding: '0.7rem', borderRadius: '9px' }}
                   onClick={() => { updateStatus(selectedOrder.id, 'cancelled'); setSelectedOrder(null) }}
                 >

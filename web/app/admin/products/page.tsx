@@ -1,5 +1,16 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { 
+  Plus, 
+  Search, 
+  Trash2, 
+  Edit, 
+  Save, 
+  X, 
+  ImageIcon, 
+  Eye 
+} from '@/components/LucideIcons'
+import { formatMoroccanPrice } from '@/lib/format'
 
 type Product = {
   id: number
@@ -7,6 +18,7 @@ type Product = {
   titleAr?: string | null
   price: number
   compareAtPrice?: number | null
+  costPrice?: number | null
   author?: string | null
   category?: string | null
   niveau?: string | null
@@ -27,7 +39,7 @@ type Product = {
 type MediaItem = { url: string; type: 'image' | 'video' }
 
 const EMPTY = {
-  title: '', titleAr: '', author: '', price: '', compareAtPrice: '',
+  title: '', titleAr: '', author: '', price: '', compareAtPrice: '', costPrice: '',
   category: '', niveau: '', emoji: '📦', g1: '#1a237e', g2: '#3949ab',
   stock: '0', isPromo: false, isBestOffer: false, isNew: false,
   description: '', descriptionAr: '',
@@ -163,13 +175,13 @@ function MediaUpload({ media, setMedia }: { media: MediaItem[]; setMedia: (m: Me
         ) : (
           <>
             <div className="media-upload-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--a-text2)" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <ImageIcon size={28} color="var(--a-text2)" />
             </div>
             <div className="media-upload-text">Glissez des images/vidéos ici</div>
             <div className="media-upload-hint">JPG, PNG, WebP, MP4 · Max 50 MB</div>
             <div className="media-upload-btns" onClick={e => e.stopPropagation()}>
-              <button className="btn-upload btn-upload-primary" onClick={() => imgRef.current?.click()}>Images</button>
-              <button className="btn-upload" onClick={() => vidRef.current?.click()}>Vidéo</button>
+              <button className="btn-upload btn-upload-primary proexcel-btn-admin-upload-action" onClick={() => imgRef.current?.click()}>Images</button>
+              <button className="btn-upload proexcel-btn-admin-upload-action" onClick={() => vidRef.current?.click()}>Vidéo</button>
             </div>
           </>
         )}
@@ -273,6 +285,7 @@ export default function AdminProducts() {
     setForm({
       title: p.title, titleAr: p.titleAr || '', author: p.author || '', price: String(p.price),
       compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '',
+      costPrice: (p as any).costPrice ? String((p as any).costPrice) : '',
       category: p.category || '', niveau: p.niveau || '', emoji: p.emoji || '📦',
       g1: p.g1 || '#1a237e', g2: p.g2 || '#3949ab',
       stock: String(p.stock), isPromo: !!p.isPromo,
@@ -295,6 +308,7 @@ export default function AdminProducts() {
       author: form.author || null,
       price: Number(form.price),
       compareAtPrice: form.compareAtPrice ? Number(form.compareAtPrice) : null,
+      costPrice: form.costPrice ? Number(form.costPrice) : null,
       category: form.category || null,
       niveau: form.niveau || null,
       emoji: form.emoji || '📦',
@@ -384,10 +398,10 @@ export default function AdminProducts() {
         </div>
         <div className="topbar-actions">
           {view !== 'list' && (
-            <button className="btn-action" onClick={() => setView('list')}>← Retour à la liste</button>
+            <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => setView('list')}>← Retour à la liste</button>
           )}
           {view === 'list' && (
-            <button className="btn-new" onClick={openCreate}>+ Créer un produit</button>
+            <button className="btn-new proexcel-btn-admin-primary-action" onClick={openCreate}><Plus size={16} /> Créer un produit</button>
           )}
         </div>
       </div>
@@ -424,7 +438,7 @@ export default function AdminProducts() {
                       <img src={mainImg} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+                        <ImageIcon size={32} color="white" />
                       </div>
                     )}
                     <div className="product-admin-badges">
@@ -438,8 +452,8 @@ export default function AdminProducts() {
                     <div className="product-admin-cat">{p.category || 'Non classé'}</div>
                     <div className="product-admin-title">{p.title}</div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-                      <span className="product-admin-price">{p.price} DH</span>
-                      {p.compareAtPrice ? <span className="product-admin-compare">{p.compareAtPrice} DH</span> : null}
+                      <span className="product-admin-price">{formatMoroccanPrice(p.price)}</span>
+                      {p.compareAtPrice && p.compareAtPrice > p.price ? <span className="product-admin-compare">{formatMoroccanPrice(p.compareAtPrice)}</span> : null}
                     </div>
                     {colors.length > 0 && (
                       <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
@@ -452,11 +466,11 @@ export default function AdminProducts() {
                   <div className="product-admin-footer">
                     <span>Stock: {p.stock}</span>
                     <div className="product-admin-actions" onClick={e => e.stopPropagation()}>
-                      <button className="btn-action" onClick={() => openEdit(p)} title="Modifier">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => openEdit(p)} title="Modifier">
+                        <Edit size={13} />
                       </button>
-                      <button className="btn-action btn-action-red" onClick={() => delProduct(p.id)} title="Supprimer">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                      <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => delProduct(p.id)} title="Supprimer">
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </div>
@@ -571,7 +585,7 @@ export default function AdminProducts() {
                       style={{ flex: 1 }}
                     />
                     <button
-                      className="btn-action"
+                      className="btn-action proexcel-btn-admin-secondary-action"
                       onClick={addVariant}
                       style={{ padding: '0.5rem 1rem', fontWeight: 700 }}
                     >+</button>
@@ -616,7 +630,7 @@ export default function AdminProducts() {
                       style={{ fontFamily: 'monospace', width: '90px' }}
                     />
                     <button
-                      className="btn-action"
+                      className="btn-action proexcel-btn-admin-secondary-action"
                       onClick={addColor}
                       style={{ padding: '0.5rem 1rem' }}
                     >+ Ajouter</button>
@@ -677,14 +691,32 @@ export default function AdminProducts() {
                 <div className="cp-section-body">
                   <div className="cp-price-grid">
                     <div className="cp-field">
-                      <div className="cp-label">Prix de vente (DH)</div>
-                      <input className="cp-input" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" />
+                      <div className="cp-label">Prix de vente (DH) *</div>
+                      <input className="cp-input" type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="Ex: 149" />
                     </div>
                     <div className="cp-field">
-                      <div className="cp-label">Prix barré (DH)</div>
-                      <input className="cp-input" type="number" value={form.compareAtPrice} onChange={e => setForm({ ...form, compareAtPrice: e.target.value })} placeholder="0.00" />
+                      <div className="cp-label">Prix barré / Prix avant réduction (DH)</div>
+                      <input className="cp-input" type="number" min="0" step="0.01" value={form.compareAtPrice} onChange={e => setForm({ ...form, compareAtPrice: e.target.value })} placeholder="Ex: 199" />
+                      <div style={{ fontSize: '0.72rem', color: 'var(--a-text2)', marginTop: '0.3rem' }}>Laissez vide si pas de réduction. Doit être supérieur au prix de vente.</div>
+                    </div>
+                    <div className="cp-field">
+                      <div className="cp-label" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        Prix d&apos;achat / Coût interne (DH)
+                        <span style={{ background: 'rgba(192,57,43,0.1)', color: 'var(--a-primary)', fontSize: '0.6rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: '4px', letterSpacing: '0.05em' }}>ADMIN</span>
+                      </div>
+                      <input className="cp-input" type="number" min="0" step="0.01" value={form.costPrice} onChange={e => setForm({ ...form, costPrice: e.target.value })} placeholder="Ex: 90" />
+                      <div style={{ fontSize: '0.72rem', color: 'var(--a-text2)', marginTop: '0.3rem' }}>Jamais affiché aux clients. Sert uniquement au calcul de marge.</div>
                     </div>
                   </div>
+                  {form.price && form.costPrice && Number(form.costPrice) > 0 && (
+                    <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.9rem', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--a-text2)' }}>
+                      Marge : <strong style={{ color: '#22c55e' }}>
+                        {Math.round((Number(form.price) - Number(form.costPrice)) / Number(form.price) * 100)}%
+                      </strong> — Bénéfice : <strong style={{ color: '#22c55e' }}>
+                        {(Number(form.price) - Number(form.costPrice)).toFixed(2)} DH
+                      </strong>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -725,7 +757,7 @@ export default function AdminProducts() {
 
               {/* Save */}
               <button
-                className="btn-new"
+                className="btn-new proexcel-btn-admin-save-action"
                 style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}
                 onClick={saveProduct}
                 disabled={loading}
@@ -744,7 +776,7 @@ export default function AdminProducts() {
               ⚠ {saveError}
             </div>
           )}
-          <button className="btn-save" onClick={saveProduct} disabled={loading}>
+          <button className="btn-save proexcel-btn-admin-save-action" onClick={saveProduct} disabled={loading}>
             {loading ? 'Enregistrement…' : 'Enregistrer le produit'}
           </button>
         </div>
