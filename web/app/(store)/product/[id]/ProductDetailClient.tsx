@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
@@ -78,6 +78,23 @@ export default function ProductDetailClient({
       : ['Standard', 'Pack Premium', 'Pack Éco']
 
   const [selectedVariant, setSelectedVariant] = useState(parsedVariants[0] || 'Standard')
+  const [hoverVariant, setHoverVariant] = useState<string | null>(null)
+  const sliderTarget = hoverVariant ?? selectedVariant
+
+  const pillContainerRef = useRef<HTMLDivElement>(null)
+  const pillBtnRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const [sliderBox, setSliderBox] = useState<{ left: number; top: number; width: number; height: number } | null>(null)
+
+  useLayoutEffect(() => {
+    const idx = parsedVariants.indexOf(sliderTarget)
+    const btn = pillBtnRefs.current[idx]
+    const container = pillContainerRef.current
+    if (!btn || !container) return
+    const br = btn.getBoundingClientRect()
+    const cr = container.getBoundingClientRect()
+    setSliderBox({ left: br.left - cr.left, top: br.top - cr.top, width: br.width, height: br.height })
+  }, [sliderTarget, parsedVariants])
+
   const [qty, setQty] = useState(1)
   const [activeImg, setActiveImg] = useState(0)
   const [openAcc, setOpenAcc] = useState<string | null>('desc')
@@ -308,16 +325,28 @@ export default function ProductDetailClient({
             </div>
           )}
 
-          {/* Variants */}
+          {/* Variants — sliding pill selector */}
           {parsedVariants.length > 0 && (
             <div className="variant-selector">
               <div className="v-title">{T.format}</div>
-              <div className="pill-grid">
-                {parsedVariants.map((v: string) => (
+              <div
+                ref={pillContainerRef}
+                className="pill-grid"
+                onMouseLeave={() => setHoverVariant(null)}
+              >
+                {sliderBox && (
+                  <div
+                    className="pill-slider"
+                    style={{ left: sliderBox.left, top: sliderBox.top, width: sliderBox.width, height: sliderBox.height }}
+                  />
+                )}
+                {parsedVariants.map((v: string, i: number) => (
                   <button
                     key={v}
-                    className={`pill-btn ${selectedVariant === v ? 'active' : ''}`}
+                    ref={el => { pillBtnRefs.current[i] = el }}
+                    className={`pill-btn${selectedVariant === v ? ' pill-selected' : ''}${sliderTarget === v ? ' pill-lit' : ''}`}
                     onClick={() => setSelectedVariant(v)}
+                    onMouseEnter={() => setHoverVariant(v)}
                   >
                     {v}
                   </button>
