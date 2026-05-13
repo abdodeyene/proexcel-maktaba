@@ -168,11 +168,11 @@ export default function CheckoutPage() {
         <p style={{ color: 'var(--text2)', fontSize: '0.95rem', fontWeight: 500 }}>Complétez vos informations pour recevoir vos livres.</p>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.25rem' }}>
+      <div className="checkout-wrapper" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.25rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '2.5rem' }} className="checkout-layout-grid">
-          
+
           {/* Form */}
-          <div>
+          <div className="checkout-form-col">
             <div className="checkout-card" style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
 
               {error && (
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
               <form onSubmit={handleSubmit}>
                 {/* Informations Personnelles */}
                 <div style={{ marginBottom: '2.5rem' }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text2)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="checkout-section-header" style={{ fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text2)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <User size={16} /> Informations Personnelles
                   </div>
 
@@ -193,9 +193,10 @@ export default function CheckoutPage() {
                       <label style={{ fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.6rem', color: 'var(--text)', display: 'block' }}>Nom Complet</label>
                       <div style={{ position: 'relative' }}>
                         <User size={18} style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text2)', opacity: 0.6 }} />
-                        <input 
-                          type="text" 
-                          placeholder="Ex: Ahmed Alaoui" 
+                        <input
+                          type="text"
+                          placeholder="Ex: Ahmed Alaoui"
+                          className="checkout-field-input"
                           style={{ width: '100%', padding: '0 1.25rem 0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
                           value={form.name}
                           onChange={e => setForm({ ...form, name: e.target.value })}
@@ -209,9 +210,10 @@ export default function CheckoutPage() {
                       <label style={{ fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.6rem', color: 'var(--text)', display: 'block' }}>Téléphone</label>
                       <div style={{ position: 'relative' }}>
                         <Phone size={18} style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text2)', opacity: 0.6 }} />
-                        <input 
-                          type="tel" 
-                          placeholder="06 00 00 00 00" 
+                        <input
+                          type="tel"
+                          placeholder="06 00 00 00 00"
+                          className="checkout-field-input"
                           style={{ width: '100%', padding: '0 1.25rem 0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
                           value={form.phone}
                           onChange={e => setForm({ ...form, phone: e.target.value })}
@@ -226,7 +228,7 @@ export default function CheckoutPage() {
 
                 {/* Adresse de Livraison */}
                 <div style={{ marginBottom: '2.5rem' }}>
-                  <div style={{ fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text2)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="checkout-section-header" style={{ fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text2)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <MapPin size={16} /> Adresse de Livraison
                   </div>
 
@@ -234,7 +236,8 @@ export default function CheckoutPage() {
                     <label style={{ fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.6rem', color: 'var(--text)', display: 'block' }}>Ville</label>
                     <div style={{ position: 'relative' }}>
                       <MapPin size={18} style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text2)', opacity: 0.6, zIndex: 1 }} />
-                      <select 
+                      <select
+                        className="checkout-field-input"
                         style={{ width: '100%', padding: '0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: form.city ? 'var(--text)' : 'var(--text2)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', appearance: 'none', transition: 'all 0.2s', cursor: 'pointer' }}
                         value={form.city}
                         onChange={e => setForm({ ...form, city: e.target.value })}
@@ -255,8 +258,9 @@ export default function CheckoutPage() {
                     <label style={{ fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.6rem', color: 'var(--text)', display: 'block' }}>Adresse de Livraison</label>
                     <div style={{ position: 'relative' }}>
                       <Truck size={18} style={{ position: 'absolute', left: '1.2rem', top: '1.25rem', color: 'var(--text2)', opacity: 0.6 }} />
-                      <textarea 
-                        placeholder="Quartier, Rue, N° d'appartement..." 
+                      <textarea
+                        placeholder="Quartier, Rue, N° d'appartement..."
+                        className="checkout-field-input"
                         style={{ width: '100%', padding: '1rem 1.25rem 1rem 3.2rem', height: '110px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', resize: 'none', transition: 'all 0.2s', fontFamily: 'inherit' }}
                         value={form.address}
                         onChange={e => setForm({ ...form, address: e.target.value })}
@@ -270,7 +274,7 @@ export default function CheckoutPage() {
 
                 {/* Méthode de Paiement & Submit */}
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text2)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div className="checkout-section-header" style={{ fontWeight: 800, fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text2)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <CreditCard size={16} /> Méthode de Paiement
                   </div>
 
@@ -299,14 +303,14 @@ export default function CheckoutPage() {
                     <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                       <ShoppingBag size={22} />
                     </div>
-                    <span style={{ color: '#fff', fontSize: '1.15rem', fontWeight: 800 }}>
+                    <span className="checkout-submit-label" style={{ color: '#fff', fontSize: '1.15rem', fontWeight: 800 }}>
                       {loading ? 'Traitement...' : 'Commander maintenant'}
                     </span>
                     <ArrowRight size={22} style={{ color: '#fff', marginRight: '0.5rem' }} />
                   </button>
 
-                  {/* Payment Cards Side by Side */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                  {/* Payment trust badges */}
+                  <div className="checkout-trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
                     <div style={{ background: 'rgba(34,197,94,0.06)', padding: '1.25rem 0.5rem', borderRadius: '16px', border: '1px solid rgba(34,197,94,0.15)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', textAlign: 'center' }}>
                       <ShieldCheck size={28} style={{ color: 'var(--green)' }} />
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--green)' }}>Paiement sécurisé</span>
@@ -370,7 +374,7 @@ export default function CheckoutPage() {
                 {appliedPromo && <div style={{ color: 'var(--green)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 700, paddingLeft: '0.5rem' }}>Code {appliedPromo.code} actif !</div>}
               </div>
 
-              <div style={{ background: 'var(--bg2)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
+              <div className="checkout-totals-box" style={{ background: 'var(--bg2)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.95rem', color: 'var(--text2)', fontWeight: 500 }}>
                   <span>Sous-total</span>
                   <span style={{ color: 'var(--text)', fontWeight: 700 }}>{subtotal.toFixed(2)} DH</span>
@@ -392,13 +396,13 @@ export default function CheckoutPage() {
                 
                 <div style={{ height: '1px', background: 'var(--border)', marginBottom: '1.25rem' }} />
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: '1.5rem', color: 'var(--primary)', alignItems: 'center' }}>
+                <div className="checkout-total-row" style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: '1.5rem', color: 'var(--primary)', alignItems: 'center' }}>
                   <span>TOTAL</span>
                   <span>{total.toFixed(2)} DH</span>
                 </div>
               </div>
 
-              <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text2)', fontSize: '0.8rem', justifyContent: 'center', fontWeight: 600 }}>
+              <div className="checkout-ssl-line" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text2)', fontSize: '0.8rem', justifyContent: 'center', fontWeight: 600 }}>
                 <Lock size={14} /> Transaction sécurisée SSL
               </div>
             </div>
@@ -408,39 +412,82 @@ export default function CheckoutPage() {
       </div>
 
       <style jsx>{`
+        /* ── Tablet: single column, summary first ── */
         @media (max-width: 960px) {
           .checkout-layout-grid {
             grid-template-columns: 1fr !important;
-            gap: 1.5rem !important;
+            gap: 1.25rem !important;
           }
           .checkout-inputs-row {
             grid-template-columns: 1fr !important;
           }
+          /* Summary floats to top on mobile */
+          .checkout-summary-wrap {
+            order: -1;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 10 !important;
+            height: auto !important;
+          }
+          .checkout-form-col {
+            order: 1;
+          }
         }
+
+        /* ── Mobile: all specific sizing ── */
         @media (max-width: 640px) {
-          .checkout-card {
-            padding: 1.5rem 1rem !important;
-            border-radius: 20px !important;
+          .checkout-wrapper {
+            padding: 0 16px !important;
           }
           .checkout-header {
-            padding: 2rem 1.25rem 1.5rem !important;
+            padding: 1.75rem 16px 1.25rem !important;
             border-bottom-left-radius: 20px !important;
             border-bottom-right-radius: 20px !important;
-          }
-          .checkout-header h1 {
-            font-size: 1.45rem !important;
-          }
-          .checkout-header-icon {
-            width: 52px !important;
-            height: 52px !important;
             margin-bottom: 1rem !important;
           }
+          .checkout-header h1 {
+            font-size: 1.35rem !important;
+          }
+          .checkout-header-icon {
+            width: 48px !important;
+            height: 48px !important;
+            margin-bottom: 0.75rem !important;
+          }
+          .checkout-card {
+            padding: 20px !important;
+            border-radius: 20px !important;
+          }
+          .checkout-section-header {
+            font-size: 11px !important;
+            letter-spacing: 2px !important;
+          }
+          /* font-size 16px prevents iOS keyboard zoom */
+          .checkout-field-input {
+            font-size: 16px !important;
+          }
           .checkout-submit-btn {
-            height: 58px !important;
+            height: 56px !important;
+            border-radius: 12px !important;
+          }
+          .checkout-submit-label {
+            font-size: 17px !important;
+          }
+          .checkout-totals-box {
+            padding: 20px !important;
             border-radius: 16px !important;
           }
-          .checkout-summary-wrap {
-            position: static !important;
+          .checkout-total-row {
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            color: #E8230A !important;
+          }
+          .checkout-ssl-line {
+            font-size: 13px !important;
+            justify-content: center !important;
+          }
+          .checkout-trust-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
           }
         }
       `}</style>
