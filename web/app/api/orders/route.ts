@@ -19,19 +19,27 @@ export async function POST(req: NextRequest) {
   try {
     const dto = await req.json()
 
-    // Validate required fields
-    const { name, phone, address, city, cart, promoCode } = dto
-    if (!name || typeof name !== 'string' || name.trim().length < 2 || name.trim().length > 120) {
-      return NextResponse.json({ message: 'Nom invalide' }, { status: 400 })
+    // Validate and sanitise required fields
+    const { cart, promoCode } = dto
+    const name    = typeof dto.name    === 'string' ? dto.name.trim()    : ''
+    const phone   = typeof dto.phone   === 'string' ? dto.phone.trim()   : ''
+    const address = typeof dto.address === 'string' ? dto.address.trim() : ''
+    const city    = typeof dto.city    === 'string' ? dto.city.trim()    : ''
+
+    if (name.length < 2 || name.length > 120) {
+      return NextResponse.json({ message: 'Veuillez saisir votre nom complet (2–120 caractères).' }, { status: 400 })
     }
-    if (!phone || typeof phone !== 'string' || !/^[\d\s+\-()]{7,20}$/.test(phone.trim())) {
-      return NextResponse.json({ message: 'Téléphone invalide' }, { status: 400 })
+    // Accept Moroccan phone formats: 06/07 mobile, 05 landline, +212, 00212
+    if (!/^[\d\s+\-().]{7,25}$/.test(phone)) {
+      return NextResponse.json({ message: 'Numéro de téléphone invalide (7–25 chiffres/caractères autorisés).' }, { status: 400 })
     }
-    if (!address || typeof address !== 'string' || address.trim().length < 5) {
-      return NextResponse.json({ message: 'Adresse invalide' }, { status: 400 })
+    // Accept any real address: letters (latin + Arabic), digits, spaces, commas,
+    // hyphens, slashes, apostrophes, dots, parentheses — just enforce length.
+    if (address.length < 5 || address.length > 300) {
+      return NextResponse.json({ message: 'Adresse invalide (5–300 caractères requis).' }, { status: 400 })
     }
-    if (!city || typeof city !== 'string' || city.trim().length < 2) {
-      return NextResponse.json({ message: 'Ville invalide' }, { status: 400 })
+    if (city.length < 2 || city.length > 100) {
+      return NextResponse.json({ message: 'Ville invalide.' }, { status: 400 })
     }
     if (!Array.isArray(cart) || cart.length === 0 || cart.length > 50) {
       return NextResponse.json({ message: 'Panier invalide' }, { status: 400 })
@@ -116,10 +124,10 @@ export async function POST(req: NextRequest) {
     const order = await prisma.order.create({
       data: {
         orderNum,
-        name: name.trim(),
-        phone: phone.trim(),
-        address: address.trim(),
-        city: city.trim(),
+        name,
+        phone,
+        address,
+        city,
         total,
         cart: verifiedCart as unknown as import('@prisma/client').Prisma.JsonArray,
       },
