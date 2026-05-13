@@ -17,7 +17,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     })
 
     const mapProduct = (p: any) => ({
-      id: String(p.id),
+      id: p.id as number,
       name: p.title,
       slug: String(p.id),
       price: p.price,

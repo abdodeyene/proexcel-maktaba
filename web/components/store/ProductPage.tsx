@@ -35,7 +35,7 @@ type Review = {
 
 interface ProductPageProps {
   product: {
-    id: string
+    id: number
     name: string
     slug: string
     price: number
@@ -151,7 +151,7 @@ export default function ProductPage({ product }: ProductPageProps) {
     setQuantity(p => Math.max(1, Math.min(product.stock ?? 99, p + delta)))
   }
 
-  function addToCartLocal(item: { productId: string; quantity: number; price: number; name: string; image: string | null }) {
+  function addToCartLocal(item: { productId: number; quantity: number; price: number; name: string; image: string | null }) {
     const cart = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
     const key  = `${item.productId}_standard`
     const idx  = cart.findIndex((i: any) => i.key === key)

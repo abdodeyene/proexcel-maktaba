@@ -46,14 +46,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate cart items structure
+    // Product.id is Int in Prisma — accept number or numeric string from any cart source
     const cartItems = cart as Array<{ productId: unknown; qty: unknown; variant?: unknown }>
     for (const item of cartItems) {
-      if (typeof item.productId !== 'number' || item.productId <= 0) {
-        return NextResponse.json({ message: 'Produit invalide' }, { status: 400 })
+      const pid = Number(item.productId)
+      if (!Number.isFinite(pid) || !Number.isInteger(pid) || pid <= 0) {
+        return NextResponse.json({ message: 'Identifiant produit invalide.' }, { status: 400 })
       }
       const qty = Number(item.qty)
       if (!Number.isInteger(qty) || qty < 1 || qty > 100) {
-        return NextResponse.json({ message: 'Quantité invalide' }, { status: 400 })
+        return NextResponse.json({ message: 'Quantité invalide (1–100).' }, { status: 400 })
       }
     }
 
