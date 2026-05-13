@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import {
@@ -51,8 +51,16 @@ interface ProductPageProps {
     isFeatured: boolean
     reviews?: Review[]
     ratingBreakdown?: Record<number, number>
+    variants?: string[]
+    colors?: string[]
   }
   relatedProducts: any[]
+}
+
+type SelectedVariant = {
+  name: string
+  type: 'color' | 'text'
+  colorHex?: string
 }
 
 const DEFAULT_TRUST = [
@@ -125,6 +133,35 @@ export default function ProductPage({ product }: ProductPageProps) {
   const [submitting, setSubmitting]         = useState(false)
   const [submitted, setSubmitted]           = useState(false)
 
+  const textVariants  = Array.isArray(product.variants) ? product.variants : [] as string[]
+  const colorVariants = Array.isArray(product.colors)   ? product.colors   : [] as string[]
+  const hasVariants   = textVariants.length > 0 || colorVariants.length > 0
+
+  const [selectedTextVariant, setSelectedTextVariant] = useState<string>(textVariants[0] || '')
+  const [selectedColor,       setSelectedColor]       = useState<string>(colorVariants[0] || '')
+  const [hoveredTextPill,     setHoveredTextPill]     = useState<string>('')
+
+  const textPillsWrapRef  = useRef<HTMLDivElement>(null)
+  const textPillSliderRef = useRef<HTMLSpanElement>(null)
+
+  useLayoutEffect(() => {
+    const wrap   = textPillsWrapRef.current
+    const slider = textPillSliderRef.current
+    if (!wrap || !slider || textVariants.length === 0) return
+    const target = hoveredTextPill || selectedTextVariant
+    if (!target) { slider.style.opacity = '0'; return }
+    const targetBtn = Array.from(wrap.querySelectorAll<HTMLElement>('[data-v]'))
+      .find(b => b.dataset.v === target)
+    if (!targetBtn) { slider.style.opacity = '0'; return }
+    const parentRect = wrap.getBoundingClientRect()
+    const btnRect    = targetBtn.getBoundingClientRect()
+    slider.style.opacity = '1'
+    slider.style.left    = `${btnRect.left - parentRect.left}px`
+    slider.style.top     = `${btnRect.top  - parentRect.top}px`
+    slider.style.width   = `${btnRect.width}px`
+    slider.style.height  = `${btnRect.height}px`
+  }, [hoveredTextPill, selectedTextVariant, textVariants])
+
   const hasDiscount     = product.compareAtPrice != null && product.compareAtPrice > product.price
   const discountPercent = hasDiscount ? Math.round((1 - product.price / product.compareAtPrice!) * 100) : 0
   const savings         = hasDiscount ? (product.compareAtPrice! - product.price).toFixed(2) : '0'
@@ -151,14 +188,36 @@ export default function ProductPage({ product }: ProductPageProps) {
     setQuantity(p => Math.max(1, Math.min(product.stock ?? 99, p + delta)))
   }
 
-  function addToCartLocal(item: { productId: number; quantity: number; price: number; name: string; image: string | null }) {
-    const cart = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
-    const key  = `${item.productId}_standard`
-    const idx  = cart.findIndex((i: any) => i.key === key)
+  function getVariantLabel(): string {
+    if (textVariants.length === 0) return 'Option'
+    const all = textVariants.join(' ').toLowerCase()
+    if (/taille|size|\bxs\b|\bs\b|\bm\b|\bl\b|\bxl\b/.test(all)) return 'Taille'
+    if (/format|pack|express|standard|édition|edition|type/.test(all)) return 'Format'
+    return 'Option'
+  }
+
+  function getCurrentSelectedVariant(): SelectedVariant | undefined {
+    if (selectedColor)       return { name: selectedColor,       type: 'color', colorHex: selectedColor }
+    if (selectedTextVariant) return { name: selectedTextVariant, type: 'text' }
+    return undefined
+  }
+
+  function addToCartLocal(item: { productId: number; quantity: number; price: number; name: string; image: string | null; selectedVariant?: SelectedVariant }) {
+    const cart       = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
+    const variantKey = item.selectedVariant
+      ? item.selectedVariant.name.replace(/\s+/g, '-').toLowerCase()
+      : 'standard'
+    const key = `${item.productId}_${variantKey}`
+    const idx = cart.findIndex((i: any) => i.key === key)
     if (idx >= 0) {
       cart[idx].qty += item.quantity
     } else {
-      cart.push({ key, ...item, qty: item.quantity, variant: 'Standard', emoji: '📚' })
+      cart.push({
+        key, ...item, qty: item.quantity,
+        variant: item.selectedVariant?.name || 'Standard',
+        selectedVariant: item.selectedVariant ?? null,
+        emoji: '📚',
+      })
     }
     localStorage.setItem('proexcel_cart', JSON.stringify(cart))
     window.dispatchEvent(new Event('cart-updated'))
@@ -167,7 +226,7 @@ export default function ProductPage({ product }: ProductPageProps) {
   async function handleAddToCart() {
     setIsAddingToCart(true)
     try {
-      addToCartLocal({ productId: product.id, quantity, price: product.price, name: product.name, image: productImages[0] ?? null })
+      addToCartLocal({ productId: product.id, quantity, price: product.price, name: product.name, image: productImages[0] ?? null, selectedVariant: getCurrentSelectedVariant() })
       setToast('Produit ajouté au panier !')
       setTimeout(() => setToast(null), 3000)
     } finally {
@@ -176,7 +235,7 @@ export default function ProductPage({ product }: ProductPageProps) {
   }
 
   function handleBuyNow() {
-    addToCartLocal({ productId: product.id, quantity, price: product.price, name: product.name, image: productImages[0] ?? null })
+    addToCartLocal({ productId: product.id, quantity, price: product.price, name: product.name, image: productImages[0] ?? null, selectedVariant: getCurrentSelectedVariant() })
     router.push('/checkout')
   }
 
@@ -337,6 +396,51 @@ export default function ProductPage({ product }: ProductPageProps) {
                   : 'Rupture de stock'}
               </span>
             </div>
+
+            {/* ── VARIANT SELECTOR ── */}
+            {hasVariants && (
+              <div className="pp-variants-section">
+                {colorVariants.length > 0 && (
+                  <div className="pp-variant-group">
+                    <span className="pp-variant-group-label">Couleur</span>
+                    <div className="pp-color-swatches">
+                      {colorVariants.map(hex => (
+                        <button
+                          key={hex}
+                          type="button"
+                          title={hex}
+                          onClick={() => setSelectedColor(hex)}
+                          className={`pp-color-swatch${selectedColor === hex ? ' selected' : ''}`}
+                          style={{ background: hex }}
+                          aria-label={`Couleur ${hex}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {textVariants.length > 0 && (
+                  <div className="pp-variant-group">
+                    <span className="pp-variant-group-label">{getVariantLabel()}</span>
+                    <div className="pp-text-pill-wrap" ref={textPillsWrapRef}>
+                      <span className="pp-text-pill-slider" ref={textPillSliderRef} />
+                      {textVariants.map(v => (
+                        <button
+                          key={v}
+                          type="button"
+                          data-v={v}
+                          onClick={() => setSelectedTextVariant(v)}
+                          onMouseEnter={() => setHoveredTextPill(v)}
+                          onMouseLeave={() => setHoveredTextPill('')}
+                          className={`pp-text-pill${selectedTextVariant === v ? ' selected' : ''}`}
+                        >
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ── PURCHASE AREA ── */}
             {/* Mobile layout — cart button only (buy now is in sticky bar) */}
@@ -750,6 +854,55 @@ export default function ProductPage({ product }: ProductPageProps) {
         .pp-stock-label { font-size: 0.875rem; font-weight: 600; }
         .pp-stock-label.in { color: var(--green); }
         .pp-stock-label.out { color: var(--red); }
+
+        /* VARIANT SELECTOR */
+        .pp-variants-section { display: flex; flex-direction: column; gap: 1rem; }
+        .pp-variant-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .pp-variant-group-label {
+          font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.08em; color: var(--text2);
+        }
+
+        .pp-color-swatches { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .pp-color-swatch {
+          width: 34px; height: 34px; border-radius: 50%; padding: 0; flex-shrink: 0;
+          border: 2.5px solid transparent;
+          outline: 2.5px solid transparent; outline-offset: 2px;
+          cursor: pointer;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, outline-color 0.18s ease;
+        }
+        .pp-color-swatch:hover { transform: scale(1.13); box-shadow: 0 4px 14px rgba(0,0,0,0.22); }
+        .pp-color-swatch.selected {
+          outline-color: var(--primary);
+          box-shadow: 0 0 0 1px var(--primary);
+          transform: scale(1.08);
+        }
+
+        .pp-text-pill-wrap {
+          position: relative; display: flex; flex-wrap: wrap; gap: 0.375rem;
+          border: 1.5px solid var(--border); border-radius: 14px;
+          padding: 4px; background: var(--card);
+        }
+        .pp-text-pill-slider {
+          position: absolute; border-radius: 10px;
+          background: var(--primary); opacity: 0; pointer-events: none; z-index: 0;
+          transition:
+            left   0.22s cubic-bezier(0.34,1.56,0.64,1),
+            top    0.22s cubic-bezier(0.34,1.56,0.64,1),
+            width  0.22s ease,
+            height 0.22s ease,
+            opacity 0.15s ease;
+        }
+        .pp-text-pill {
+          position: relative; z-index: 1;
+          padding: 0.375rem 1rem; border-radius: 10px;
+          font-size: 0.82rem; font-weight: 600;
+          border: none; color: var(--text);
+          background: transparent; cursor: pointer;
+          transition: color 0.18s ease; white-space: nowrap;
+        }
+        .pp-text-pill:hover  { color: #fff; }
+        .pp-text-pill.selected { color: #fff; }
 
         /* QUANTITY */
         .pp-qty-row { display: flex; align-items: center; gap: 1.25rem; }

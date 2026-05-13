@@ -28,10 +28,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       sku: `PE-${p.id}`,
       rating: p.rating || 4.5,
       reviewCount: p.reviewCount || 0,
-      soldCount: 15 + (p.id % 40), // Realistic mock
+      soldCount: 15 + (p.id % 40),
       description: p.description || '',
       isFeatured: p.isBestOffer || false,
       reviews: Array.isArray(p.reviews) ? p.reviews : [],
+      variants: Array.isArray(p.variants) ? (p.variants as string[]) : [],
+      colors: Array.isArray(p.colors) ? (p.colors as string[]) : [],
     })
 
     return (

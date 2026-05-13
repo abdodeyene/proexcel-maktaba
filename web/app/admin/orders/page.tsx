@@ -6,6 +6,7 @@ type OrderItem = {
   qty: number
   price: number
   variant?: string
+  selectedVariant?: { name: string; type: 'color' | 'text'; colorHex?: string } | null
 }
 
 type Order = {
@@ -288,7 +289,13 @@ export default function AdminOrders() {
               {((selectedOrder.cart as OrderItem[]) || []).map((item, index) => (
                 <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--a-border)', fontSize: '0.85rem' }}>
                   <div>{item.title}</div>
-                  <div style={{ color: 'var(--a-text2)' }}>{item.variant ? `${item.variant} ×` : ''} {item.qty}</div>
+                  <div style={{ color: 'var(--a-text2)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    {item.selectedVariant?.type === 'color' && item.selectedVariant.colorHex && (
+                      <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: item.selectedVariant.colorHex, border: '1px solid rgba(0,0,0,0.15)', flexShrink: 0 }} />
+                    )}
+                    {(item.selectedVariant?.name || item.variant) ? `${item.selectedVariant?.name || item.variant} ×` : ''}
+                    {' '}{item.qty}
+                  </div>
                   <div style={{ fontWeight: 700, color: 'var(--a-primary)' }}>{item.price * item.qty} DH</div>
                 </div>
               ))}

@@ -16,12 +16,19 @@ import {
   Sparkles
 } from '@/components/LucideIcons'
 
+type SelectedVariant = {
+  name: string
+  type: 'color' | 'text'
+  colorHex?: string
+}
+
 type CartItem = {
   key: string
   productId: number
   id: number
   title: string
   variant: string
+  selectedVariant?: SelectedVariant | null
   price: number
   qty: number
   emoji?: string
@@ -146,7 +153,12 @@ export default function CartPage() {
                 
                 <div className="ci-details">
                   <div className="ci-title">{item.title}</div>
-                  <div className="ci-variant">Format: {item.variant}</div>
+                  <div className="ci-variant" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {item.selectedVariant?.type === 'color' && item.selectedVariant.colorHex && (
+                      <span style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', background: item.selectedVariant.colorHex, border: '1.5px solid rgba(0,0,0,0.12)', flexShrink: 0 }} />
+                    )}
+                    {item.selectedVariant ? item.selectedVariant.name : item.variant || 'Standard'}
+                  </div>
                   <div className="ci-price-mob">{item.price} DH</div>
                 </div>
                 
