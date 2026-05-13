@@ -168,12 +168,12 @@ export default function CheckoutPage() {
         <p style={{ color: 'var(--text2)', fontSize: '0.95rem', fontWeight: 500 }}>Complétez vos informations pour recevoir vos livres.</p>
       </div>
 
-      <div className="checkout-wrapper" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.25rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '2.5rem' }} className="checkout-layout-grid">
+      <div className="checkout-wrapper">
+        <div className="checkout-layout-grid">
 
           {/* Form */}
           <div className="checkout-form-col">
-            <div className="checkout-card" style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+            <div className="checkout-card">
 
               {error && (
                 <div style={{ color: '#ef4444', padding: '1rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)', borderRadius: '16px', marginBottom: '2rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
                     <User size={16} /> Informations Personnelles
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }} className="checkout-inputs-row">
+                  <div className="checkout-inputs-row">
                     <div>
                       <label style={{ fontWeight: 700, fontSize: '0.88rem', marginBottom: '0.6rem', color: 'var(--text)', display: 'block' }}>Nom Complet</label>
                       <div style={{ position: 'relative' }}>
@@ -327,8 +327,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Sidebar Summary */}
-          <div className="checkout-summary-wrap" style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
-            <div className="checkout-card" style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+          <div className="checkout-summary-wrap">
+            <div className="checkout-card">
               <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)' }}>
                 <Package size={22} style={{ color: 'var(--primary)' }} /> Votre Commande
               </h3>
