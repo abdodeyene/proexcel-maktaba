@@ -131,24 +131,22 @@ export default function CheckoutPage() {
           phone: form.phone,
           address: form.address,
           city: form.city,
-          total: total,
-          cart: cart
+          cart: cart,
+          promoCode: appliedPromo?.code || ''
         })
       })
 
       if (!res.ok) {
-        throw new Error('Erreur API')
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || 'Erreur lors de la commande')
       }
 
       const orderData = await res.json()
       localStorage.removeItem('proexcel_cart')
       window.dispatchEvent(new Event('cart-updated'))
-      router.push(`/thank-you?order=${orderData.orderNum || orderData.id || '2026-X'}`)
+      router.push(`/thank-you?order=${orderData.orderNum || orderData.id}`)
     } catch (err) {
-      const mockOrderNum = `PE-${Math.floor(1000 + Math.random() * 9000)}`
-      localStorage.removeItem('proexcel_cart')
-      window.dispatchEvent(new Event('cart-updated'))
-      router.push(`/thank-you?order=${mockOrderNum}`)
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.')
     } finally {
       setLoading(false)
     }

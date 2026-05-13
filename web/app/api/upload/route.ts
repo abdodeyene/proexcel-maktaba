@@ -5,6 +5,17 @@ import path from 'path'
 
 export const maxDuration = 60
 
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+])
+const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+
 async function uploadToSupabase(file: File): Promise<string> {
   const bytes = await file.arrayBuffer()
   const buffer = Buffer.from(bytes)
@@ -49,6 +60,29 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const files = formData.getAll('files') as File[]
 
+    if (files.length === 0) {
+      return NextResponse.json({ message: 'No files provided' }, { status: 400 })
+    }
+    if (files.length > 10) {
+      return NextResponse.json({ message: 'Too many files (max 10)' }, { status: 400 })
+    }
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({ message: `File too large: ${file.name} (max 5 MB)` }, { status: 400 })
+      }
+
+      const mimeType = file.type.toLowerCase()
+      if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+        return NextResponse.json({ message: `Invalid file type: ${mimeType}` }, { status: 400 })
+      }
+
+      const ext = file.name.split('.').pop()?.toLowerCase() || ''
+      if (!ALLOWED_EXTENSIONS.has(ext)) {
+        return NextResponse.json({ message: `Invalid file extension: .${ext}` }, { status: 400 })
+      }
+    }
+
     const urls: string[] = []
     for (const file of files) {
       const url = process.env.SUPABASE_URL
@@ -62,7 +96,7 @@ export async function POST(req: NextRequest) {
     if (e instanceof Error && e.message === 'Unauthorized')
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
     if (e instanceof Error && e.message.startsWith('Supabase:'))
-      return NextResponse.json({ message: e.message }, { status: 500 })
+      return NextResponse.json({ message: 'Upload failed' }, { status: 500 })
     return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
 }

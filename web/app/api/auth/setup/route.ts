@@ -1,21 +1,25 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 
-export async function GET() {
-  const dbUrl = process.env.DATABASE_URL || process.env.DIRECT_URL || ''
-
-  const envInfo = {
-    DATABASE_URL: !!process.env.DATABASE_URL,
-    DIRECT_URL: !!process.env.DIRECT_URL,
-    JWT_SECRET: !!process.env.JWT_SECRET,
-    SUPABASE_URL: !!process.env.SUPABASE_URL,
-    NODE_ENV: process.env.NODE_ENV,
+// Protected setup endpoint — requires SETUP_SECRET header to function.
+// Set SETUP_SECRET in your environment variables to enable this route.
+// In production, remove or rotate SETUP_SECRET after first use.
+export async function GET(req: NextRequest) {
+  const setupSecret = process.env.SETUP_SECRET
+  if (!setupSecret) {
+    return NextResponse.json({ message: 'Not found' }, { status: 404 })
   }
 
+  const providedSecret = req.headers.get('x-setup-secret')
+  if (providedSecret !== setupSecret) {
+    return NextResponse.json({ message: 'Forbidden' }, { status: 403 })
+  }
+
+  const dbUrl = process.env.DATABASE_URL || process.env.DIRECT_URL || ''
   if (!dbUrl) {
-    return NextResponse.json({ message: 'DATABASE_URL and DIRECT_URL are both empty', envInfo }, { status: 500 })
+    return NextResponse.json({ message: 'DATABASE_URL is not configured' }, { status: 500 })
   }
 
   const adapter = new PrismaPg({ connectionString: dbUrl })
@@ -27,11 +31,16 @@ export async function GET() {
     })
 
     if (existing) {
-      return NextResponse.json({ message: 'Admin already exists', email: existing.email, envInfo })
+      return NextResponse.json({ message: 'Admin already exists' })
     }
 
-    const hash = await bcrypt.hash('proexcel2026@@', 10)
-    const user = await prisma.user.create({
+    const adminPassword = process.env.ADMIN_PASSWORD
+    if (!adminPassword) {
+      return NextResponse.json({ message: 'ADMIN_PASSWORD env var is required' }, { status: 500 })
+    }
+
+    const hash = await bcrypt.hash(adminPassword, 12)
+    await prisma.user.create({
       data: {
         email: 'proexcel2026@gmail.com',
         password: hash,
@@ -39,11 +48,10 @@ export async function GET() {
       },
     })
 
-    return NextResponse.json({ message: 'Admin created successfully', email: user.email, envInfo })
+    return NextResponse.json({ message: 'Admin created successfully' })
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e)
-    console.error(e)
-    return NextResponse.json({ message: msg, envInfo }, { status: 500 })
+    console.error('Setup error:', e)
+    return NextResponse.json({ message: 'Setup failed' }, { status: 500 })
   } finally {
     await prisma.$disconnect()
   }
