@@ -15,27 +15,24 @@ function TikTokIcon({ size = 18 }: { size?: number }) {
 
 export default function Footer() {
   const { lang } = useLang()
-  const [logoSrc, setLogoSrc] = useState('/logo.png')
-  const [logoLoaded, setLogoLoaded] = useState(false)
+  const [logoSrc, setLogoSrc] = useState('')
+  const [logoReady, setLogoReady] = useState(false)
   const [socials, setSocials] = useState({ fb: '', ig: '', tt: '', yt: '' })
 
   useEffect(() => {
     fetch('/api/settings').then(r => r.json()).then(d => {
-      if (d?.site_logo) {
-        const img = new Image()
-        img.onload = () => { setLogoSrc(d.site_logo); setLogoLoaded(true) }
-        img.onerror = () => setLogoLoaded(true)
-        img.src = d.site_logo
-      } else {
-        setLogoLoaded(true)
-      }
+      const src = d?.site_logo || '/logo.png'
+      const img = new Image()
+      img.onload = () => { setLogoSrc(src); setLogoReady(true) }
+      img.onerror = () => { setLogoSrc(''); setLogoReady(false) }
+      img.src = src
       setSocials({
         fb: d?.store_facebook || '',
         ig: d?.store_instagram || '',
         tt: d?.store_tiktok || d?.store_twitter || '',
         yt: d?.store_youtube || ''
       })
-    }).catch(() => setLogoLoaded(true))
+    }).catch(() => {})
   }, [])
 
   const t = {
@@ -79,16 +76,16 @@ export default function Footer() {
 
   return (
     <footer>
-      <div className="footer-grid" style={{ gridTemplateColumns: '2fr 1fr 1fr' }}>
+      <div className="footer-grid">
 
         {/* ── Brand column ── */}
         <div className="f-brand">
-          {logoLoaded ? (
+          {logoReady && logoSrc ? (
             <img
               src={logoSrc}
               alt="ProExcel Maktaba"
-              style={{ height: '42px', objectFit: 'contain', marginBottom: '1rem', display: 'block', filter: 'brightness(0) invert(1)', opacity: 0.9 }}
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+              style={{ height: '42px', objectFit: 'contain', marginBottom: '1rem', display: 'block', filter: 'brightness(0) invert(1)', opacity: 0.9, animation: 'logo-fadein 0.3s ease' }}
+              onError={() => setLogoReady(false)}
             />
           ) : (
             <div style={{ height: '42px', marginBottom: '1rem', fontFamily: 'Playfair Display, Georgia, serif', fontSize: '1.4rem', fontWeight: 700, color: '#fff' }}>

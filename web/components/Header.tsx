@@ -25,15 +25,14 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
-  const [logoSrc, setLogoSrc] = useState('/logo.png')
-  const [logoLoaded, setLogoLoaded] = useState(false)
+  const [logoSrc, setLogoSrc] = useState('')
+  const [logoReady, setLogoReady] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   const { lang, setLang } = useLang()
-  const imgRef = useRef<HTMLImageElement>(null)
   const langRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const searchPanelRef = useRef<HTMLDivElement>(null)
@@ -59,16 +58,13 @@ export default function Header() {
     fetch('/api/settings')
       .then(r => r.json())
       .then(d => {
-        if (d?.site_logo) {
-          const img = new Image()
-          img.onload = () => { setLogoSrc(d.site_logo); setLogoLoaded(true) }
-          img.onerror = () => setLogoLoaded(true)
-          img.src = d.site_logo
-        } else {
-          setLogoLoaded(true)
-        }
+        const src = d?.site_logo || '/logo.png'
+        const img = new Image()
+        img.onload = () => { setLogoSrc(src); setLogoReady(true) }
+        img.onerror = () => { setLogoSrc(''); setLogoReady(false) }
+        img.src = src
       })
-      .catch(() => setLogoLoaded(true))
+      .catch(() => {})
 
     return () => {
       window.removeEventListener('cart-updated', updateCart)
@@ -155,16 +151,17 @@ export default function Header() {
           </Link>
 
           <Link href="/" className="logo">
-            <img
-              ref={imgRef}
-              src={logoSrc}
-              alt="ProExcel Maktaba"
-              className="logo-img"
-              style={{ opacity: logoLoaded ? 1 : 0, transition: 'opacity 0.3s ease' }}
-              onLoad={() => setLogoLoaded(true)}
-              onError={() => { setLogoLoaded(true); if (imgRef.current) imgRef.current.style.display = 'none' }}
-            />
-            {!logoLoaded && <span style={{ fontFamily: 'inherit', fontSize: '1.3rem', fontWeight: 800 }}>ProExcel</span>}
+            {logoReady && logoSrc ? (
+              <img
+                src={logoSrc}
+                alt="ProExcel Maktaba"
+                className="logo-img"
+                style={{ animation: 'logo-fadein 0.3s ease' }}
+                onError={() => setLogoReady(false)}
+              />
+            ) : (
+              <span className="logo-text-fallback">ProExcel</span>
+            )}
           </Link>
 
           <nav className="header-nav-center">

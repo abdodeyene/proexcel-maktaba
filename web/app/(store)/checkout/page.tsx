@@ -160,8 +160,8 @@ export default function CheckoutPage() {
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '4rem' }}>
       
       {/* Top Header */}
-      <div style={{ textAlign: 'center', padding: '3rem 1.5rem 2rem', background: 'var(--card)', borderBottom: '1px solid var(--border)', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', marginBottom: '2rem' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(232,53,42,0.08)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+      <div className="checkout-header" style={{ textAlign: 'center', padding: '3rem 1.5rem 2rem', background: 'var(--card)', borderBottom: '1px solid var(--border)', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', marginBottom: '2rem' }}>
+        <div className="checkout-header-icon" style={{ width: '64px', height: '64px', borderRadius: '32px', background: 'rgba(232,53,42,0.08)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
           <ShoppingBag size={28} />
         </div>
         <h1 style={{ fontSize: '1.9rem', fontWeight: 900, marginBottom: '0.4rem', color: 'var(--text)', letterSpacing: '-0.02em' }}>Finaliser la commande</h1>
@@ -173,8 +173,8 @@ export default function CheckoutPage() {
           
           {/* Form */}
           <div>
-            <div style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
-              
+            <div className="checkout-card" style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+
               {error && (
                 <div style={{ color: '#ef4444', padding: '1rem', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)', borderRadius: '16px', marginBottom: '2rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
                   <span>⚠️</span> {error}
@@ -274,13 +274,14 @@ export default function CheckoutPage() {
                     <CreditCard size={16} /> Méthode de Paiement
                   </div>
 
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
+                    className="checkout-submit-btn"
                     disabled={loading}
-                    style={{ 
-                      width: '100%', 
-                      height: '66px', 
-                      borderRadius: '20px', 
+                    style={{
+                      width: '100%',
+                      height: '66px',
+                      borderRadius: '20px',
                       background: 'linear-gradient(135deg, var(--primary) 0%, #ff7a00 100%)', 
                       display: 'flex', 
                       alignItems: 'center', 
@@ -322,8 +323,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Sidebar Summary */}
-          <div style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
-            <div style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+          <div className="checkout-summary-wrap" style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
+            <div className="checkout-card" style={{ background: 'var(--card)', borderRadius: '28px', padding: '2.5rem 2rem', border: '1px solid var(--border)', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
               <h3 style={{ fontSize: '1.35rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text)' }}>
                 <Package size={22} style={{ color: 'var(--primary)' }} /> Votre Commande
               </h3>
@@ -410,10 +411,36 @@ export default function CheckoutPage() {
         @media (max-width: 960px) {
           .checkout-layout-grid {
             grid-template-columns: 1fr !important;
-            gap: 2rem !important;
+            gap: 1.5rem !important;
           }
           .checkout-inputs-row {
             grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .checkout-card {
+            padding: 1.5rem 1rem !important;
+            border-radius: 20px !important;
+          }
+          .checkout-header {
+            padding: 2rem 1.25rem 1.5rem !important;
+            border-bottom-left-radius: 20px !important;
+            border-bottom-right-radius: 20px !important;
+          }
+          .checkout-header h1 {
+            font-size: 1.45rem !important;
+          }
+          .checkout-header-icon {
+            width: 52px !important;
+            height: 52px !important;
+            margin-bottom: 1rem !important;
+          }
+          .checkout-submit-btn {
+            height: 58px !important;
+            border-radius: 16px !important;
+          }
+          .checkout-summary-wrap {
+            position: static !important;
           }
         }
       `}</style>
