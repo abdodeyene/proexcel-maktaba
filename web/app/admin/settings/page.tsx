@@ -30,7 +30,8 @@ import {
   ShoppingCart,
   User,
   Send,
-  ShieldCheck
+  ShieldCheck,
+  Bell
 } from '@/components/LucideIcons'
 
 const TABS = [
@@ -263,6 +264,51 @@ export default function AdminSettings() {
 
   const [products, setProducts] = useState<any[]>([])
   const [orders, setOrders] = useState<any[]>([])
+
+  type PushStatus = 'idle' | 'loading' | 'success' | 'denied' | 'unsupported' | 'error'
+  const [pushStatus, setPushStatus] = useState<PushStatus>('idle')
+
+  function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const raw = window.atob(base64)
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0))).buffer as ArrayBuffer
+  }
+
+  async function enablePushNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setPushStatus('unsupported')
+      return
+    }
+    setPushStatus('loading')
+    try {
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        setPushStatus('denied')
+        return
+      }
+      const reg = await navigator.serviceWorker.register('/sw.js')
+      await navigator.serviceWorker.ready
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidKey) { setPushStatus('error'); return }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+      })
+      const res = await fetch('/api/admin/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token()}`,
+        },
+        body: JSON.stringify(sub),
+      })
+      if (!res.ok) { setPushStatus('error'); return }
+      setPushStatus('success')
+    } catch {
+      setPushStatus('error')
+    }
+  }
 
   function token() { return localStorage.getItem('proexcel_admin_token') || '' }
 
@@ -1968,6 +2014,61 @@ export default function AdminSettings() {
                     <div>
                       <div className="s-label">Mots-clés (séparés par des virgules)</div>
                       <input className="s-input" value={settings.seo_keywords} onChange={e => updateKey('seo_keywords', e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="sp-section-title" style={{ marginTop: '1.5rem' }}>Notifications Push</div>
+                <div className="settings-card" style={{ padding: '2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '220px' }}>
+                      <div className="s-label" style={{ fontSize: '0.9rem', marginBottom: '0.35rem' }}>
+                        Notifications de commandes
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--a-text2)', margin: 0, lineHeight: 1.5 }}>
+                        Recevez une notification push sur cet appareil à chaque nouvelle commande.
+                        Fonctionne sur Chrome desktop, Android Chrome et PWA.
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'flex-start' }}>
+                      <button
+                        onClick={enablePushNotifications}
+                        disabled={pushStatus === 'loading' || pushStatus === 'success'}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '0.5rem',
+                          padding: '0.6rem 1.25rem', borderRadius: '9px', fontWeight: 700,
+                          fontSize: '0.85rem', cursor: pushStatus === 'loading' || pushStatus === 'success' ? 'not-allowed' : 'pointer',
+                          background: pushStatus === 'success' ? 'var(--a-green)' : 'var(--a-primary)',
+                          color: '#fff', border: 'none', opacity: pushStatus === 'loading' ? 0.7 : 1,
+                          transition: 'all 0.2s',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <Bell size={15} />
+                        {pushStatus === 'loading' ? 'Activation…'
+                          : pushStatus === 'success' ? 'Notifications activées ✓'
+                          : 'Activer les notifications de commandes'}
+                      </button>
+                      {pushStatus === 'success' && (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--a-green)', fontWeight: 600 }}>
+                          ✓ Notifications activées avec succès sur cet appareil.
+                        </span>
+                      )}
+                      {pushStatus === 'denied' && (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--a-red, #e53e3e)', fontWeight: 600 }}>
+                          ✗ Permission refusée. Autorisez les notifications dans les paramètres du navigateur.
+                        </span>
+                      )}
+                      {pushStatus === 'unsupported' && (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--a-text2)', fontWeight: 600 }}>
+                          ✗ Les notifications push ne sont pas supportées par ce navigateur.
+                        </span>
+                      )}
+                      {pushStatus === 'error' && (
+                        <span style={{ fontSize: '0.78rem', color: 'var(--a-red, #e53e3e)', fontWeight: 600 }}>
+                          ✗ Échec de l'activation. Réessayez ou vérifiez la configuration VAPID.
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
