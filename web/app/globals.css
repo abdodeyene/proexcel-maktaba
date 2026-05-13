@@ -6919,7 +6919,8 @@ textarea.form-input {
 /* ── Tablet ≤960px: single column, summary first ── */
 @media (max-width: 960px) {
   .checkout-wrapper {
-    padding: 0 16px;
+    padding: 0 20px;
+    max-width: 600px;   /* centers on wider phones / small tablets */
   }
   .checkout-layout-grid {
     display: flex;
@@ -6929,8 +6930,8 @@ textarea.form-input {
   .checkout-summary-wrap {
     order: -1;
     position: sticky;
-    top: 0;
-    z-index: 10;
+    top: 68px;          /* sticks below the fixed navbar (68px height) */
+    z-index: 100;
     height: auto;
   }
   .checkout-form-col {
@@ -6944,7 +6945,7 @@ textarea.form-input {
 /* ── Mobile ≤640px: compact sizing ── */
 @media (max-width: 640px) {
   .checkout-header {
-    padding: 1.5rem 16px 1.25rem;
+    padding: 1.5rem 20px 1.25rem;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     margin-bottom: 0.75rem;
@@ -6999,14 +7000,14 @@ textarea.form-input {
 /* ── Very small phones ≤375px ── */
 @media (max-width: 375px) {
   .checkout-wrapper {
-    padding: 0 12px;
+    padding: 0 14px;
   }
   .checkout-card {
     padding: 16px;
     border-radius: 16px;
   }
   .checkout-header {
-    padding: 1.25rem 12px 1rem;
+    padding: 1.25rem 14px 1rem;
   }
   .checkout-header h1 {
     font-size: 1.2rem;

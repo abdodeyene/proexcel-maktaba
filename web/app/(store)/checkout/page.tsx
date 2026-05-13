@@ -286,27 +286,28 @@ export default function CheckoutPage() {
                       width: '100%',
                       height: '66px',
                       borderRadius: '20px',
-                      background: 'linear-gradient(135deg, var(--primary) 0%, #ff7a00 100%)', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'space-between', 
-                      padding: '0 1rem', 
-                      border: 'none', 
-                      cursor: loading ? 'not-allowed' : 'pointer', 
-                      boxShadow: '0 15px 35px rgba(232,53,42,0.35)', 
+                      background: 'linear-gradient(135deg, var(--primary) 0%, #ff7a00 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.75rem',
+                      padding: '0 1.25rem',
+                      border: 'none',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      boxShadow: '0 15px 35px rgba(232,53,42,0.35)',
                       transition: 'transform 0.2s, filter 0.2s',
                       filter: loading ? 'brightness(0.8)' : 'none'
                     }}
                     onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { if (!loading) e.currentTarget.style.transform = 'translateY(0)' }}
                   >
-                    <div style={{ width: '46px', height: '46px', borderRadius: '14px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <ShoppingBag size={22} />
+                    <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                      <ShoppingBag size={20} />
                     </div>
-                    <span className="checkout-submit-label" style={{ color: '#fff', fontSize: '1.15rem', fontWeight: 800 }}>
+                    <span className="checkout-submit-label" style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 800, flex: 1, textAlign: 'center' }}>
                       {loading ? 'Traitement...' : 'Commander maintenant'}
                     </span>
-                    <ArrowRight size={22} style={{ color: '#fff', marginRight: '0.5rem' }} />
+                    <ArrowRight size={20} style={{ color: '#fff', flexShrink: 0, opacity: 0.9 }} />
                   </button>
 
                   {/* Payment trust badges */}
