@@ -157,7 +157,7 @@ export default function CheckoutPage() {
   const cities = MOROCCAN_CITIES
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '4rem' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '4rem', overflowX: 'hidden' }}>
       
       {/* Top Header */}
       <div className="checkout-header" style={{ textAlign: 'center', padding: '3rem 1.5rem 2rem', background: 'var(--card)', borderBottom: '1px solid var(--border)', borderBottomLeftRadius: '32px', borderBottomRightRadius: '32px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', marginBottom: '2rem' }}>
@@ -197,7 +197,7 @@ export default function CheckoutPage() {
                           type="text"
                           placeholder="Ex: Ahmed Alaoui"
                           className="checkout-field-input"
-                          style={{ width: '100%', padding: '0 1.25rem 0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
+                          style={{ width: '100%', boxSizing: 'border-box', padding: '0 1.25rem 0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
                           value={form.name}
                           onChange={e => setForm({ ...form, name: e.target.value })}
                           onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--card)' }}
@@ -214,7 +214,7 @@ export default function CheckoutPage() {
                           type="tel"
                           placeholder="06 00 00 00 00"
                           className="checkout-field-input"
-                          style={{ width: '100%', padding: '0 1.25rem 0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
+                          style={{ width: '100%', boxSizing: 'border-box', padding: '0 1.25rem 0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', transition: 'all 0.2s' }}
                           value={form.phone}
                           onChange={e => setForm({ ...form, phone: e.target.value })}
                           onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--card)' }}
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                       <MapPin size={18} style={{ position: 'absolute', left: '1.2rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text2)', opacity: 0.6, zIndex: 1 }} />
                       <select
                         className="checkout-field-input"
-                        style={{ width: '100%', padding: '0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: form.city ? 'var(--text)' : 'var(--text2)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', appearance: 'none', transition: 'all 0.2s', cursor: 'pointer' }}
+                        style={{ width: '100%', boxSizing: 'border-box', padding: '0 3.2rem', height: '56px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: form.city ? 'var(--text)' : 'var(--text2)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', appearance: 'none', transition: 'all 0.2s', cursor: 'pointer' }}
                         value={form.city}
                         onChange={e => setForm({ ...form, city: e.target.value })}
                         onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--card)' }}
@@ -261,7 +261,7 @@ export default function CheckoutPage() {
                       <textarea
                         placeholder="Quartier, Rue, N° d'appartement..."
                         className="checkout-field-input"
-                        style={{ width: '100%', padding: '1rem 1.25rem 1rem 3.2rem', height: '110px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', resize: 'none', transition: 'all 0.2s', fontFamily: 'inherit' }}
+                        style={{ width: '100%', boxSizing: 'border-box', padding: '1rem 1.25rem 1rem 3.2rem', height: '110px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, fontSize: '0.95rem', outline: 'none', resize: 'none', transition: 'all 0.2s', fontFamily: 'inherit' }}
                         value={form.address}
                         onChange={e => setForm({ ...form, address: e.target.value })}
                         onFocus={e => { e.target.style.borderColor = 'var(--primary)'; e.target.style.background = 'var(--card)' }}
@@ -357,16 +357,16 @@ export default function CheckoutPage() {
 
               <div style={{ marginBottom: '1.75rem' }}>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input 
-                    type="text" 
-                    placeholder="Code Promo" 
+                  <input
+                    type="text"
+                    placeholder="Code Promo"
                     value={promoInput}
                     onChange={e => setPromoInput(e.target.value)}
-                    style={{ flex: 1, padding: '0 1.25rem', height: '48px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontSize: '0.9rem', outline: 'none', fontWeight: 600 }}
+                    style={{ flex: 1, minWidth: 0, padding: '0 1.25rem', height: '48px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontSize: '0.9rem', outline: 'none', fontWeight: 600, boxSizing: 'border-box' }}
                     onFocus={e => { e.target.style.borderColor = 'var(--primary)' }}
                     onBlur={e => { e.target.style.borderColor = 'var(--border)' }}
                   />
-                  <button onClick={handleApplyPromo} style={{ padding: '0 1.5rem', height: '48px', borderRadius: '14px', border: 'none', background: 'var(--text)', color: 'var(--bg)', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = '0.8'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                  <button onClick={handleApplyPromo} style={{ padding: '0 1rem', height: '48px', borderRadius: '14px', border: 'none', background: 'var(--text)', color: 'var(--bg)', fontSize: '0.9rem', fontWeight: 700, cursor: 'pointer', transition: 'opacity 0.2s', flexShrink: 0, whiteSpace: 'nowrap' }} onMouseEnter={e => e.currentTarget.style.opacity = '0.8'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                     Appliquer
                   </button>
                 </div>
@@ -411,86 +411,6 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      <style jsx>{`
-        /* ── Tablet: single column, summary first ── */
-        @media (max-width: 960px) {
-          .checkout-layout-grid {
-            grid-template-columns: 1fr !important;
-            gap: 1.25rem !important;
-          }
-          .checkout-inputs-row {
-            grid-template-columns: 1fr !important;
-          }
-          /* Summary floats to top on mobile */
-          .checkout-summary-wrap {
-            order: -1;
-            position: sticky !important;
-            top: 0 !important;
-            z-index: 10 !important;
-            height: auto !important;
-          }
-          .checkout-form-col {
-            order: 1;
-          }
-        }
-
-        /* ── Mobile: all specific sizing ── */
-        @media (max-width: 640px) {
-          .checkout-wrapper {
-            padding: 0 16px !important;
-          }
-          .checkout-header {
-            padding: 1.75rem 16px 1.25rem !important;
-            border-bottom-left-radius: 20px !important;
-            border-bottom-right-radius: 20px !important;
-            margin-bottom: 1rem !important;
-          }
-          .checkout-header h1 {
-            font-size: 1.35rem !important;
-          }
-          .checkout-header-icon {
-            width: 48px !important;
-            height: 48px !important;
-            margin-bottom: 0.75rem !important;
-          }
-          .checkout-card {
-            padding: 20px !important;
-            border-radius: 20px !important;
-          }
-          .checkout-section-header {
-            font-size: 11px !important;
-            letter-spacing: 2px !important;
-          }
-          /* font-size 16px prevents iOS keyboard zoom */
-          .checkout-field-input {
-            font-size: 16px !important;
-          }
-          .checkout-submit-btn {
-            height: 56px !important;
-            border-radius: 12px !important;
-          }
-          .checkout-submit-label {
-            font-size: 17px !important;
-          }
-          .checkout-totals-box {
-            padding: 20px !important;
-            border-radius: 16px !important;
-          }
-          .checkout-total-row {
-            font-size: 22px !important;
-            font-weight: 700 !important;
-            color: #E8230A !important;
-          }
-          .checkout-ssl-line {
-            font-size: 13px !important;
-            justify-content: center !important;
-          }
-          .checkout-trust-grid {
-            grid-template-columns: 1fr 1fr !important;
-            gap: 12px !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }
