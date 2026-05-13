@@ -815,7 +815,7 @@ export default function ProductPage({ product }: ProductPageProps) {
         .pp-acc-title { font-size: 1rem; font-weight: 700; color: var(--text); }
         .pp-acc-chevron { width: 32px; height: 32px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .pp-chevron-icon { width: 1rem; height: 1rem; color: var(--text2); }
-        .pp-acc-body { padding: 0 1.5rem 1.5rem; font-size: 0.92rem; line-height: 1.75; color: var(--text2); max-width: 800px; }
+        .pp-acc-body { padding: 0 1.5rem 1.5rem; font-size: 0.92rem; line-height: 1.75; color: var(--text); max-width: 800px; }
         .pp-no-desc { opacity: 0.6; font-style: italic; }
 
         /* REVIEWS */
