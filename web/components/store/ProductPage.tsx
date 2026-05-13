@@ -404,7 +404,6 @@ export default function ProductPage({ product }: ProductPageProps) {
             {/* Meta */}
             <div className="pp-meta">
               <span>Réf: <strong>{product.sku}</strong></span>
-              <span>Catégorie: <strong className="capitalize">{product.category?.name}</strong></span>
             </div>
           </div>
         </div>
