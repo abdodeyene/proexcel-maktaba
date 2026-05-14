@@ -136,9 +136,14 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Fire push notification without awaiting — order creation must not fail if push fails
-    sendOrderPushNotification({ name: order.name, city: order.city, total: order.total })
-      .catch(e => console.error('[push] sendOrderPushNotification error:', e))
+    try {
+      console.log('[push-order] order created', order.id)
+      console.log('[push-order] sending notification')
+      const result = await sendOrderPushNotification(order as unknown as Record<string, unknown>)
+      console.log('[push-order] result', result)
+    } catch (error) {
+      console.error('[push-order] failed', error)
+    }
 
     return NextResponse.json(order, { status: 201 })
   } catch {
