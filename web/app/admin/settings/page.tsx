@@ -362,7 +362,13 @@ export default function AdminSettings() {
         return
       }
 
-      setPushStatus('success')
+      const data = await res.json().catch(() => ({}))
+      if (data.saved) {
+        setPushStatus('success')
+      } else {
+        setPushError('La souscription n\'a pas pu être enregistrée.')
+        setPushStatus('error')
+      }
     } catch (e) {
       console.error('[push] Unexpected error:', e)
       setPushError(e instanceof Error ? e.message : String(e))
@@ -384,7 +390,7 @@ export default function AdminSettings() {
         setTestStatus('error')
         return
       }
-      setTestMessage(`Envoyé à ${data.subscriptions ?? 0} appareil(s)`)
+      setTestMessage(`Appareils enregistrés: ${data.subscriptionsCount ?? 0}, envoyées: ${data.sent ?? 0}`)
       setTestStatus('success')
     } catch (e) {
       setTestMessage(e instanceof Error ? e.message : 'Erreur réseau')
@@ -445,6 +451,53 @@ export default function AdminSettings() {
       .then(r => r.json())
       .then(setOrders)
       .catch(console.error)
+  }, [])
+
+  // On mount: detect if this device is already subscribed and restore push status
+  useEffect(() => {
+    async function checkPushSubscription() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+      if (Notification.permission !== 'granted') return
+      try {
+        const reg = await navigator.serviceWorker.ready
+        const sub = await reg.pushManager.getSubscription()
+        if (!sub) return
+
+        // Ask the server whether this endpoint is in the DB
+        const res = await fetch('/api/admin/push/status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token()}`,
+          },
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        })
+        if (!res.ok) return
+        const data = await res.json().catch(() => ({}))
+
+        if (data.subscribed) {
+          setPushStatus('success')
+        } else {
+          // Browser has subscription but DB lost it — re-save silently
+          const saveRes = await fetch('/api/admin/push/subscribe', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token()}`,
+            },
+            body: JSON.stringify(sub),
+          })
+          if (saveRes.ok) {
+            const saveData = await saveRes.json().catch(() => ({}))
+            if (saveData.saved) setPushStatus('success')
+          }
+        }
+      } catch {
+        // silently ignore — do not change push status on startup errors
+      }
+    }
+    checkPushSubscription()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Instant Favicon Preview in Browser Tab

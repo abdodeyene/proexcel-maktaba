@@ -24,7 +24,12 @@ export async function POST(req: NextRequest) {
       create: { endpoint, p256dh, auth, userAgent },
     })
 
-    return NextResponse.json({ success: true })
+    const subscriptionsCount = await prisma.pushSubscription.count()
+
+    console.log('[pushed-subscribe] saved subscription')
+    console.log('[pushed-subscribe] subscriptions count:', subscriptionsCount)
+
+    return NextResponse.json({ success: true, saved: true, subscriptionsCount })
   } catch (e: unknown) {
     if (e instanceof Error && e.message === 'Unauthorized') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
