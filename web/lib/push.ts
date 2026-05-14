@@ -81,6 +81,60 @@ export async function sendPushToAll(payload: PushPayload): Promise<PushResult> {
   return result
 }
 
+export type SinglePushResult = {
+  found:    boolean
+  attempted: number
+  sent:      number
+  error?:    string
+}
+
+export async function sendPushToOne(endpoint: string, payload: PushPayload): Promise<SinglePushResult> {
+  ensureConfigured()
+
+  const result: SinglePushResult = { found: false, attempted: 0, sent: 0 }
+
+  if (!configured) {
+    result.error = 'VAPID not configured'
+    return result
+  }
+
+  let sub: { id: string; p256dh: string; auth: string } | null
+  try {
+    sub = await prisma.pushSubscription.findUnique({
+      where:  { endpoint },
+      select: { id: true, p256dh: true, auth: true },
+    })
+  } catch (e) {
+    result.error = 'DB lookup failed'
+    console.error('[push] DB lookup error:', e)
+    return result
+  }
+
+  if (!sub) return result
+
+  result.found     = true
+  result.attempted = 1
+
+  try {
+    await webpush.sendNotification(
+      { endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+      JSON.stringify(payload),
+    )
+    result.sent = 1
+  } catch (e: unknown) {
+    const status = (e as { statusCode?: number }).statusCode
+    if (status === 404 || status === 410) {
+      await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {})
+      result.error = `Subscription expired (${status}) — removed from DB`
+    } else {
+      result.error = `Send failed: ${status ?? 'unknown'}`
+    }
+    console.error('[push] sendPushToOne failed:', result.error)
+  }
+
+  return result
+}
+
 export async function sendOrderPushNotification(
   order: Record<string, unknown>,
 ): Promise<PushResult> {

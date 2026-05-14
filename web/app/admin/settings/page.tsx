@@ -380,18 +380,84 @@ export default function AdminSettings() {
     setTestStatus('loading')
     setTestMessage('')
     try {
-      const res = await fetch('/api/admin/push/test', {
+      // Get the current browser push subscription
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        setTestMessage('Notifications push non supportées par ce navigateur.')
+        setTestStatus('error')
+        return
+      }
+
+      let reg: ServiceWorkerRegistration
+      try {
+        reg = await navigator.serviceWorker.ready
+      } catch {
+        setTestMessage('Service worker non disponible.')
+        setTestStatus('error')
+        return
+      }
+
+      let sub = await reg.pushManager.getSubscription()
+
+      // If browser has no subscription, try to re-subscribe
+      if (!sub) {
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim()
+        if (!vapidKey) {
+          setTestMessage('Aucune souscription active. Cliquez "Activer les notifications" d\'abord.')
+          setTestStatus('error')
+          return
+        }
+        try {
+          const appServerKey = urlBase64ToUint8Array(vapidKey)
+          sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appServerKey })
+          // Save the new subscription to DB
+          await fetch('/api/admin/push/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+            body: JSON.stringify(sub),
+          })
+        } catch {
+          setTestMessage('Aucune souscription active. Cliquez "Activer les notifications" d\'abord.')
+          setTestStatus('error')
+          return
+        }
+      }
+
+      // Test this exact device
+      const res = await fetch('/api/admin/push/test-current-device', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ endpoint: sub.endpoint }),
       })
       const data = await res.json().catch(() => ({}))
+
       if (!res.ok) {
         setTestMessage(data.message || `Erreur ${res.status}`)
         setTestStatus('error')
         return
       }
-      setTestMessage(`Appareils enregistrés: ${data.subscriptionsCount ?? 0}, envoyées: ${data.sent ?? 0}`)
-      setTestStatus('success')
+
+      // If not found in DB, re-save and retry once
+      if (!data.found) {
+        await fetch('/api/admin/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+          body: JSON.stringify(sub),
+        })
+        const res2 = await fetch('/api/admin/push/test-current-device', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        })
+        const data2 = await res2.json().catch(() => ({}))
+        const sent2 = data2.sent === 1
+        setTestMessage(`Test envoyé à cet appareil: ${sent2 ? 'oui' : 'non'}${data2.error ? ' — ' + data2.error : ''}`)
+        setTestStatus(sent2 ? 'success' : 'error')
+        return
+      }
+
+      const sent = data.sent === 1
+      setTestMessage(`Test envoyé à cet appareil: ${sent ? 'oui' : 'non'}${data.error ? ' — ' + data.error : ''}`)
+      setTestStatus(sent ? 'success' : 'error')
     } catch (e) {
       setTestMessage(e instanceof Error ? e.message : 'Erreur réseau')
       setTestStatus('error')
