@@ -267,34 +267,75 @@ export default function AdminSettings() {
 
   type PushStatus = 'idle' | 'loading' | 'success' | 'denied' | 'unsupported' | 'error'
   const [pushStatus, setPushStatus] = useState<PushStatus>('idle')
+  const [pushError,  setPushError]  = useState<string>('')
 
   function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-    const raw = window.atob(base64)
-    return Uint8Array.from([...raw].map(c => c.charCodeAt(0))).buffer as ArrayBuffer
+    const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const raw     = window.atob(base64)
+    const bytes   = new Uint8Array(raw.length)
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i)
+    return bytes.buffer as ArrayBuffer
   }
 
   async function enablePushNotifications() {
+    setPushError('')
+
+    // Step 1 — browser support
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.error('[push] ServiceWorker or PushManager not supported in this browser')
       setPushStatus('unsupported')
       return
     }
     setPushStatus('loading')
+
     try {
+      // Step 2 — notification permission
       const permission = await Notification.requestPermission()
+      console.log('[push] Permission:', permission)
       if (permission !== 'granted') {
         setPushStatus('denied')
         return
       }
-      const reg = await navigator.serviceWorker.register('/sw.js')
-      await navigator.serviceWorker.ready
+
+      // Step 3 — register service worker
+      let reg: ServiceWorkerRegistration
+      try {
+        reg = await navigator.serviceWorker.register('/sw.js')
+        await navigator.serviceWorker.ready
+        console.log('[push] SW registered, scope:', reg.scope)
+      } catch (swErr) {
+        console.error('[push] SW registration failed:', swErr)
+        setPushError('Service worker registration failed: ' + (swErr instanceof Error ? swErr.message : String(swErr)))
+        setPushStatus('error')
+        return
+      }
+
+      // Step 4 — VAPID public key
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (!vapidKey) { setPushStatus('error'); return }
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
-      })
+      console.log('[push] VAPID key present:', !!vapidKey, vapidKey ? `(${vapidKey.length} chars)` : '(MISSING)')
+      if (!vapidKey) {
+        console.error('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set in environment')
+        setPushError('VAPID public key manquante — ajoutez NEXT_PUBLIC_VAPID_PUBLIC_KEY dans les variables Vercel')
+        setPushStatus('error')
+        return
+      }
+
+      // Step 5 — convert key and subscribe
+      let sub: PushSubscription
+      try {
+        const appServerKey = urlBase64ToUint8Array(vapidKey)
+        console.log('[push] VAPID key converted, byteLength:', appServerKey.byteLength)
+        sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appServerKey })
+        console.log('[push] Subscribed, endpoint:', sub.endpoint)
+      } catch (subErr) {
+        console.error('[push] pushManager.subscribe failed:', subErr)
+        setPushError('Subscribe failed: ' + (subErr instanceof Error ? subErr.message : String(subErr)))
+        setPushStatus('error')
+        return
+      }
+
+      // Step 6 — save subscription to server
       const res = await fetch('/api/admin/push/subscribe', {
         method: 'POST',
         headers: {
@@ -303,9 +344,19 @@ export default function AdminSettings() {
         },
         body: JSON.stringify(sub),
       })
-      if (!res.ok) { setPushStatus('error'); return }
+      console.log('[push] API response status:', res.status)
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        console.error('[push] API error:', res.status, body)
+        setPushError(`Erreur serveur ${res.status}${body ? ': ' + body : ''}`)
+        setPushStatus('error')
+        return
+      }
+
       setPushStatus('success')
-    } catch {
+    } catch (e) {
+      console.error('[push] Unexpected error:', e)
+      setPushError(e instanceof Error ? e.message : String(e))
       setPushStatus('error')
     }
   }
@@ -2065,8 +2116,8 @@ export default function AdminSettings() {
                         </span>
                       )}
                       {pushStatus === 'error' && (
-                        <span style={{ fontSize: '0.78rem', color: 'var(--a-red, #e53e3e)', fontWeight: 600 }}>
-                          ✗ Échec de l'activation. Réessayez ou vérifiez la configuration VAPID.
+                        <span style={{ fontSize: '0.78rem', color: 'var(--a-red, #e53e3e)', fontWeight: 600, wordBreak: 'break-word' }}>
+                          ✗ {pushError || 'Échec de l\'activation. Consultez la console pour les détails.'}
                         </span>
                       )}
                     </div>
