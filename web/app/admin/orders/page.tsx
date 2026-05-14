@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import ConfirmModal from '@/components/admin/ConfirmModal'
 
 type OrderItem = {
   title: string
@@ -44,6 +45,9 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([])
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(false)
+  const [deleteTarget,  setDeleteTarget]  = useState<number | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError,   setDeleteError]   = useState('')
 
   // Filters
   const [currentTab, setCurrentTab] = useState('all')
@@ -87,17 +91,28 @@ export default function AdminOrders() {
     }
   }
 
-  async function delOrder(id: number) {
-    if (!confirm('Supprimer cette commande ?')) return
+  function delOrder(id: number) {
+    setDeleteError('')
+    setDeleteTarget(id)
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return
+    setDeleteLoading(true)
+    setDeleteError('')
     try {
-      await fetch(`/api/orders/${id}`, {
+      const res = await fetch(`/api/orders/${deleteTarget}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token()}` }
       })
+      if (!res.ok) throw new Error(`Erreur ${res.status}`)
+      setDeleteTarget(null)
       setSelectedOrder(null)
       await load()
     } catch (e) {
-      console.error(e)
+      setDeleteError(e instanceof Error ? e.message : 'Erreur lors de la suppression')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -253,6 +268,19 @@ export default function AdminOrders() {
           )}
         </div>
       </div>
+
+      {/* DELETE CONFIRM MODAL */}
+      {deleteTarget !== null && (
+        <ConfirmModal
+          title="Supprimer la commande ?"
+          message="Cette action est irréversible. Voulez-vous vraiment supprimer cette commande ?"
+          confirmLabel="Supprimer"
+          loading={deleteLoading}
+          error={deleteError}
+          onConfirm={confirmDelete}
+          onCancel={() => { if (!deleteLoading) { setDeleteTarget(null); setDeleteError('') } }}
+        />
+      )}
 
       {/* DETAIL MODAL */}
       {selectedOrder && (
