@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
+import { sendOrderPushNotification } from '@/lib/push'
 
 export async function GET(req: NextRequest) {
   try {
@@ -134,6 +135,10 @@ export async function POST(req: NextRequest) {
         cart: verifiedCart as unknown as import('@prisma/client').Prisma.JsonArray,
       },
     })
+
+    // Fire push notification without awaiting — order creation must not fail if push fails
+    sendOrderPushNotification({ name: order.name, city: order.city, total: order.total })
+      .catch(e => console.error('[push] sendOrderPushNotification error:', e))
 
     return NextResponse.json(order, { status: 201 })
   } catch {

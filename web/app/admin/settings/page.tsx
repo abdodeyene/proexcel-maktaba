@@ -266,8 +266,11 @@ export default function AdminSettings() {
   const [orders, setOrders] = useState<any[]>([])
 
   type PushStatus = 'idle' | 'loading' | 'success' | 'denied' | 'unsupported' | 'error'
-  const [pushStatus, setPushStatus] = useState<PushStatus>('idle')
-  const [pushError,  setPushError]  = useState<string>('')
+  const [pushStatus,   setPushStatus]   = useState<PushStatus>('idle')
+  const [pushError,    setPushError]    = useState<string>('')
+  type TestStatus = 'idle' | 'loading' | 'success' | 'error'
+  const [testStatus,   setTestStatus]   = useState<TestStatus>('idle')
+  const [testMessage,  setTestMessage]  = useState<string>('')
 
   function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
     const trimmed = base64String.trim()
@@ -364,6 +367,28 @@ export default function AdminSettings() {
       console.error('[push] Unexpected error:', e)
       setPushError(e instanceof Error ? e.message : String(e))
       setPushStatus('error')
+    }
+  }
+
+  async function sendTestNotification() {
+    setTestStatus('loading')
+    setTestMessage('')
+    try {
+      const res = await fetch('/api/admin/push/test', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token()}` },
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setTestMessage(data.message || `Erreur ${res.status}`)
+        setTestStatus('error')
+        return
+      }
+      setTestMessage(`Envoyé à ${data.subscriptions ?? 0} appareil(s)`)
+      setTestStatus('success')
+    } catch (e) {
+      setTestMessage(e instanceof Error ? e.message : 'Erreur réseau')
+      setTestStatus('error')
     }
   }
 
@@ -2126,6 +2151,34 @@ export default function AdminSettings() {
                           ✗ {pushError || 'Échec de l\'activation. Consultez la console pour les détails.'}
                         </span>
                       )}
+
+                      <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <button
+                          onClick={sendTestNotification}
+                          disabled={testStatus === 'loading'}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                            padding: '0.5rem 1rem', borderRadius: '9px', fontWeight: 600,
+                            fontSize: '0.8rem', cursor: testStatus === 'loading' ? 'not-allowed' : 'pointer',
+                            background: 'transparent', color: 'var(--a-primary)',
+                            border: '1.5px solid var(--a-primary)',
+                            opacity: testStatus === 'loading' ? 0.6 : 1,
+                            transition: 'all 0.2s', whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {testStatus === 'loading' ? 'Envoi…' : '🔔 Envoyer une notification test'}
+                        </button>
+                        {testStatus === 'success' && (
+                          <span style={{ fontSize: '0.78rem', color: 'var(--a-green)', fontWeight: 600 }}>
+                            ✓ {testMessage}
+                          </span>
+                        )}
+                        {testStatus === 'error' && (
+                          <span style={{ fontSize: '0.78rem', color: 'var(--a-red, #e53e3e)', fontWeight: 600, wordBreak: 'break-word' }}>
+                            ✗ {testMessage}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
