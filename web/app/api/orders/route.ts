@@ -60,21 +60,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Recalculate prices server-side
+    // Recalculate prices server-side (also fetch stock for validation)
     const productIds = [...new Set(cartItems.map(i => Number(i.productId)))]
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, price: true, title: true, emoji: true },
+      select: { id: true, price: true, title: true, emoji: true, stock: true },
     })
     const productMap = new Map(products.map(p => [p.id, p]))
 
-    let subtotal = 0
-    const verifiedCart: Array<Record<string, unknown>> = []
+    // Stock validation before order creation
+    console.log('[stock] checking stock')
     for (const item of cartItems) {
       const product = productMap.get(Number(item.productId))
       if (!product) {
         return NextResponse.json({ message: `Produit ${item.productId} introuvable` }, { status: 400 })
       }
+      const qty = Number(item.qty)
+      if (product.stock < qty) {
+        return NextResponse.json(
+          { message: `Stock insuffisant pour ${product.title}` },
+          { status: 400 }
+        )
+      }
+    }
+
+    let subtotal = 0
+    const verifiedCart: Array<Record<string, unknown>> = []
+    for (const item of cartItems) {
+      const product = productMap.get(Number(item.productId))!
       const qty = Number(item.qty)
       subtotal += product.price * qty
       verifiedCart.push({
@@ -124,17 +137,32 @@ export async function POST(req: NextRequest) {
     const total = subtotalAfterDiscount + shipping
 
     const orderNum = 'ORD-' + Date.now() + '-' + Math.floor(Math.random() * 1000)
-    const order = await prisma.order.create({
-      data: {
-        orderNum,
-        name,
-        phone,
-        address,
-        city,
-        total,
-        cart: verifiedCart as unknown as import('@prisma/client').Prisma.JsonArray,
-      },
+
+    // Create order and decrement stock atomically
+    console.log('[stock] decrementing product stock')
+    const order = await prisma.$transaction(async (tx) => {
+      const newOrder = await tx.order.create({
+        data: {
+          orderNum,
+          name,
+          phone,
+          address,
+          city,
+          total,
+          cart: verifiedCart as unknown as import('@prisma/client').Prisma.JsonArray,
+        },
+      })
+
+      for (const item of cartItems) {
+        await tx.product.update({
+          where: { id: Number(item.productId) },
+          data: { stock: { decrement: Number(item.qty) } },
+        })
+      }
+
+      return newOrder
     })
+    console.log('[stock] order created with stock updated')
 
     try {
       console.log('[push-order] order created', order.id)
