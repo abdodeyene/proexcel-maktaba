@@ -14,11 +14,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
+const ALLOWED_STATUSES = ['pending', 'processing', 'completed', 'shipped', 'cancelled']
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     requireAuth(req)
     const { id } = await params
     const { status } = await req.json()
+    if (!status || !ALLOWED_STATUSES.includes(status)) {
+      return NextResponse.json({ message: 'Statut invalide.' }, { status: 400 })
+    }
     const order = await prisma.order.update({ where: { id: Number(id) }, data: { status } })
     return NextResponse.json(order)
   } catch {

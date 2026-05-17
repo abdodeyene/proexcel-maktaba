@@ -17,25 +17,28 @@ export async function GET(req: NextRequest) {
     if (ids) {
       where.id = { in: ids.split(',').map(id => parseInt(id)).filter(id => !isNaN(id)) }
     }
-    if (category) where.category = category
-    if (niveau) where.niveau = niveau
+    if (category) where.category = category.trim().slice(0, 100)
+    if (niveau) where.niveau = niveau.trim().slice(0, 100)
     if (isPromo === 'true') where.isPromo = true
     if (isBestOffer === 'true') where.isBestOffer = true
     if (isNew === 'true') where.isNew = true
     if (search) {
-      const searchNum = parseFloat(search)
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { titleAr: { contains: search, mode: 'insensitive' } },
-        { category: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { descriptionAr: { contains: search, mode: 'insensitive' } },
-        { author: { contains: search, mode: 'insensitive' } },
-        ...(isNaN(searchNum) ? [] : [
-          { price: { gte: searchNum - 5, lte: searchNum + 5 } },
-          { id: isNaN(parseInt(search)) ? undefined : { equals: parseInt(search) } }
-        ].filter(x => x !== undefined))
-      ]
+      const sanitized = search.trim().replace(/[<>]/g, '').slice(0, 100)
+      if (sanitized) {
+        const searchNum = parseFloat(sanitized)
+        where.OR = [
+          { title: { contains: sanitized, mode: 'insensitive' } },
+          { titleAr: { contains: sanitized, mode: 'insensitive' } },
+          { category: { contains: sanitized, mode: 'insensitive' } },
+          { description: { contains: sanitized, mode: 'insensitive' } },
+          { descriptionAr: { contains: sanitized, mode: 'insensitive' } },
+          { author: { contains: sanitized, mode: 'insensitive' } },
+          ...(isNaN(searchNum) ? [] : [
+            { price: { gte: searchNum - 5, lte: searchNum + 5 } },
+            { id: isNaN(parseInt(sanitized)) ? undefined : { equals: parseInt(sanitized) } }
+          ].filter(x => x !== undefined))
+        ]
+      }
     }
 
     const products = await prisma.product.findMany({ where, orderBy: { createdAt: 'desc' } })

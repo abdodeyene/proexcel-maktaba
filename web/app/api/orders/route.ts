@@ -3,12 +3,14 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 import { sendOrderPushNotification } from '@/lib/push'
 
+const ALLOWED_STATUSES = ['pending', 'processing', 'completed', 'shipped', 'cancelled']
+
 export async function GET(req: NextRequest) {
   try {
     requireAuth(req)
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
-    const where = status ? { status } : {}
+    const where = (status && ALLOWED_STATUSES.includes(status)) ? { status } : {}
     const orders = await prisma.order.findMany({ where, orderBy: { date: 'desc' } })
     return NextResponse.json(orders)
   } catch {
@@ -102,7 +104,6 @@ export async function POST(req: NextRequest) {
 
     // Validate and apply promo code server-side
     let discount = 0
-    let appliedPromoCode: string | null = null
     if (promoCode && typeof promoCode === 'string') {
       const promoSetting = await prisma.setting.findUnique({ where: { key: 'promo_codes' } })
       if (promoSetting?.value) {
@@ -115,7 +116,6 @@ export async function POST(req: NextRequest) {
             discount = match.type === 'percent'
               ? subtotal * (match.discount / 100)
               : match.discount
-            appliedPromoCode = match.code
           }
         } catch {
           // invalid promo_codes JSON in DB — ignore
