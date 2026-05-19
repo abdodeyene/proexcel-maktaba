@@ -1,14 +1,15 @@
 import jwt from 'jsonwebtoken'
 import { NextRequest } from 'next/server'
 
-const SECRET = process.env.JWT_SECRET!
+const SECRET = process.env.JWT_SECRET
+if (!SECRET) throw new Error('JWT_SECRET environment variable is not set')
 
 export function signToken(payload: { id: number; email: string; role: string }) {
-  return jwt.sign(payload, SECRET, { expiresIn: '30d' })
+  return jwt.sign(payload, SECRET!, { expiresIn: '30d' })
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, SECRET) as { id: number; email: string; role: string }
+  return jwt.verify(token, SECRET!) as { id: number; email: string; role: string }
 }
 
 export function getTokenFromRequest(req: NextRequest) {

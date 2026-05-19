@@ -11,9 +11,8 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
 ])
-const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])
+const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp'])
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
 async function uploadToSupabase(file: File): Promise<string> {

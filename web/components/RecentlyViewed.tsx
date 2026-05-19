@@ -19,7 +19,7 @@ export default function RecentlyViewed({ currentId }: { currentId: number }) {
     if (otherIds.length > 0) {
       fetch(`/api/products?ids=${otherIds.join(',')}`)
         .then(r => r.json())
-        .then(data => setProducts(data))
+        .then(data => setProducts(Array.isArray(data) ? data : (data?.products ?? [])))
         .catch(console.error)
     }
 

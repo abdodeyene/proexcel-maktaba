@@ -3,17 +3,18 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  FolderTree, 
-  MessageSquare, 
-  Settings, 
-  ExternalLink, 
-  Sun, 
-  Moon, 
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  FolderTree,
+  MessageSquare,
+  Settings,
+  ExternalLink,
+  Sun,
+  Moon,
   LogOut,
-  BookOpen
+  BookOpen,
+  Layers
 } from '@/components/LucideIcons'
 import './admin.css'
 
@@ -70,10 +71,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .then(data => {
           if (data && typeof data.pending === 'number') {
             if (currentLastCount !== null && data.pending > currentLastCount) {
-              // Play notification sound
+              // Play notification beep via Web Audio API (no external dependency)
               try {
-                const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3')
-                audio.play().catch(()=>{})
+                const ctx = new AudioContext()
+                const osc = ctx.createOscillator()
+                const gain = ctx.createGain()
+                osc.connect(gain)
+                gain.connect(ctx.destination)
+                osc.frequency.value = 880
+                gain.gain.setValueAtTime(0.3, ctx.currentTime)
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5)
+                osc.start()
+                osc.stop(ctx.currentTime + 0.5)
               } catch(e) {}
               setShowToast(true)
               setTimeout(() => setShowToast(false), 5000)
@@ -151,6 +160,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
 
           <div className="sidebar-section-label">Configuration</div>
+          <Link href="/admin/slider" className={`sidebar-link ${pathname.startsWith('/admin/slider') ? 'active' : ''}`}>
+            <span className="sl-icon"><Layers size={16} /></span>
+            Hero Slider
+          </Link>
           <Link href="/admin/settings" className={`sidebar-link ${pathname.startsWith('/admin/settings') ? 'active' : ''}`}>
             <span className="sl-icon"><Settings size={16} /></span>
             Paramètres

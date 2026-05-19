@@ -31,7 +31,9 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  const isHome = pathname === '/'
   const { lang, setLang } = useLang()
   const langRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -72,6 +74,14 @@ export default function Header() {
     }
   }, [])
 
+  // Transparent-header: track scroll position (only matters on homepage)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   // Close lang dropdown on outside click
   useEffect(() => {
     function onOutside(e: MouseEvent) {
@@ -110,7 +120,7 @@ export default function Header() {
         const res = await fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`)
         if (res.ok) {
           const data = await res.json()
-          setSearchResults(data)
+          setSearchResults(Array.isArray(data) ? data : (data?.products ?? []))
         }
       } catch (err) {
         console.error('Search error:', err)
@@ -128,6 +138,9 @@ export default function Header() {
     document.documentElement.setAttribute('data-theme', newTheme)
   }
 
+  // Transparent when at the top of the home page and no panels are open
+  const atHero = isHome && !scrolled && !menuOpen && !searchOpen
+
   const LANGS = [
     { code: 'fr' as const, label: 'Français', flag: '🇫🇷' },
     { code: 'ar' as const, label: 'العربية', flag: '🇲🇦' },
@@ -142,7 +155,10 @@ export default function Header() {
 
   return (
     <>
-      <header>
+      <header
+        className={atHero ? 'at-hero' : ''}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 1000, paddingTop: isHome ? 0 : 'min(env(safe-area-inset-top, 0px), 60px)' }}
+      >
         <div className="header-inner">
           {/* Mobile: cart on left */}
           <Link href="/cart" className="btn-icon mob-only" title="Panier" style={{ position: 'relative' }}>
@@ -167,21 +183,21 @@ export default function Header() {
           <nav className="header-nav-center">
             <Link href="/" className={pathname === '/' ? 'active' : ''}>{currentT.home}</Link>
             <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>{currentT.offers}</Link>
-            <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee'].includes(pathname) ? 'active' : ''}`}>
+            <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee', '/niveaux/primaire', '/niveaux/college', '/niveaux/lycee'].some(p => pathname.startsWith(p)) ? 'active' : ''}`}>
               <button className="nav-dropdown-btn">
                 {currentT.levels}
                 <ChevronDown size={14} style={{ marginLeft: '4px' }} />
               </button>
               <div className="nav-dropdown-menu">
-                <Link href="/primaire" className={pathname === '/primaire' ? 'active' : ''}>
+                <Link href="/niveaux/primaire" className={pathname.includes('primaire') ? 'active' : ''}>
                   <span className="nav-dropdown-icon"><Backpack size={18} /></span>
                   {currentT.primaire}
                 </Link>
-                <Link href="/college" className={pathname === '/college' ? 'active' : ''}>
+                <Link href="/niveaux/college" className={pathname.includes('college') ? 'active' : ''}>
                   <span className="nav-dropdown-icon"><BookOpen size={18} /></span>
                   {currentT.college}
                 </Link>
-                <Link href="/lycee" className={pathname === '/lycee' ? 'active' : ''}>
+                <Link href="/niveaux/lycee" className={pathname.includes('lycee') ? 'active' : ''}>
                   <span className="nav-dropdown-icon"><GraduationCap size={18} /></span>
                   {currentT.lycee}
                 </Link>
@@ -247,9 +263,9 @@ export default function Header() {
         <Link href="/" onClick={() => setMenuOpen(false)}>{currentT.home}</Link>
         <Link href="/best-offers" onClick={() => setMenuOpen(false)}>{currentT.offers}</Link>
         <div className="mobile-nav-section">{currentT.levels}</div>
-        <Link href="/primaire" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎒 {currentT.primaire}</Link>
-        <Link href="/college" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>📚 {currentT.college}</Link>
-        <Link href="/lycee" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎓 {currentT.lycee}</Link>
+        <Link href="/niveaux/primaire" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎒 {currentT.primaire}</Link>
+        <Link href="/niveaux/college" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>📚 {currentT.college}</Link>
+        <Link href="/niveaux/lycee" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎓 {currentT.lycee}</Link>
         <Link href="/about" onClick={() => setMenuOpen(false)}>{currentT.about}</Link>
         <Link href="/contact" onClick={() => setMenuOpen(false)}>{currentT.contact}</Link>
         <div className="mobile-nav-extras">

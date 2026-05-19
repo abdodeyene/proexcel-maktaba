@@ -3,57 +3,24 @@
 
 import { useState, useEffect } from 'react'
 import ProductCard from '@/components/ProductCard'
-import HeroSlider from '@/components/HeroSlider'
+import HeroSlider from '@/components/store/HeroSlider'
+import StatsBar from '@/components/store/StatsBar'
+import InfoStrip from '@/components/store/InfoStrip'
 import Link from 'next/link'
 import { useLang } from '@/components/LangContext'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import { usePathname } from 'next/navigation'
-import { 
-  MapPin, 
-  Clock, 
+import {
+  MapPin,
+  Clock,
   Navigation,
   CheckCircle2,
   Truck,
   ShieldCheck,
   Library,
-  Users,
-  FileText,
   BookOpen,
   GraduationCap
 } from '@/components/LucideIcons'
-
-type Feature = {
-  icon: string
-  titleFr: string
-  titleAr: string
-  subFr: string
-  subAr: string
-  iconColor?: string
-  titleColor?: string
-}
-
-const DEFAULT_FEATURES: Feature[] = [
-  { icon: 'delivery', titleFr: 'Livraison 48h', titleAr: 'توصيل خلال 48 ساعة', subFr: 'Partout au Maroc', subAr: 'في جميع أنحاء المغرب' },
-  { icon: 'security', titleFr: 'Paiement Sécurisé', titleAr: 'دفع آمن', subFr: 'Transactions protégées', subAr: 'معاملات محمية' },
-  { icon: 'catalog', titleFr: '1200+ Titres', titleAr: '+1200 عنوان', subFr: 'Catalogue complet', subAr: 'كتالوج شامل' },
-  { icon: 'clients', titleFr: '15K+ Clients', titleAr: '+15000 عميل', subFr: 'Clients satisfaits', subAr: 'عملاء راضون' },
-]
-
-const FEATURE_ICONS: Record<string, React.ReactNode> = {
-  delivery: <Truck size={22} />,
-  security: <ShieldCheck size={22} />,
-  catalog: <Library size={22} />,
-  clients: <Users size={22} />,
-  star: <FileText size={22} />,
-  check: <CheckCircle2 size={22} />,
-  gift: <BookOpen size={22} />,
-  phone: <GraduationCap size={22} />,
-  '🚚': <Truck size={22} />,
-  '🔒': <ShieldCheck size={22} />,
-  '📚': <Library size={22} />,
-  '⭐': <Users size={22} />,
-  '👥': <Users size={22} />,
-}
 
 type Product = {
   id: number
@@ -94,8 +61,7 @@ export default function HomePage() {
   const pathname = usePathname()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
-  const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES)
-  const [settings, setSettings] = useState<any>(null)
+  const [settings, setSettings] = useState<Record<string, string | null> | undefined>(undefined)
 
   useScrollAnimation()
 
@@ -104,20 +70,15 @@ export default function HomePage() {
 
     const loadData = () => {
       fetch('/api/products').then(r => r.json()).then(d => {
-        if (alive && Array.isArray(d)) setProducts(d)
+        const arr = Array.isArray(d) ? d : (d?.products ?? [])
+        if (alive && arr.length >= 0) setProducts(arr)
       }).catch(() => {})
       fetch('/api/categories').then(r => r.json()).then(d => {
         if (alive && Array.isArray(d)) setCategories(d)
       }).catch(() => {})
-      fetch('/api/settings').then(r => r.json()).then(d => {
+      fetch('/api/settings').then(r => r.json()).then((d: Record<string, string | null>) => {
         if (!alive) return
         setSettings(d)
-        if (d?.features_strip) {
-          try {
-            const parsed = JSON.parse(d.features_strip)
-            if (Array.isArray(parsed) && parsed.length > 0) setFeatures(parsed)
-          } catch { /* keep defaults */ }
-        }
       }).catch(() => {})
     }
 
@@ -244,7 +205,7 @@ export default function HomePage() {
       name: T.primaire,
       years: T.primaireYears,
       desc: T.primaireDesc,
-      href: '/primaire',
+      href: '/niveaux/primaire',
       icon: <Library size={24} />,
     },
     {
@@ -252,7 +213,7 @@ export default function HomePage() {
       name: T.college,
       years: T.collegeYears,
       desc: T.collegeDesc,
-      href: '/college',
+      href: '/niveaux/college',
       icon: <BookOpen size={24} />,
     },
     {
@@ -260,7 +221,7 @@ export default function HomePage() {
       name: T.lycee,
       years: T.lyceeYears,
       desc: T.lyceeDesc,
-      href: '/lycee',
+      href: '/niveaux/lycee',
       icon: <GraduationCap size={24} />,
     },
   ]
@@ -297,25 +258,8 @@ export default function HomePage() {
       {/* ── HERO ── */}
       <HeroSlider />
 
-      {/* ── TRUST BAR ── */}
-      <div className="features-strip">
-        <div className="features-inner">
-          {features.map((f, i) => {
-            const svgIcon = FEATURE_ICONS[f.icon]
-            return (
-              <div key={i} className={`feature-item scroll-reveal ${STAGGER[i] || ''}`}>
-                <div className="feature-icon-wrap" style={f.iconColor ? { color: f.iconColor, background: `${f.iconColor}18` } : undefined}>
-                  {svgIcon ?? <Truck size={22} />}
-                </div>
-                <div>
-                  <div className="feature-title" style={f.titleColor ? { color: f.titleColor } : undefined}>{lang === 'ar' ? f.titleAr : f.titleFr}</div>
-                  <div className="feature-sub">{lang === 'ar' ? f.subAr : f.subFr}</div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      {/* ── INFO STRIP — icons strip under hero ── */}
+      <InfoStrip lang={lang} />
 
       {/* ── SCHOOL LEVELS ── */}
       <div className="levels-section">
@@ -396,46 +340,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── PROMO STRIP ── */}
-      <div className="promo-strip">
-        <div className="promo-strip-inner">
-          <div className="scroll-reveal">
-            <div className="promo-strip-label">
-              {lang === 'ar' ? (settings?.promo_tag_ar || T.lto) : (settings?.promo_tag_fr || T.lto)}
-            </div>
-            <h2>
-              {lang === 'ar' ? (settings?.promo_title_ar || T.freeShip) : (settings?.promo_title_fr || T.freeShip)}
-              {' — '}
-              <em>{lang === 'ar' ? (settings?.promo_em_ar || T.freeShipEm) : (settings?.promo_em_fr || T.freeShipEm)}</em>
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.88rem', marginTop: '0.5rem', fontFamily: 'var(--font-latin)' }}>
-              {lang === 'ar' ? (settings?.promo_sub_ar || T.shipSub) : (settings?.promo_sub_fr || T.shipSub)}
-            </p>
-          </div>
-
-          <div className="promo-strip-stats">
-            <div className="promo-stat scroll-reveal reveal-d1">
-              <span className="promo-stat-num">{settings?.promo_stat1_num || '1200+'}</span>
-              <span className="promo-stat-label">{lang === 'ar' ? (settings?.promo_stat1_ar || T.titles) : (settings?.promo_stat1_fr || T.titles)}</span>
-            </div>
-            <div className="promo-stat scroll-reveal reveal-d2">
-              <span className="promo-stat-num">{settings?.promo_stat2_num || '15K+'}</span>
-              <span className="promo-stat-label">{lang === 'ar' ? (settings?.promo_stat2_ar || T.clients) : (settings?.promo_stat2_fr || T.clients)}</span>
-            </div>
-            <div className="promo-stat scroll-reveal reveal-d3">
-              <span className="promo-stat-num">{settings?.promo_stat3_num || '30%'}</span>
-              <span className="promo-stat-label">{lang === 'ar' ? (settings?.promo_stat3_ar || T.savings) : (settings?.promo_stat3_fr || T.savings)}</span>
-            </div>
-          </div>
-
-          <Link href={settings?.promo_btn_link || '/best-offers'} className="promo-strip-btn proexcel-btn-home-promo-strip scroll-reveal reveal-d2">
-            {lang === 'ar' ? (settings?.promo_btn_ar || T.seeAll) : (settings?.promo_btn_fr || T.seeAll)}
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </Link>
-        </div>
-      </div>
+      {/* ── STATS BAR — dark promo section ── */}
+      <StatsBar settings={settings} lang={lang} />
 
       {/* ── PROMO PRODUCTS ── */}
       {promos.length > 0 && (
@@ -538,7 +444,7 @@ export default function HomePage() {
                       </div>
                       <div className="store-hours-row">
                         <span className="store-hours-day">{T.sun}</span>
-                        <span className={settings.hours_sun.toLowerCase().includes('fermé') || settings.hours_sun.includes('مغلق') ? 'store-hours-closed' : 'store-hours-time'}>
+                        <span className={(settings.hours_sun ?? '').toLowerCase().includes('fermé') || (settings.hours_sun ?? '').includes('مغلق') ? 'store-hours-closed' : 'store-hours-time'}>
                           {settings.hours_sun}
                         </span>
                       </div>

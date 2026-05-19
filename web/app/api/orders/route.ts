@@ -5,6 +5,31 @@ import { sendOrderPushNotification } from '@/lib/push'
 
 const ALLOWED_STATUSES = ['pending', 'processing', 'completed', 'shipped', 'cancelled']
 
+// Rate limiter: max 20 orders per IP per hour
+const orderAttempts = new Map<string, { count: number; firstAt: number }>()
+const ORDER_WINDOW_MS = 60 * 60 * 1000
+const ORDER_MAX = 20
+
+function isOrderRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = orderAttempts.get(ip)
+  if (!entry || now - entry.firstAt > ORDER_WINDOW_MS) {
+    orderAttempts.set(ip, { count: 1, firstAt: now })
+    return false
+  }
+  if (entry.count >= ORDER_MAX) return true
+  entry.count++
+  return false
+}
+
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown'
+  )
+}
+
 export async function GET(req: NextRequest) {
   try {
     requireAuth(req)
@@ -20,6 +45,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req)
+    if (isOrderRateLimited(ip)) {
+      return NextResponse.json({ message: 'Trop de commandes. Réessayez plus tard.' }, { status: 429 })
+    }
+
     const dto = await req.json()
 
     // Validate and sanitise required fields

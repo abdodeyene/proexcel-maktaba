@@ -70,6 +70,19 @@ type Slide = {
   subColorLight?: string
 }
 
+type HeroSlide = {
+  id: number
+  tag: string; tagAr: string
+  title: string; titleAr: string
+  subtitle: string; subtitleAr: string
+  ctaText: string; ctaTextAr: string
+  ctaLink: string; ctaText2: string; ctaLink2: string
+  imageUrl: string | null
+  bgPosition: string; textAlign: string; overlayStrength: string
+  titleColor: string; subtitleColor: string; tagColor: string
+  isActive: boolean; order: number
+}
+
 type Feature = {
   icon: string
   titleFr: string
@@ -107,6 +120,10 @@ export default function AdminSettings() {
   ])
   const [slideUploading, setSlideUploading] = useState<number | null>(null)
   const [uploadError, setUploadError] = useState('')
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([])
+  const [heroSlideUploading, setHeroSlideUploading] = useState<number | null>(null)
+  const [heroSlideSaving, setHeroSlideSaving] = useState<number | null>(null)
+  const [heroSlideError, setHeroSlideError] = useState('')
   const [features, setFeatures] = useState<Feature[]>(DEFAULT_FEATURES)
 
   type AboutStat = { num: string; labelFr: string; labelAr: string }
@@ -508,9 +525,14 @@ export default function AdminSettings() {
       })
       .catch(console.error)
 
+    fetch('/api/admin/slides', { headers: { Authorization: `Bearer ${token()}` } })
+      .then(r => r.json())
+      .then((data: HeroSlide[]) => { if (Array.isArray(data)) setHeroSlides(data) })
+      .catch(console.error)
+
     fetch('/api/products', { headers: { Authorization: `Bearer ${token()}` } })
       .then(r => r.json())
-      .then(setProducts)
+      .then(data => setProducts(Array.isArray(data) ? data : (data?.products ?? [])))
       .catch(console.error)
 
     fetch('/api/orders', { headers: { Authorization: `Bearer ${token()}` } })
@@ -657,6 +679,81 @@ export default function AdminSettings() {
     if (target < 0 || target >= next.length) return
       ;[next[idx], next[target]] = [next[target], next[idx]]
     setSlides(next)
+  }
+
+  function updateHeroSlide(id: number, patch: Partial<HeroSlide>) {
+    setHeroSlides(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s))
+  }
+
+  async function saveHeroSlide(slide: HeroSlide) {
+    setHeroSlideSaving(slide.id)
+    setHeroSlideError('')
+    try {
+      const res = await fetch(`/api/admin/slides/${slide.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify(slide),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    } catch (e) {
+      setHeroSlideError(e instanceof Error ? e.message : 'Erreur sauvegarde')
+    } finally {
+      setHeroSlideSaving(null)
+    }
+  }
+
+  async function addHeroSlide() {
+    setHeroSlideError('')
+    try {
+      const res = await fetch('/api/admin/slides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ tag: '', title: 'Nouveau titre', subtitle: '', ctaText: 'Voir plus', ctaLink: '/best-offers', isActive: true }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const newSlide: HeroSlide = await res.json()
+      setHeroSlides(prev => [...prev, newSlide])
+    } catch (e) {
+      setHeroSlideError(e instanceof Error ? e.message : 'Erreur création')
+    }
+  }
+
+  async function deleteHeroSlide(id: number) {
+    if (!confirm('Supprimer cette slide ?')) return
+    try {
+      await fetch(`/api/admin/slides/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token()}` },
+      })
+      setHeroSlides(prev => prev.filter(s => s.id !== id))
+    } catch (e) {
+      setHeroSlideError(e instanceof Error ? e.message : 'Erreur suppression')
+    }
+  }
+
+  async function uploadHeroSlideImage(slide: HeroSlide, file: File) {
+    setHeroSlideUploading(slide.id)
+    setHeroSlideError('')
+    try {
+      const formData = new FormData()
+      formData.append('files', file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token()}` },
+        body: formData,
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const { urls } = await res.json()
+      if (urls[0]) {
+        const updated = { ...slide, imageUrl: urls[0] }
+        updateHeroSlide(slide.id, { imageUrl: urls[0] })
+        await saveHeroSlide(updated)
+      }
+    } catch (e) {
+      setHeroSlideError(e instanceof Error ? e.message : 'Erreur upload')
+    } finally {
+      setHeroSlideUploading(null)
+    }
   }
 
   function updateKey(key: string, val: string) {
@@ -964,187 +1061,173 @@ export default function AdminSettings() {
             {/* TAB: HERO SLIDER */}
             {activeTab === 'tab-slider' && (
               <div className="settings-panel active">
-                <div className="sp-section-title">Diapositives du Hero Slider</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--a-text2)', marginBottom: '1.5rem' }}>
-                  La 1ère diapositive = principale. Cliquez ▲▼ pour réordonner. Sauvegardez après modifications.
-                </div>
+                <div className="sp-section-title">Hero Slider</div>
+                <p style={{ fontSize: '0.82rem', color: 'var(--a-text2)', marginBottom: '1.5rem' }}>
+                  Gérez les diapositives du Hero Slider de la page d'accueil — images, textes, boutons.{' '}
+                  <a href="/admin/slider" target="_blank" style={{ color: 'var(--a-primary)', textDecoration: 'underline' }}>
+                    Page avancée (ordre, overlay, couleurs) →
+                  </a>
+                </p>
 
-                {slides.map((slide, idx) => (
-                  <div key={idx} className="settings-card" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                {heroSlideError && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.82rem', color: '#dc2626' }}>
+                    {heroSlideError}
+                  </div>
+                )}
+
+                {heroSlides.map((slide) => (
+                  <div key={slide.id} style={{ background: 'var(--a-bg)', border: '1px solid var(--a-border)', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.25rem' }}>
+                    {/* Header row */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--a-primary)', fontSize: '0.95rem' }}>
-                        {idx === 0 ? '⭐ ' : ''}Diapositive {idx + 1}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--a-text)' }}>Slide #{slide.order + 1}</span>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: 'var(--a-text2)', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={slide.isActive}
+                            onChange={e => updateHeroSlide(slide.id, { isActive: e.target.checked })}
+                          />
+                          Active
+                        </label>
                       </div>
-                      <div style={{ display: 'flex', gap: '0.4rem' }}>
-                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => moveSlide(idx, -1)} disabled={idx === 0} title="Monter">▲</button>
-                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => moveSlide(idx, 1)} disabled={idx === slides.length - 1} title="Descendre">▼</button>
-                        <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => removeSlide(idx)} disabled={slides.length <= 1} title="Supprimer">✕</button>
+                      <button
+                        onClick={() => deleteHeroSlide(slide.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.25rem' }}
+                        title="Supprimer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    {/* Image upload */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Image de fond</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        {slide.imageUrl && (
+                          <img src={slide.imageUrl} alt="" style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--a-border)' }} />
+                        )}
+                        <label style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                          background: 'var(--a-card)', border: '1px solid var(--a-border)',
+                          borderRadius: '8px', padding: '0.4rem 0.9rem', fontSize: '0.8rem',
+                          cursor: 'pointer', color: 'var(--a-text)',
+                        }}>
+                          <Upload size={14} />
+                          {heroSlideUploading === slide.id ? 'Upload...' : 'Choisir image'}
+                          <input type="file" accept="image/*" style={{ display: 'none' }}
+                            onChange={e => { if (e.target.files?.[0]) uploadHeroSlideImage(slide, e.target.files[0]) }}
+                          />
+                        </label>
+                        {slide.imageUrl && (
+                          <input
+                            type="text"
+                            value={slide.imageUrl}
+                            onChange={e => updateHeroSlide(slide.id, { imageUrl: e.target.value })}
+                            placeholder="URL image"
+                            style={{ flex: 1, background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: 'var(--a-text)' }}
+                          />
+                        )}
                       </div>
                     </div>
 
-                    {/* 2 images: background + product side */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-
-                      {/* Image 1: Background */}
-                      <div style={{ background: 'var(--a-bg)', border: '1px solid var(--a-border)', borderRadius: '10px', padding: '1rem' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--a-primary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.6rem' }}>🌄 Image de fond (full cover)</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--a-text2)', marginBottom: '0.75rem', lineHeight: 1.4 }}>Couvre tout le slider en arrière-plan.</div>
-                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                          {slide.image ? (
-                            <div style={{ width: '110px', height: '65px', borderRadius: '7px', overflow: 'hidden', border: '1px solid var(--a-border)', flexShrink: 0 }}>
-                              <img src={slide.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                          ) : (
-                            <div style={{ width: '110px', height: '65px', borderRadius: '7px', background: `radial-gradient(ellipse at 60% 50%, ${slide.bgColor1 || '#0e1e3a'} 0%, ${slide.bgColor2 || '#070B14'} 100%)`, flexShrink: 0, border: '2px dashed var(--a-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--a-text2)', fontSize: '0.65rem' }}>Aucune</div>
-                          )}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                            <label style={{ cursor: 'pointer' }}>
-                              <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) uploadSlideImage(idx, e.target.files[0], 'image'); e.target.value = '' }} />
-                              <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'inline-block', cursor: 'pointer' }}>
-                                {slideUploading === idx ? '⏳…' : '📷 Choisir'}
-                              </span>
-                            </label>
-                            {slide.image && (
-                              <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => updateSlide(idx, 'image', '')}>✕ Suppr.</button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Image 2: Product side */}
-                      <div style={{ background: 'var(--a-bg)', border: '1px solid var(--a-border)', borderRadius: '10px', padding: '1rem' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--a-primary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.6rem' }}>📦 Image produit (côté texte)</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--a-text2)', marginBottom: '0.75rem', lineHeight: 1.4 }}>S'affiche à côté du texte. PNG transparent recommandé.</div>
-                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                          {slide.productImage ? (
-                            <div style={{ width: '110px', height: '65px', borderRadius: '7px', overflow: 'hidden', border: '1px solid var(--a-border)', flexShrink: 0, background: 'repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 0 0 / 10px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <img src={slide.productImage} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                            </div>
-                          ) : (
-                            <div style={{ width: '110px', height: '65px', borderRadius: '7px', border: '2px dashed var(--a-border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--a-text2)', fontSize: '0.65rem' }}>Aucune</div>
-                          )}
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                            <label style={{ cursor: 'pointer' }}>
-                              <input type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) uploadSlideImage(idx, e.target.files[0], 'productImage'); e.target.value = '' }} />
-                              <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'inline-block', cursor: 'pointer' }}>
-                                {slideUploading === idx ? '⏳…' : '🏷️ Choisir'}
-                              </span>
-                            </label>
-                            {slide.productImage && (
-                              <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => updateSlide(idx, 'productImage', '')}>✕ Suppr.</button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-
-                    {/* Gradient colors (shown when no image) */}
-                    {!slide.image && (
-                      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                        <div style={{ flex: 1 }}>
-                          <div className="s-label">Couleur dégradé 1</div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <input type="color" value={slide.bgColor1} onChange={e => updateSlide(idx, 'bgColor1', e.target.value)} style={{ width: '40px', height: '32px', borderRadius: '4px', border: 'none', cursor: 'pointer' }} />
-                            <input className="s-input" style={{ fontFamily: 'monospace', flex: 1 }} value={slide.bgColor1} onChange={e => updateSlide(idx, 'bgColor1', e.target.value)} />
-                          </div>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div className="s-label">Couleur dégradé 2</div>
-                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <input type="color" value={slide.bgColor2} onChange={e => updateSlide(idx, 'bgColor2', e.target.value)} style={{ width: '40px', height: '32px', borderRadius: '4px', border: 'none', cursor: 'pointer' }} />
-                            <input className="s-input" style={{ fontFamily: 'monospace', flex: 1 }} value={slide.bgColor2} onChange={e => updateSlide(idx, 'bgColor2', e.target.value)} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    {/* Text fields grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                       <div>
-                        <div className="s-label">Tag (petit texte)</div>
-                        <input className="s-input" value={slide.tag} onChange={e => updateSlide(idx, 'tag', e.target.value)} placeholder="Ex: Rentrée 2026" />
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Tag (FR)</label>
+                        <input value={slide.tag} onChange={e => updateHeroSlide(slide.id, { tag: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.85rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
                       <div>
-                        <div className="s-label">Titre principal</div>
-                        <input className="s-input" value={slide.title} onChange={e => updateSlide(idx, 'title', e.target.value)} placeholder="Ex: Tous vos manuels" />
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Tag (AR)</label>
+                        <input value={slide.tagAr} onChange={e => updateHeroSlide(slide.id, { tagAr: e.target.value })} dir="rtl"
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.85rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
                       <div>
-                        <div className="s-label">Titre coloré (suite)</div>
-                        <input className="s-input" value={slide.span} onChange={e => updateSlide(idx, 'span', e.target.value)} placeholder="Ex: en un seul endroit" />
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Titre (FR)</label>
+                        <input value={slide.title} onChange={e => updateHeroSlide(slide.id, { title: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.85rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
                       <div>
-                        <div className="s-label">Sous-titre</div>
-                        <input className="s-input" value={slide.sub} onChange={e => updateSlide(idx, 'sub', e.target.value)} />
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Titre (AR)</label>
+                        <input value={slide.titleAr} onChange={e => updateHeroSlide(slide.id, { titleAr: e.target.value })} dir="rtl"
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.85rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
                       <div>
-                        <div className="s-label">Bouton 1 texte</div>
-                        <input className="s-input" value={slide.btn1} onChange={e => updateSlide(idx, 'btn1', e.target.value)} />
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Sous-titre (FR)</label>
+                        <input value={slide.subtitle} onChange={e => updateHeroSlide(slide.id, { subtitle: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.85rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
                       <div>
-                        <div className="s-label">Bouton 1 lien</div>
-                        <input className="s-input" value={slide.btn1Link} onChange={e => updateSlide(idx, 'btn1Link', e.target.value)} />
-                      </div>
-                      <div>
-                        <div className="s-label">Bouton 2 texte (optionnel)</div>
-                        <input className="s-input" value={slide.btn2} onChange={e => updateSlide(idx, 'btn2', e.target.value)} />
-                      </div>
-                      <div>
-                        <div className="s-label">Bouton 2 lien</div>
-                        <input className="s-input" value={slide.btn2Link} onChange={e => updateSlide(idx, 'btn2Link', e.target.value)} />
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Sous-titre (AR)</label>
+                        <input value={slide.subtitleAr} onChange={e => updateHeroSlide(slide.id, { subtitleAr: e.target.value })} dir="rtl"
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.85rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
                     </div>
 
-                    {/* Text Colors */}
-                    <div style={{ marginTop: '1rem', borderRadius: '8px', border: '1px solid var(--a-border)', overflow: 'hidden' }}>
-                      {/* Dark Mode Colors */}
-                      <div style={{ padding: '0.75rem 0.85rem', background: '#0d1220' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8896A9', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.65rem' }}>🌙 Dark Mode — couleurs</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.65rem' }}>
-                          {[
-                            { label: 'Titre', key: 'titleColor', def: '#F1EDE4' },
-                            { label: 'Titre coloré', key: 'spanColor', def: '#E8352A' },
-                            { label: 'Sous-titre', key: 'subColor', def: '#8896A9' },
-                          ].map(({ label, key, def }) => (
-                            <div key={key}>
-                              <div style={{ fontSize: '0.68rem', color: '#8896A9', fontWeight: 600, marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
-                              <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                                <input type="color" value={(slide as any)[key] || def} onChange={e => updateSlide(idx, key as keyof Slide, e.target.value)} style={{ width: '32px', height: '28px', borderRadius: '4px', border: '1px solid #2a3245', cursor: 'pointer', padding: '2px', background: 'transparent' }} />
-                                <input style={{ flex: 1, padding: '0.35rem 0.5rem', background: '#111827', border: '1px solid #2a3245', borderRadius: '5px', color: '#F1EDE4', fontSize: '0.72rem', outline: 'none', fontFamily: 'monospace' }} value={(slide as any)[key] || ''} onChange={e => updateSlide(idx, key as keyof Slide, e.target.value)} placeholder={def} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                    {/* CTA buttons row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Bouton 1</label>
+                        <input value={slide.ctaText} onChange={e => updateHeroSlide(slide.id, { ctaText: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.82rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
-                      {/* Light Mode Colors */}
-                      <div style={{ padding: '0.75rem 0.85rem', background: '#f3f4f6', borderTop: '1px solid #e5e7eb' }}>
-                        <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.65rem' }}>☀️ Light Mode — couleurs</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.65rem' }}>
-                          {[
-                            { label: 'Titre', key: 'titleColorLight', def: '#111827' },
-                            { label: 'Titre coloré', key: 'spanColorLight', def: '#e11d2e' },
-                            { label: 'Sous-titre', key: 'subColorLight', def: '#374151' },
-                          ].map(({ label, key, def }) => (
-                            <div key={key}>
-                              <div style={{ fontSize: '0.68rem', color: '#6b7280', fontWeight: 600, marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
-                              <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                                <input type="color" value={(slide as any)[key] || def} onChange={e => updateSlide(idx, key as keyof Slide, e.target.value)} style={{ width: '32px', height: '28px', borderRadius: '4px', border: '1px solid #d1d5db', cursor: 'pointer', padding: '2px' }} />
-                                <input style={{ flex: 1, padding: '0.35rem 0.5rem', background: '#ffffff', border: '1px solid #d1d5db', borderRadius: '5px', color: '#111827', fontSize: '0.72rem', outline: 'none', fontFamily: 'monospace' }} value={(slide as any)[key] || ''} onChange={e => updateSlide(idx, key as keyof Slide, e.target.value)} placeholder={def} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Lien 1</label>
+                        <input value={slide.ctaLink} onChange={e => updateHeroSlide(slide.id, { ctaLink: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.82rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
                       </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Bouton 2</label>
+                        <input value={slide.ctaText2} onChange={e => updateHeroSlide(slide.id, { ctaText2: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.82rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, color: 'var(--a-text2)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Lien 2</label>
+                        <input value={slide.ctaLink2} onChange={e => updateHeroSlide(slide.id, { ctaLink2: e.target.value })}
+                          style={{ width: '100%', background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', padding: '0.45rem 0.75rem', fontSize: '0.82rem', color: 'var(--a-text)', boxSizing: 'border-box' }} />
+                      </div>
+                    </div>
+
+                    {/* Save button */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <button
+                        onClick={() => saveHeroSlide(slide)}
+                        disabled={heroSlideSaving === slide.id}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                          background: 'var(--a-primary)', color: '#fff', fontWeight: 700,
+                          fontSize: '0.82rem', padding: '0.55rem 1.25rem', borderRadius: '8px',
+                          border: 'none', cursor: 'pointer', opacity: heroSlideSaving === slide.id ? 0.6 : 1,
+                        }}
+                      >
+                        <Save size={14} />
+                        {heroSlideSaving === slide.id ? 'Sauvegarde...' : 'Sauvegarder'}
+                      </button>
                     </div>
                   </div>
                 ))}
 
+                {/* Add slide button */}
                 <button
-                  className="btn-new proexcel-btn-admin-primary-action"
-                  onClick={addSlide}
-                  style={{ width: '100%', marginTop: '0.5rem', padding: '0.85rem', borderRadius: '10px', textAlign: 'center' }}
+                  onClick={addHeroSlide}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    width: '100%', justifyContent: 'center',
+                    background: 'none', border: '2px dashed var(--a-border)', borderRadius: '12px',
+                    padding: '1rem', fontSize: '0.85rem', color: 'var(--a-text2)',
+                    cursor: 'pointer', fontWeight: 600,
+                  }}
                 >
-                  + Ajouter une diapositive
+                  <Plus size={16} /> Ajouter une slide
                 </button>
+
+                {/* Hidden: keep old slide state alive to avoid TS errors */}
+                {false && slides.map((slide, idx) => (
+                  <div key={idx} style={{ display: 'none' }}>
+                    {slide.tag}{slide.title}{slide.sub}{slide.btn1}{slide.btn1Link}
+                    {slide.btn2}{slide.btn2Link}{slide.span}{idx}
+                  </div>
+                ))}
               </div>
             )}
 

@@ -3,8 +3,9 @@ import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-export default async function OrderReceiptPage({ params }: { params: { id: string } }) {
-  const orderId = parseInt(params.id, 10)
+export default async function OrderReceiptPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const orderId = parseInt(id, 10)
   if (isNaN(orderId)) return notFound()
 
   const order = await prisma.order.findUnique({

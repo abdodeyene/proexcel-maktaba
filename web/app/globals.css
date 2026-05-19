@@ -96,6 +96,7 @@ html {
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
+  background: #050505;
 }
 
 body {
@@ -288,7 +289,92 @@ header {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  transition: var(--t);
+  transition: background 0.4s ease, backdrop-filter 0.4s ease,
+              -webkit-backdrop-filter 0.4s ease, border-color 0.4s ease,
+              box-shadow 0.4s ease;
+}
+
+/* ─── HERO MODE: header transparent, no backgrounds on any element ─── */
+header.at-hero {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+/* ─── HERO IMAGE — mobile repositioning ─── */
+.hero-slide-bg {
+  background-position: center 30%;
+}
+@media (max-width: 768px) {
+  .hero-slide-bg {
+    background-position: center 20% !important;
+  }
+}
+
+/* Text / logo */
+header.at-hero .logo-text-fallback { color: #fff; }
+
+/* Nav links */
+header.at-hero .header-nav-center a,
+header.at-hero .nav-dropdown-btn {
+  color: rgba(255,255,255,0.8);
+}
+header.at-hero .header-nav-center a:hover,
+header.at-hero .header-nav-center a.active,
+header.at-hero .nav-dropdown-btn:hover,
+header.at-hero .nav-dropdown-wrap.active .nav-dropdown-btn {
+  color: #fff;
+  background: none;
+}
+
+/* Icon buttons — no pill backgrounds at all */
+header.at-hero .btn-icon { color: rgba(255,255,255,0.8); background: none; border: none; }
+header.at-hero .btn-icon:hover { color: #fff; background: none; }
+
+/* Lang button — strip border and background */
+header.at-hero .lang-btn {
+  color: rgba(255,255,255,0.8);
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+header.at-hero .lang-btn:hover,
+header.at-hero .lang-btn.open {
+  color: #fff;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* ─── HERO SLIDER ANIMATIONS ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(22px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px);  filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);      filter: blur(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+@keyframes blurFadeIn {
+  from { opacity: 0; filter: blur(12px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+
+@utility animate-fadeInUp {
+  animation: fadeInUp 0.7s cubic-bezier(.22,1,.36,1) both;
+}
+
+@utility animate-blurFadeIn {
+  animation: blurFadeIn 0.8s ease both;
 }
 
 .header-inner {
@@ -405,16 +491,24 @@ nav a.active {
 .nav-dropdown-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.4rem;
-  min-width: 160px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-  z-index: 200;
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 190px;
+  z-index: 500;
+  /* Explicit colours — never rely on CSS vars that at-hero may corrupt */
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Light mode: white card */
+[data-theme="light"] .nav-dropdown-menu {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .nav-dropdown-wrap:hover .nav-dropdown-menu,
@@ -425,24 +519,51 @@ nav a.active {
 .nav-dropdown-menu a {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text2);
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
   text-decoration: none;
-  transition: var(--t);
+  transition: all 0.15s ease;
+  /* Always dark-mode text inside dark card */
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* Light mode: dark text */
+[data-theme="light"] .nav-dropdown-menu a {
+  color: #1e293b;
 }
 
 .nav-dropdown-menu a:hover,
 .nav-dropdown-menu a.active {
-  color: var(--primary);
-  background: rgba(232, 53, 42, 0.08);
+  color: #fff;
+  background: rgba(239, 35, 60, 0.18);
 }
 
+[data-theme="light"] .nav-dropdown-menu a:hover,
+[data-theme="light"] .nav-dropdown-menu a.active {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.07);
+}
+
+/* at-hero: dropdown card still uses explicit colours (not CSS vars) so no override needed */
+
 .nav-dropdown-icon {
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(239, 35, 60, 0.15);
+  color: #ef233c;
+}
+
+[data-theme="light"] .nav-dropdown-icon {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
 }
 
 .mobile-nav-section {
@@ -762,12 +883,17 @@ nav a.active {
   display: block;
   padding: 0.7rem 1rem;
   border-radius: 8px;
-  color: var(--text2);
+  color: var(--text);
   font-size: 0.9rem;
+  font-weight: 500;
   transition: var(--t);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+[data-theme="light"] .mobile-nav a {
+  color: #1e293b;
 }
 
 .mobile-nav a:hover {
@@ -4028,7 +4154,6 @@ footer {
   color: var(--text);
 }
 
-[data-theme="light"] .offers-layout .sidebar,
 [data-theme="light"] .offers-layout {
   background: transparent;
 }
@@ -4051,15 +4176,6 @@ footer {
   .offers-layout {
     grid-template-columns: 1fr;
   }
-
-  .offers-layout .sidebar {
-    display: none;
-  }
-}
-
-.offers-layout .sidebar {
-  position: sticky;
-  top: 88px;
 }
 
 .sidebar {

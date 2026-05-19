@@ -22,6 +22,7 @@ type Product = {
   author?: string | null
   category?: string | null
   niveau?: string | null
+  subject?: string | null
   stock: number
   isPromo: boolean
   isBestOffer: boolean
@@ -40,11 +41,25 @@ type MediaItem = { url: string; type: 'image' | 'video' }
 
 const EMPTY = {
   title: '', titleAr: '', author: '', price: '', compareAtPrice: '', costPrice: '',
-  category: '', niveau: '', emoji: '📦', g1: '#1a237e', g2: '#3949ab',
+  category: '', niveau: '', subject: '', emoji: '📦', g1: '#1a237e', g2: '#3949ab',
   stock: '0', isPromo: false, isBestOffer: false, isNew: false,
   description: '', descriptionAr: '',
   variants: [] as string[],
   colors: [] as string[],
+}
+
+const SUBJECTS_BY_NIVEAU: Record<string, string[]> = {
+  Primaire: ['arabe','francais','anglais','maths','sciences','islamia','tarbia','tchkila','histoire'],
+  College:  ['arabe','francais','anglais','maths','svt','pc','histoire','islamia','tarbia','informatique'],
+  Lycee:    ['arabe','francais','anglais','maths','svt','pc','falsafa','histoire','islamia','informatique','economie'],
+}
+
+const SUBJECT_LABELS: Record<string, string> = {
+  arabe: 'Langue Arabe', francais: 'Langue Française', anglais: 'Langue Anglaise',
+  maths: 'Mathématiques', sciences: 'Sciences', islamia: 'Éducation Islamique',
+  tarbia: 'Éducation Civique', tchkila: 'Arts Plastiques', histoire: 'Histoire-Géo',
+  svt: 'SVT', pc: 'Physique-Chimie', informatique: 'Informatique',
+  falsafa: 'Philosophie', economie: 'Économie',
 }
 
 // ─── Rich Text Editor ───
@@ -255,7 +270,7 @@ export default function AdminProducts() {
       const data = await fetch('/api/products', {
         headers: { Authorization: `Bearer ${token()}` }
       }).then(r => r.json())
-      setProducts(Array.isArray(data) ? data : [])
+      setProducts(Array.isArray(data) ? data : (data?.products ?? []))
     } catch (e) { console.error(e) }
   }
 
@@ -286,7 +301,8 @@ export default function AdminProducts() {
       title: p.title, titleAr: p.titleAr || '', author: p.author || '', price: String(p.price),
       compareAtPrice: p.compareAtPrice ? String(p.compareAtPrice) : '',
       costPrice: (p as any).costPrice ? String((p as any).costPrice) : '',
-      category: p.category || '', niveau: p.niveau || '', emoji: p.emoji || '📦',
+      category: p.category || '', niveau: p.niveau || '', subject: (p as any).subject || '',
+      emoji: p.emoji || '📦',
       g1: p.g1 || '#1a237e', g2: p.g2 || '#3949ab',
       stock: String(p.stock), isPromo: !!p.isPromo,
       isBestOffer: !!p.isBestOffer, isNew: !!p.isNew,
@@ -311,6 +327,7 @@ export default function AdminProducts() {
       costPrice: form.costPrice ? Number(form.costPrice) : null,
       category: form.category || null,
       niveau: form.niveau || null,
+      subject: form.subject || null,
       emoji: form.emoji || '📦',
       g1: form.g1,
       g2: form.g2,
@@ -518,12 +535,24 @@ export default function AdminProducts() {
                   className="cp-cat-select"
                   style={{ marginTop: '0.6rem' }}
                   value={form.niveau}
-                  onChange={e => setForm({ ...form, niveau: e.target.value })}
+                  onChange={e => setForm({ ...form, niveau: e.target.value, subject: '' })}
                 >
                   <option value="">Niveau scolaire (optionnel)</option>
                   <option value="Primaire">Primaire</option>
                   <option value="College">Collège</option>
                   <option value="Lycee">Lycée</option>
+                </select>
+                <select
+                  className="cp-cat-select"
+                  style={{ marginTop: '0.6rem' }}
+                  value={form.subject}
+                  onChange={e => setForm({ ...form, subject: e.target.value })}
+                  disabled={!form.niveau}
+                >
+                  <option value="">Matière (optionnel)</option>
+                  {(SUBJECTS_BY_NIVEAU[form.niveau] || []).map(s => (
+                    <option key={s} value={s}>{SUBJECT_LABELS[s] || s}</option>
+                  ))}
                 </select>
                 <input
                   className="cp-title-input"

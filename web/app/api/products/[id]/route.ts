@@ -25,6 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         costPrice: dto.costPrice ? Number(dto.costPrice) : null,
         category: dto.category ?? null,
         niveau: dto.niveau ?? null,
+        subject: dto.subject ?? null,
         emoji: dto.emoji ?? '📦',
         g1: dto.g1 ?? '#1a237e',
         g2: dto.g2 ?? '#3949ab',

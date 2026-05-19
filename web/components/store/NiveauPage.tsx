@@ -1,18 +1,95 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
 import ProductCard from '@/components/ProductCard'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   SlidersHorizontal,
-  RotateCcw,
+  Library,
+  BookOpen,
+  GraduationCap,
   Search,
   X,
   Check,
+  RotateCcw,
   ChevronDown,
 } from '@/components/LucideIcons'
+
+// ─── Subject definitions per niveau ──────────────────────────────────────────
+
+const NIVEAU_SUBJECTS: Record<string, { id: string; label: string }[]> = {
+  primaire: [
+    { id: 'arabe',    label: 'Langue Arabe' },
+    { id: 'francais', label: 'Langue Française' },
+    { id: 'anglais',  label: 'Langue Anglaise' },
+    { id: 'maths',    label: 'Mathématiques' },
+    { id: 'sciences', label: 'Sciences' },
+    { id: 'islamia',  label: 'Éducation Islamique' },
+    { id: 'tarbia',   label: 'Éducation Civique' },
+    { id: 'tchkila',  label: 'Arts Plastiques' },
+    { id: 'histoire', label: 'Histoire-Géographie' },
+  ],
+  college: [
+    { id: 'arabe',        label: 'Langue Arabe' },
+    { id: 'francais',     label: 'Langue Française' },
+    { id: 'anglais',      label: 'Langue Anglaise' },
+    { id: 'maths',        label: 'Mathématiques' },
+    { id: 'svt',          label: 'SVT' },
+    { id: 'pc',           label: 'Physique-Chimie' },
+    { id: 'histoire',     label: 'Histoire-Géo' },
+    { id: 'islamia',      label: 'Éducation Islamique' },
+    { id: 'tarbia',       label: 'Éducation Civique' },
+    { id: 'informatique', label: 'Informatique' },
+  ],
+  lycee: [
+    { id: 'arabe',        label: 'Langue Arabe' },
+    { id: 'francais',     label: 'Langue Française' },
+    { id: 'anglais',      label: 'Langue Anglaise' },
+    { id: 'maths',        label: 'Mathématiques' },
+    { id: 'svt',          label: 'SVT' },
+    { id: 'pc',           label: 'Physique-Chimie' },
+    { id: 'falsafa',      label: 'Philosophie' },
+    { id: 'histoire',     label: 'Histoire-Géo' },
+    { id: 'islamia',      label: 'Éducation Islamique' },
+    { id: 'informatique', label: 'Informatique' },
+    { id: 'economie',     label: 'Économie' },
+  ],
+}
+
+const NIVEAU_META: Record<string, {
+  fr: string; ar: string
+  years_fr: string; years_ar: string
+  desc_fr: string; desc_ar: string
+  icon: React.ReactNode
+  emoji: string
+}> = {
+  primaire: {
+    fr: 'Primaire', ar: 'الابتدائي',
+    years_fr: '1ère – 6ème Année', years_ar: 'السنة الأولى – السادسة',
+    desc_fr: 'Manuels officiels pour le cycle primaire, toutes matières du programme national marocain.',
+    desc_ar: 'الكتب الرسمية للتعليم الابتدائي لجميع المواد في البرنامج الوطني المغربي.',
+    icon: <Library size={28} />,
+    emoji: '🎒',
+  },
+  college: {
+    fr: 'Collège', ar: 'الإعدادي',
+    years_fr: '1ère – 3ème Année Collège', years_ar: 'السنة الأولى – الثالثة إعدادي',
+    desc_fr: 'Livres scolaires pour le cycle collégial, français et arabe, conformes au programme officiel.',
+    desc_ar: 'الكتب المدرسية للسلك الإعدادي بالفرنسية والعربية وفق البرنامج الرسمي.',
+    icon: <BookOpen size={28} />,
+    emoji: '📚',
+  },
+  lycee: {
+    fr: 'Lycée', ar: 'الثانوي',
+    years_fr: 'Tronc Commun · 1ère · 2ème Bac', years_ar: 'الجذع المشترك · الأولى · الثانية باك',
+    desc_fr: 'Manuels et livres parascolaires pour le baccalauréat, toutes filières.',
+    desc_ar: 'الكتب المدرسية والبرامج للبكالوريا في جميع الشعب.',
+    icon: <GraduationCap size={28} />,
+    emoji: '🎓',
+  },
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Product = {
   id: number
@@ -21,30 +98,16 @@ type Product = {
   price: number
   compareAtPrice?: number | null
   category?: string | null
-  g1?: string | null
-  g2?: string | null
   emoji?: string | null
   stock: number
   rating?: number | null
   isPromo?: boolean | null
   isNew?: boolean | null
   isBestOffer?: boolean | null
+  niveau?: string | null
+  subject?: string | null
   variants?: unknown
 }
-
-type Category = {
-  id: number
-  name: string
-  emoji?: string | null
-  image?: string | null
-  count?: number
-  _count?: { products?: number }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const titleCase = (s: string) =>
-  s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 
 // ─── Premium CheckRow ─────────────────────────────────────────────────────────
 
@@ -99,10 +162,8 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 // ─── Premium FilterPanel ──────────────────────────────────────────────────────
 
 function FilterPanel({
-  categories,
-  selectedCats,
-  toggleCategory,
-  isCatSelected,
+  subjects,
+  selectedSubjects, toggleSubject,
   inStockOnly, setInStockOnly,
   promoOnly,   setPromoOnly,
   priceMin,    setPriceMin,
@@ -113,10 +174,9 @@ function FilterPanel({
   activeFilterCount,
   onApply,
 }: {
-  categories: Category[]
-  selectedCats: string[]
-  toggleCategory: (name: string) => void
-  isCatSelected: (name: string) => boolean
+  subjects: { id: string; label: string }[]
+  selectedSubjects: string[]
+  toggleSubject: (id: string) => void
   inStockOnly: boolean; setInStockOnly: (v: boolean) => void
   promoOnly: boolean;   setPromoOnly:   (v: boolean) => void
   priceMin: number;     setPriceMin:    (v: number) => void
@@ -202,44 +262,21 @@ function FilterPanel({
         )}
       </div>
 
-      {/* ── Categories ──────────────────────────────────────────────────── */}
-      {categories.length > 0 && (
+      {/* ── Matière ─────────────────────────────────────────────────────── */}
+      {subjects.length > 0 && (
         <div style={{ marginBottom: '26px' }}>
-          <SectionTitle>Catégorie</SectionTitle>
+          <SectionTitle>Matière</SectionTitle>
           <div>
-            {categories.map((cat) => {
-              const selected = isCatSelected(cat.name)
-              const count = cat.count ?? cat._count?.products ?? 0
+            {subjects.map((sub) => {
+              const selected = selectedSubjects.includes(sub.id)
               return (
-                <CheckRow key={cat.id} selected={selected} onClick={() => toggleCategory(cat.name)}>
-                  {/* Thumbnail */}
-                  <div style={{
-                    width: '34px', height: '34px', borderRadius: '10px', flexShrink: 0,
-                    overflow: 'hidden', background: '#f1f5f9', border: '1px solid #e5e7eb',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {cat.image ? (
-                      <Image src={cat.image} alt={cat.name} width={34} height={34} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                    ) : cat.emoji ? (
-                      <span style={{ fontSize: '16px', lineHeight: 1 }}>{cat.emoji}</span>
-                    ) : (
-                      <span style={{ fontSize: '14px', color: '#94a3b8' }}>📁</span>
-                    )}
-                  </div>
-                  {/* Name */}
+                <CheckRow key={sub.id} selected={selected} onClick={() => toggleSubject(sub.id)}>
                   <span style={{
                     fontSize: '15px', fontWeight: 700, flex: 1,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     color: selected ? '#dc2626' : '#1e293b', transition: 'color 150ms',
                   }}>
-                    {titleCase(cat.name)}
+                    {sub.label}
                   </span>
-                  {/* Count */}
-                  {count > 0 && (
-                    <span style={{ fontSize: '12px', flexShrink: 0, color: selected ? '#dc2626' : '#94a3b8' }}>
-                      {count}
-                    </span>
-                  )}
                 </CheckRow>
               )
             })}
@@ -313,18 +350,21 @@ function FilterPanel({
         <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px', marginTop: '12px' }}>
           <SectionTitle>Filtres actifs</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {selectedCats.map((catName) => (
-              <span key={catName} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3',
-                borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800,
-              }}>
-                {titleCase(catName)}
-                <button onClick={() => toggleCategory(catName)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            ))}
+            {selectedSubjects.map((sid) => {
+              const label = subjects.find(s => s.id === sid)?.label ?? sid
+              return (
+                <span key={sid} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3',
+                  borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800,
+                }}>
+                  {label}
+                  <button onClick={() => toggleSubject(sid)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                    <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
+                  </button>
+                </span>
+              )
+            })}
             {priceMin > 0 && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
                 Min {priceMin} DH
@@ -384,42 +424,35 @@ function FilterPanel({
   )
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
 
-export default function BestOffersClient({
-  products: initialProducts,
-  categories: initialCategories,
-  pageTitle,
-  pageSubtitle,
+export default function NiveauPage({
+  niveau,
+  initialProducts,
 }: {
-  products: Product[]
-  categories: Category[]
-  pageTitle?: string
-  pageSubtitle?: string
+  niveau: string
+  initialProducts: Product[]
 }) {
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const [products, setProducts] = useState<Product[]>(initialProducts)
 
-  const [products,   setProducts]   = useState<Product[]>(initialProducts)
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
+  // Filter state
+  const [searchQuery,      setSearchQuery]      = useState('')
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
+  const [inStockOnly,      setInStockOnly]      = useState(false)
+  const [promoOnly,        setPromoOnly]        = useState(false)
+  const [priceMin,         setPriceMin]         = useState(0)
+  const [priceMax,         setPriceMax]         = useState(9999)
+  const [sortBy,           setSortBy]           = useState('default')
+  const [filterOpen,       setFilterOpen]       = useState(false)
 
-  // Filter states
-  const [searchQuery,  setSearchQuery]  = useState('')
-  const [selectedCats, setSelectedCats] = useState<string[]>([])
-  const [inStockOnly,  setInStockOnly]  = useState(false)
-  const [promoOnly,    setPromoOnly]    = useState(false)
-  const [priceMin,     setPriceMin]     = useState(0)
-  const [priceMax,     setPriceMax]     = useState(9999)
-  const [sort,         setSort]         = useState('default')
-  const [filterOpen,   setFilterOpen]   = useState(false)
-
-  // Read URL params on mount
-  useEffect(() => {
-    const catParam  = searchParams.get('cat')
-    if (catParam) setSelectedCats([catParam])
-    const sortParam = searchParams.get('sort')
-    if (sortParam) setSort(sortParam)
-  }, [searchParams])
+  const subjects = NIVEAU_SUBJECTS[niveau.toLowerCase()] ?? []
+  const meta = NIVEAU_META[niveau.toLowerCase()] ?? {
+    fr: niveau, ar: niveau,
+    years_fr: '', years_ar: '',
+    desc_fr: '', desc_ar: '',
+    icon: <BookOpen size={28} />,
+    emoji: '📘',
+  }
 
   // Light mode for this page
   useEffect(() => {
@@ -427,121 +460,132 @@ export default function BestOffersClient({
     return () => document.documentElement.removeAttribute('data-theme')
   }, [])
 
-  // Fetch categories once
+  // Load products for this niveau
   useEffect(() => {
-    fetch('/api/categories')
-      .then((r) => r.json())
-      .then((cats) => { if (Array.isArray(cats)) setCategories(cats) })
-      .catch(() => {})
-  }, [])
-
-  // Fetch products from API whenever filters change
-  useEffect(() => {
-    const params = new URLSearchParams()
-    selectedCats.forEach((name) => params.append('category', name))
-    if (searchQuery)     params.set('search',   searchQuery)
-    if (priceMax < 9999) params.set('maxPrice', String(priceMax))
-    if (inStockOnly)     params.set('inStock',  'true')
-    if (promoOnly)       params.set('onSale',   'true')
-    params.set('sortBy', sort)
-
-    fetch(`/api/products?${params.toString()}`)
+    fetch(`/api/products?niveau=${encodeURIComponent(niveau)}`)
       .then((r) => r.json())
       .then((data) => {
-        if (data.products && Array.isArray(data.products)) {
-          setProducts(data.products)
-        } else if (Array.isArray(data)) {
-          setProducts(data)
-        } else {
-          console.error('[BestOffersClient] API error:', data)
-        }
+        const list: Product[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.products)
+          ? data.products
+          : []
+        if (list.length > 0) setProducts(list)
       })
-      .catch((err) => console.error('[BestOffersClient] fetch error:', err))
-  }, [selectedCats, searchQuery, priceMax, inStockOnly, promoOnly, sort])
+      .catch(() => {})
+  }, [niveau])
 
-  // Lock body scroll when mobile filter open
+  // Lock body scroll on mobile drawer
   useEffect(() => {
     document.body.style.overflow = filterOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [filterOpen])
 
-  const isCatSelected = (name: string) =>
-    selectedCats.some((c) => c.toLowerCase() === name.toLowerCase())
-
-  const toggleCategory = (catName: string) => {
-    setSelectedCats((prev) =>
-      isCatSelected(catName)
-        ? prev.filter((c) => c.toLowerCase() !== catName.toLowerCase())
-        : [...prev, catName]
+  const toggleSubject = (id: string) => {
+    setSelectedSubjects((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     )
   }
 
   const clearFilters = () => {
-    setSelectedCats([])
+    setSelectedSubjects([])
     setInStockOnly(false)
     setPromoOnly(false)
     setSearchQuery('')
     setPriceMin(0)
     setPriceMax(9999)
-    setSort('default')
-    router.push(pageTitle ? window.location.pathname : '/best-offers')
+    setSortBy('default')
   }
 
   const hasActiveFilters =
-    selectedCats.length > 0 || inStockOnly || promoOnly ||
-    searchQuery.length > 0  || priceMin > 0 || priceMax < 9999
+    selectedSubjects.length > 0 || inStockOnly || promoOnly ||
+    searchQuery.length > 0 || priceMin > 0 || priceMax < 9999
 
   const activeFilterCount =
-    selectedCats.length +
+    selectedSubjects.length +
     (inStockOnly ? 1 : 0) +
     (promoOnly ? 1 : 0) +
     (searchQuery ? 1 : 0) +
     (priceMin > 0 ? 1 : 0) +
     (priceMax < 9999 ? 1 : 0)
 
-  // Local sort + priceMin filter (API handles the rest)
   const filtered = useMemo(() => {
     let list = [...products]
-    if (priceMin > 0) list = list.filter((p) => p.price >= priceMin)
-    if (sort === 'price_asc' || sort === 'price-asc')     list.sort((a, b) => a.price - b.price)
-    else if (sort === 'price_desc' || sort === 'price-desc') list.sort((a, b) => b.price - a.price)
-    else if (sort === 'newest' || sort === 'new')  list.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
-    else if (sort === 'popular' || sort === 'rating') list.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    if (selectedSubjects.length > 0) {
+      list = list.filter((p) =>
+        p.subject && selectedSubjects.includes(p.subject.toLowerCase())
+      )
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      list = list.filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        (p.author && p.author.toLowerCase().includes(q)) ||
+        (p.category && p.category.toLowerCase().includes(q))
+      )
+    }
+    if (priceMin > 0)   list = list.filter((p) => p.price >= priceMin)
+    if (priceMax < 9999) list = list.filter((p) => p.price <= priceMax)
+    if (inStockOnly)    list = list.filter((p) => p.stock > 0)
+    if (promoOnly)      list = list.filter((p) => p.isPromo)
+    if (sortBy === 'price_asc')  list.sort((a, b) => a.price - b.price)
+    else if (sortBy === 'price_desc') list.sort((a, b) => b.price - a.price)
+    else if (sortBy === 'newest')  list.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
+    else if (sortBy === 'popular') list.sort((a, b) => (b.rating || 0) - (a.rating || 0))
     return list
-  }, [products, priceMin, sort])
+  }, [products, selectedSubjects, searchQuery, priceMin, priceMax, inStockOnly, promoOnly, sortBy])
 
   const filterProps = {
-    categories, selectedCats, toggleCategory, isCatSelected,
-    inStockOnly, setInStockOnly, promoOnly, setPromoOnly,
-    priceMin, setPriceMin, priceMax, setPriceMax,
-    searchQuery, setSearchQuery, clearFilters, hasActiveFilters, activeFilterCount,
+    subjects,
+    selectedSubjects, toggleSubject,
+    inStockOnly, setInStockOnly,
+    promoOnly,   setPromoOnly,
+    priceMin,    setPriceMin,
+    priceMax,    setPriceMax,
+    searchQuery, setSearchQuery,
+    clearFilters,
+    hasActiveFilters,
+    activeFilterCount,
   }
 
   return (
-    <>
-      {/* ── PAGE HERO ──────────────────────────────────────────────────── */}
-      <div className="page-hero">
-        <div className="page-hero-inner">
-          <div className="breadcrumb-nav">
-            <Link href="/">Accueil</Link>
-            <span>›</span>
-            <span>{pageTitle || 'Meilleures Offres'}</span>
+    <div className="niveau-page">
+
+      {/* ── HERO BANNER ─────────────────────────────────────────────────── */}
+      <div className="niveau-banner">
+        <div className="niveau-banner-glow" aria-hidden="true" />
+        <div className="niveau-banner-grid" aria-hidden="true" />
+        <div className="niveau-banner-inner">
+          <nav className="niveau-breadcrumb" aria-label="Fil d'Ariane">
+            <Link href="/" className="niveau-breadcrumb-link">Accueil</Link>
+            <span className="niveau-breadcrumb-sep" aria-hidden="true">›</span>
+            <span className="niveau-breadcrumb-link">Niveaux</span>
+            <span className="niveau-breadcrumb-sep" aria-hidden="true">›</span>
+            <span className="niveau-breadcrumb-current">{meta.fr}</span>
+          </nav>
+          <div className="niveau-banner-content">
+            <div className="niveau-banner-icon" aria-hidden="true">{meta.icon}</div>
+            <div className="niveau-banner-text">
+              <div className="niveau-banner-tag">Niveau scolaire</div>
+              <h1 className="niveau-banner-title">{meta.fr}</h1>
+              <p className="niveau-banner-years">{meta.years_fr}</p>
+              <p className="niveau-banner-desc">{meta.desc_fr}</p>
+            </div>
+            <div className="niveau-banner-stat" aria-label={`${products.length} produits disponibles`}>
+              <span className="niveau-banner-stat-num">{products.length}</span>
+              <span className="niveau-banner-stat-label">Produits</span>
+            </div>
           </div>
-          <h1>{pageTitle || 'Meilleures Offres'}</h1>
-          <p>
-            {pageSubtitle ||
-              'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}
-          </p>
         </div>
       </div>
 
-      {/* ── LAYOUT ────────────────────────────────────────────────────── */}
-      <div className="offers-layout">
+      {/* ── LAYOUT ──────────────────────────────────────────────────────── */}
+      <div className="niveau-layout">
 
-        {/* ── DESKTOP SIDEBAR ───────────────────────────────────────── */}
+        {/* ── DESKTOP SIDEBAR ─────────────────────────────────────────── */}
         <aside
-          className="hidden md:block sticky self-start flex-shrink-0"
-          style={{ top: '88px', width: '300px' }}
+          className="hidden md:block self-start flex-shrink-0"
+          style={{ width: '300px', position: 'sticky', top: '88px' }}
         >
           <div style={{
             background: '#ffffff',
@@ -555,11 +599,11 @@ export default function BestOffersClient({
           </div>
         </aside>
 
-        {/* ── RESULTS ───────────────────────────────────────────────── */}
+        {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
         <div className="flex-1 min-w-0">
 
           {/* Sort bar */}
-          <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               {/* Mobile filter button */}
               <button
@@ -574,19 +618,17 @@ export default function BestOffersClient({
                   </span>
                 )}
               </button>
-
               <p className="text-sm text-gray-500">
                 <span className="font-bold text-gray-900">{filtered.length}</span>{' '}
                 produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
               </p>
             </div>
-
             <div className="flex items-center gap-2">
               <label className="text-sm text-gray-500 hidden sm:block">Trier par :</label>
               <div className="relative">
                 <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
                   className="appearance-none border border-gray-200 rounded-xl pl-4 pr-9 py-2.5 text-sm font-medium bg-white focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none cursor-pointer"
                 >
                   <option value="default">Par défaut</option>
@@ -600,17 +642,20 @@ export default function BestOffersClient({
             </div>
           </div>
 
-          {/* Active Filter Chips */}
+          {/* Active filter chips */}
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-2 mb-6">
-              {selectedCats.map((cat) => (
-                <div key={`chip-cat-${cat}`} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
-                  <span>{titleCase(cat)}</span>
-                  <button onClick={() => toggleCategory(cat)} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
+              {selectedSubjects.map((sid) => {
+                const label = subjects.find(s => s.id === sid)?.label ?? sid
+                return (
+                  <div key={`chip-${sid}`} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                    <span>{label}</span>
+                    <button onClick={() => toggleSubject(sid)} className="text-red-400 hover:text-red-700 transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )
+              })}
               {priceMin > 0 && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
                   <span>Min {priceMin} DH</span>
@@ -654,15 +699,19 @@ export default function BestOffersClient({
               </div>
               <h3 className="font-bold text-gray-900 mb-1">Aucun produit trouvé</h3>
               <p className="text-sm text-gray-500 mb-4">
-                Aucun produit ne correspond à vos filtres.
+                {hasActiveFilters
+                  ? 'Aucun produit ne correspond à vos filtres.'
+                  : `Aucun produit pour le niveau ${meta.fr} pour le moment.`}
               </p>
-              <button
-                onClick={clearFilters}
-                className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                Réinitialiser les filtres
-              </button>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Réinitialiser les filtres
+                </button>
+              )}
             </div>
           ) : (
             <div className="products-grid">
@@ -674,7 +723,7 @@ export default function BestOffersClient({
         </div>
       </div>
 
-      {/* ── MOBILE BOTTOM SHEET ───────────────────────────────────────── */}
+      {/* ── MOBILE FILTER DRAWER ────────────────────────────────────────── */}
       {filterOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
@@ -722,6 +771,109 @@ export default function BestOffersClient({
           </div>
         </div>
       )}
-    </>
+
+      <style>{`
+        .niveau-page {
+          min-height: 100vh;
+          background: var(--bg);
+        }
+
+        /* ── Hero Banner ── */
+        .niveau-banner {
+          position: relative;
+          overflow: hidden;
+          padding: 3.5rem 0 2.75rem;
+          background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 60%, var(--bg) 100%);
+          border-bottom: 1px solid var(--border);
+        }
+        .niveau-banner-glow {
+          position: absolute; top: -60px; left: -80px;
+          width: 480px; height: 480px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(232,53,42,0.14) 0%, transparent 65%);
+          pointer-events: none;
+        }
+        .niveau-banner-grid {
+          position: absolute; inset: 0;
+          background-image:
+            linear-gradient(rgba(232,53,42,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(232,53,42,0.04) 1px, transparent 1px);
+          background-size: 48px 48px;
+          pointer-events: none;
+        }
+        .niveau-banner-inner {
+          position: relative;
+          max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+        }
+        .niveau-breadcrumb {
+          display: flex; align-items: center; gap: 0.4rem;
+          font-size: 0.75rem; margin-bottom: 1.75rem;
+        }
+        .niveau-breadcrumb-link { color: var(--text2); transition: color 0.15s; text-decoration: none; }
+        .niveau-breadcrumb-link:hover { color: var(--text); }
+        .niveau-breadcrumb-sep { color: var(--text2); opacity: 0.5; }
+        .niveau-breadcrumb-current { color: var(--primary); font-weight: 600; }
+        .niveau-banner-content {
+          display: flex; align-items: flex-start; gap: 1.5rem;
+        }
+        .niveau-banner-icon {
+          flex-shrink: 0; width: 68px; height: 68px; border-radius: 18px;
+          display: flex; align-items: center; justify-content: center;
+          color: var(--primary);
+          background: rgba(232,53,42,0.12); border: 1px solid rgba(232,53,42,0.2);
+          box-shadow: 0 0 24px rgba(232,53,42,0.12);
+        }
+        .niveau-banner-text { flex: 1; min-width: 0; }
+        .niveau-banner-tag {
+          font-size: 0.62rem; font-weight: 800; letter-spacing: 2.5px;
+          text-transform: uppercase; color: var(--primary);
+          margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .niveau-banner-tag::before {
+          content: ''; display: inline-block; width: 16px; height: 1.5px;
+          background: var(--primary); border-radius: 2px;
+        }
+        .niveau-banner-title {
+          font-size: clamp(1.8rem,4vw,2.6rem); font-weight: 800; color: var(--text);
+          line-height: 1.1; margin-bottom: 0.35rem; letter-spacing: -0.02em;
+        }
+        .niveau-banner-years {
+          font-size: 0.8rem; font-weight: 600; color: var(--primary);
+          opacity: 0.8; margin-bottom: 0.6rem; letter-spacing: 0.3px;
+        }
+        .niveau-banner-desc { font-size: 0.875rem; color: var(--text2); line-height: 1.6; max-width: 520px; }
+        .niveau-banner-stat {
+          flex-shrink: 0; display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          background: rgba(232,53,42,0.08); border: 1px solid rgba(232,53,42,0.18);
+          border-radius: 16px; padding: 1rem 1.5rem; text-align: center; min-width: 80px;
+        }
+        .niveau-banner-stat-num { font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1; }
+        .niveau-banner-stat-label {
+          font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px;
+          text-transform: uppercase; color: var(--text2); margin-top: 0.3rem;
+        }
+
+        /* ── Layout ── */
+        .niveau-layout {
+          max-width: 1200px; margin: 0 auto;
+          padding: 2rem 2rem 4rem;
+          display: flex; gap: 2rem; align-items: flex-start;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+          .niveau-banner { padding: 2.25rem 0 2rem; }
+          .niveau-banner-inner { padding: 0 1.25rem; }
+          .niveau-banner-content { flex-wrap: wrap; gap: 1rem; }
+          .niveau-banner-icon { width: 54px; height: 54px; border-radius: 14px; }
+          .niveau-banner-stat { display: none; }
+          .niveau-layout { padding: 1.5rem 1rem 3rem; gap: 0; }
+        }
+        @media (max-width: 480px) {
+          .niveau-banner-title { font-size: 1.6rem; }
+          .niveau-banner-icon { width: 46px; height: 46px; border-radius: 12px; }
+        }
+      `}</style>
+    </div>
   )
 }

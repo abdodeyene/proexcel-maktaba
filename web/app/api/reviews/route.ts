@@ -2,6 +2,31 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 
+// Rate limiter: max 10 reviews per IP per hour
+const reviewAttempts = new Map<string, { count: number; firstAt: number }>()
+const REVIEW_WINDOW_MS = 60 * 60 * 1000
+const REVIEW_MAX = 10
+
+function isReviewRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const entry = reviewAttempts.get(ip)
+  if (!entry || now - entry.firstAt > REVIEW_WINDOW_MS) {
+    reviewAttempts.set(ip, { count: 1, firstAt: now })
+    return false
+  }
+  if (entry.count >= REVIEW_MAX) return true
+  entry.count++
+  return false
+}
+
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown'
+  )
+}
+
 type Review = {
   id: string
   name: string
@@ -47,6 +72,11 @@ export async function GET(req: NextRequest) {
 // POST /api/reviews  { productId, name, rating, comment }  (public — customers add reviews)
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req)
+    if (isReviewRateLimited(ip)) {
+      return NextResponse.json({ message: 'Trop d\'avis soumis. Réessayez plus tard.' }, { status: 429 })
+    }
+
     const { productId, name, rating, comment } = await req.json()
     if (!productId || !name || !rating || !comment)
       return NextResponse.json({ message: 'Missing fields' }, { status: 400 })

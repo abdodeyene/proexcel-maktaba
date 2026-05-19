@@ -24,6 +24,7 @@ model Product {
   compareAtPrice Float?
   category       String?
   niveau         String?
+  subject        String?
   g1             String?  @default("#1a237e")
   g2             String?  @default("#3949ab")
   emoji          String?  @default("📦")
@@ -93,4 +94,51 @@ model PushSubscription {
   updatedAt DateTime @updatedAt
 
   @@map("push_subscriptions")
+}
+
+model HeroSlide {
+  id              Int      @id @default(autoincrement())
+  tag             String   @default("")
+  tagAr           String   @default("")
+  title           String   @default("")
+  titleAr         String   @default("")
+  subtitle        String   @default("")
+  subtitleAr      String   @default("")
+  ctaText         String   @default("")
+  ctaTextAr       String   @default("")
+  ctaLink         String   @default("/")
+  ctaText2        String   @default("")
+  ctaLink2        String   @default("/")
+  imageUrl        String?
+  bgPosition      String   @default("center")
+  textAlign       String   @default("center")
+  overlayStrength String   @default("medium")
+  titleColor      String   @default("")
+  subtitleColor   String   @default("")
+  tagColor        String   @default("")
+  isActive        Boolean  @default(true)
+  order           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("hero_slides")
+}
+
+model SliderButtonStyle {
+  id                  String  @id @default("default")
+  bgType              String  @default("solid")
+  bgColor             String  @default("#ffffff")
+  bgGradientStart     String  @default("#e11d2e")
+  bgGradientEnd       String  @default("#000000")
+  bgGradientDirection String  @default("135deg")
+  textColor           String  @default("#111827")
+  borderRadius        String  @default("999px")
+  paddingX            String  @default("28px")
+  paddingY            String  @default("14px")
+  fontSize            String  @default("0.9rem")
+  fontWeight          String  @default("700")
+  showArrowDot        Boolean @default(true)
+  arrowDotColor       String  @default("#e11d2e")
+
+  @@map("slider_button_styles")
 }

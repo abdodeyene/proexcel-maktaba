@@ -149,7 +149,7 @@ export default function AdminDashboard() {
 
     fetch('/api/products', { headers: h })
       .then(r => r.json())
-      .then(data => setProducts(Array.isArray(data) ? data : []))
+      .then(data => setProducts(Array.isArray(data) ? data : (data?.products ?? [])))
       .catch(console.error)
 
     setVisitors(Array.from({ length: 14 }, () => Math.floor(Math.random() * 80 + 20)))
