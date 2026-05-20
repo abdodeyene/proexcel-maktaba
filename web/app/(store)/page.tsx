@@ -288,54 +288,58 @@ export default function HomePage() {
       </div>
 
       {/* ── CATEGORIES ── */}
-      <div className="section">
-        <div className="section-header scroll-reveal">
-          <div className="section-tag">{T.browse}</div>
-          <h2 className="section-title">{T.ourCat}</h2>
-          <p className="section-sub">{T.catSub}</p>
-        </div>
-        <div className="cats-grid">
-          {categories.map((cat, idx) => {
-            const count = cat.count ?? 0
-            return (
-              <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} className={`cat-card proexcel-btn-home-cat-card scroll-reveal ${STAGGER[Math.min(idx, 6)]}`}>
-                <div className="cat-card-bg">
-                  {cat.image
-                    ? <img src={cat.image} alt={cat.name} />
-                    : <div className="cat-card-bg-fallback" />
-                  }
-                </div>
-                <div className="cat-card-overlay" />
-                <div className="cat-card-content">
-                  <div className="cat-card-name">
-                    <span className="cat-dot" />
-                    {cat.name}
+      <div style={{ background: 'var(--bg)' }}>
+        <div className="section">
+          <div className="section-header scroll-reveal">
+            <div className="section-tag">{T.browse}</div>
+            <h2 className="section-title">{T.ourCat}</h2>
+            <p className="section-sub">{T.catSub}</p>
+          </div>
+          <div className="cats-grid">
+            {categories.map((cat, idx) => {
+              const count = cat.count ?? 0
+              return (
+                <Link key={cat.id} href={`/best-offers?cat=${encodeURIComponent(cat.name)}`} className={`cat-card proexcel-btn-home-cat-card scroll-reveal ${STAGGER[Math.min(idx, 6)]}`}>
+                  <div className="cat-card-bg">
+                    {cat.image
+                      ? <img src={cat.image} alt={cat.name} />
+                      : <div className="cat-card-bg-fallback" />
+                    }
                   </div>
-                  <div className="cat-card-footer">
-                    {count > 0 && (
-                      <span className="cat-card-count">{count} {lang === 'fr' ? 'produits' : 'منتج'}</span>
-                    )}
-                    <span className="cat-card-arrow">{lang === 'ar' ? '‹' : '›'}</span>
+                  <div className="cat-card-overlay" />
+                  <div className="cat-card-content">
+                    <div className="cat-card-name">
+                      <span className="cat-dot" />
+                      {cat.name}
+                    </div>
+                    <div className="cat-card-footer">
+                      {count > 0 && (
+                        <span className="cat-card-count">{count} {lang === 'fr' ? 'produits' : 'منتج'}</span>
+                      )}
+                      <span className="cat-card-arrow">{lang === 'ar' ? '‹' : '›'}</span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            )
-          })}
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </div>
 
       {/* ── FEATURED PRODUCTS ── */}
       {featured.length > 0 && (
-        <div className="section" style={{ paddingTop: 0 }}>
-          <div className="section-header scroll-reveal">
-            <div className="section-tag">{T.trend}</div>
-            <h2 className="section-title">{T.featBooks}</h2>
-            <p className="section-sub">{T.featSub}</p>
-          </div>
-          <div className="products-grid scroll-reveal reveal-d1">
-            {featured.map((p, i) => (
-              <ProductCard key={p.id} product={p as any} index={i} />
-            ))}
+        <div style={{ background: 'var(--bg)' }}>
+          <div className="section" style={{ paddingTop: 0 }}>
+            <div className="section-header scroll-reveal">
+              <div className="section-tag">{T.trend}</div>
+              <h2 className="section-title">{T.featBooks}</h2>
+              <p className="section-sub">{T.featSub}</p>
+            </div>
+            <div className="products-grid scroll-reveal reveal-d1">
+              {featured.map((p, i) => (
+                <ProductCard key={p.id} product={p as any} index={i} />
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -345,21 +349,23 @@ export default function HomePage() {
 
       {/* ── PROMO PRODUCTS ── */}
       {promos.length > 0 && (
-        <div className="section">
-          <div className="section-header scroll-reveal">
-            <div className="section-tag">{T.promoTag}</div>
-            <h2 className="section-title">{T.specialOff}</h2>
-            <p className="section-sub">{T.promoSub}</p>
-          </div>
-          <div className="products-grid scroll-reveal reveal-d1">
-            {promos.map((p, i) => (
-              <ProductCard key={p.id} product={p as any} index={i} />
-            ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '2.5rem' }} className="scroll-reveal reveal-d2">
-            <Link href="/best-offers" className="btn-primary proexcel-btn-home-offers-link">
-              {T.seeAll} ›
-            </Link>
+        <div style={{ background: 'var(--bg)' }}>
+          <div className="section">
+            <div className="section-header scroll-reveal">
+              <div className="section-tag">{T.promoTag}</div>
+              <h2 className="section-title">{T.specialOff}</h2>
+              <p className="section-sub">{T.promoSub}</p>
+            </div>
+            <div className="products-grid scroll-reveal reveal-d1">
+              {promos.map((p, i) => (
+                <ProductCard key={p.id} product={p as any} index={i} />
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '2.5rem' }} className="scroll-reveal reveal-d2">
+              <Link href="/best-offers" className="btn-primary proexcel-btn-home-offers-link">
+                {T.seeAll} ›
+              </Link>
+            </div>
           </div>
         </div>
       )}

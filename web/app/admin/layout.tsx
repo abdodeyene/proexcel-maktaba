@@ -98,6 +98,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => clearInterval(interval)
   }, [checked, lastCount])
 
+  // Force French and LTR direction in DOM attributes whenever pathname changes
+  useEffect(() => {
+    document.documentElement.setAttribute('dir', 'ltr')
+    document.documentElement.setAttribute('lang', 'fr')
+    document.body.setAttribute('dir', 'ltr')
+    document.body.setAttribute('lang', 'fr')
+  }, [pathname])
+
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark'
     setTheme(next)
@@ -115,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (!checked) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--a-bg, #f1f5f9)' }}>
+    <div lang="fr" dir="ltr" className="admin-root ltr" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--a-bg, #f1f5f9)' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
         <BookOpen size={32} color="#64748b" />
         <div style={{ color: 'var(--a-text2, #64748b)', fontSize: '0.9rem', fontFamily: 'Inter, sans-serif' }}>Chargement…</div>
@@ -124,101 +132,103 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="admin-layout">
-      {/* SIDEBAR */}
-      <aside className="admin-sidebar">
-        <div className="sidebar-logo">
-          <img src={logoSrc} alt="ProExcel Admin" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
-          <div>
-            <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '1px' }}>Admin Panel</div>
-          </div>
-        </div>
-
-        <nav className="sidebar-nav">
-          <div className="sidebar-section-label">Principale</div>
-          <Link href="/admin" className={`sidebar-link ${pathname === '/admin' ? 'active' : ''}`}>
-            <span className="sl-icon"><LayoutDashboard size={16} /></span>
-            Dashboard
-          </Link>
-          <Link href="/admin/products" className={`sidebar-link ${pathname.startsWith('/admin/products') ? 'active' : ''}`}>
-            <span className="sl-icon"><Package size={16} /></span>
-            Produits
-          </Link>
-          <Link href="/admin/orders" className={`sidebar-link ${pathname.startsWith('/admin/orders') ? 'active' : ''}`}>
-            <span className="sl-icon"><ShoppingCart size={16} /></span>
-            Commandes
-            {pendingCount > 0 && <span className="sl-badge">{pendingCount}</span>}
-          </Link>
-          <Link href="/admin/categories" className={`sidebar-link ${pathname.startsWith('/admin/categories') ? 'active' : ''}`}>
-            <span className="sl-icon"><FolderTree size={16} /></span>
-            Catégories
-          </Link>
-
-          <Link href="/admin/reviews" className={`sidebar-link ${pathname.startsWith('/admin/reviews') ? 'active' : ''}`}>
-            <span className="sl-icon"><MessageSquare size={16} /></span>
-            Avis clients
-          </Link>
-
-          <div className="sidebar-section-label">Configuration</div>
-          <Link href="/admin/slider" className={`sidebar-link ${pathname.startsWith('/admin/slider') ? 'active' : ''}`}>
-            <span className="sl-icon"><Layers size={16} /></span>
-            Hero Slider
-          </Link>
-          <Link href="/admin/settings" className={`sidebar-link ${pathname.startsWith('/admin/settings') ? 'active' : ''}`}>
-            <span className="sl-icon"><Settings size={16} /></span>
-            Paramètres
-          </Link>
-          <Link href="/" className="sidebar-link" target="_blank" rel="noopener noreferrer">
-            <span className="sl-icon"><ExternalLink size={16} /></span>
-            Voir la boutique
-          </Link>
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="sidebar-admin">
-            <div className="sidebar-avatar">A</div>
+    <div lang="fr" dir="ltr" className="admin-root ltr">
+      <div className="admin-layout">
+        {/* SIDEBAR */}
+        <aside className="admin-sidebar">
+          <div className="sidebar-logo">
+            <img src={logoSrc} alt="ProExcel Admin" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
             <div>
-              <div className="sidebar-admin-name">Admin ProExcel</div>
-              <div className="sidebar-admin-role">Super Admin</div>
+              <div style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.3)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '1px' }}>Admin Panel</div>
             </div>
           </div>
-          <button className="sidebar-theme-btn proexcel-btn-admin-theme-toggle" onClick={toggleTheme}>
-            {theme === 'dark' ? <><Sun size={14} /> Mode clair</> : <><Moon size={14} /> Mode sombre</>}
-          </button>
-          <button className="sidebar-logout proexcel-btn-admin-logout" onClick={logout}>
-            <LogOut size={14} />
-            Déconnexion
-          </button>
-        </div>
-      </aside>
 
-      {/* MAIN */}
-      <main className="admin-main">
-        {children}
-      </main>
+          <nav className="sidebar-nav">
+            <div className="sidebar-section-label">Principale</div>
+            <Link href="/admin" className={`sidebar-link ${pathname === '/admin' ? 'active' : ''}`}>
+              <span className="sl-icon"><LayoutDashboard size={16} /></span>
+              Dashboard
+            </Link>
+            <Link href="/admin/products" className={`sidebar-link ${pathname.startsWith('/admin/products') ? 'active' : ''}`}>
+              <span className="sl-icon"><Package size={16} /></span>
+              Produits
+            </Link>
+            <Link href="/admin/orders" className={`sidebar-link ${pathname.startsWith('/admin/orders') ? 'active' : ''}`}>
+              <span className="sl-icon"><ShoppingCart size={16} /></span>
+              Commandes
+              {pendingCount > 0 && <span className="sl-badge">{pendingCount}</span>}
+            </Link>
+            <Link href="/admin/categories" className={`sidebar-link ${pathname.startsWith('/admin/categories') ? 'active' : ''}`}>
+              <span className="sl-icon"><FolderTree size={16} /></span>
+              Catégories
+            </Link>
 
-      {/* NEW ORDER NOTIFICATION TOAST */}
-      <div style={{
-        position: 'fixed',
-        top: '2rem',
-        right: '2rem',
-        background: '#22c55e',
-        color: '#fff',
-        padding: '1rem 1.5rem',
-        borderRadius: '12px',
-        boxShadow: '0 10px 30px rgba(34, 197, 94, 0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        transform: showToast ? 'translateX(0)' : 'translateX(150%)',
-        opacity: showToast ? 1 : 0,
-        transition: 'all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-        zIndex: 9999
-      }}>
-        <div style={{ fontSize: '1.5rem' }}>🔔</div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: '1rem' }}>Nouvelle Commande !</div>
-          <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Vérifiez l'onglet Commandes.</div>
+            <Link href="/admin/reviews" className={`sidebar-link ${pathname.startsWith('/admin/reviews') ? 'active' : ''}`}>
+              <span className="sl-icon"><MessageSquare size={16} /></span>
+              Avis clients
+            </Link>
+
+            <div className="sidebar-section-label">Configuration</div>
+            <Link href="/admin/slider" className={`sidebar-link ${pathname.startsWith('/admin/slider') ? 'active' : ''}`}>
+              <span className="sl-icon"><Layers size={16} /></span>
+              Hero Slider
+            </Link>
+            <Link href="/admin/settings" className={`sidebar-link ${pathname.startsWith('/admin/settings') ? 'active' : ''}`}>
+              <span className="sl-icon"><Settings size={16} /></span>
+              Paramètres
+            </Link>
+            <Link href="/" className="sidebar-link" target="_blank" rel="noopener noreferrer">
+              <span className="sl-icon"><ExternalLink size={16} /></span>
+              Voir la boutique
+            </Link>
+          </nav>
+
+          <div className="sidebar-footer">
+            <div className="sidebar-admin">
+              <div className="sidebar-avatar">A</div>
+              <div>
+                <div className="sidebar-admin-name">Admin ProExcel</div>
+                <div className="sidebar-admin-role">Super Admin</div>
+              </div>
+            </div>
+            <button className="sidebar-theme-btn proexcel-btn-admin-theme-toggle" onClick={toggleTheme}>
+              {theme === 'dark' ? <><Sun size={14} /> Mode clair</> : <><Moon size={14} /> Mode sombre</>}
+            </button>
+            <button className="sidebar-logout proexcel-btn-admin-logout" onClick={logout}>
+              <LogOut size={14} />
+              Déconnexion
+            </button>
+          </div>
+        </aside>
+
+        {/* MAIN */}
+        <main className="admin-main">
+          {children}
+        </main>
+
+        {/* NEW ORDER NOTIFICATION TOAST */}
+        <div style={{
+          position: 'fixed',
+          top: '2rem',
+          right: '2rem',
+          background: '#22c55e',
+          color: '#fff',
+          padding: '1rem 1.5rem',
+          borderRadius: '12px',
+          boxShadow: '0 10px 30px rgba(34, 197, 94, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          transform: showToast ? 'translateX(0)' : 'translateX(150%)',
+          opacity: showToast ? 1 : 0,
+          transition: 'all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
+          zIndex: 9999
+        }}>
+          <div style={{ fontSize: '1.5rem' }}>🔔</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '1rem' }}>Nouvelle Commande !</div>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Vérifiez l'onglet Commandes.</div>
+          </div>
         </div>
       </div>
     </div>

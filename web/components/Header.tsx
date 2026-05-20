@@ -162,9 +162,10 @@ export default function Header() {
     <>
       <header
         className={headerClass}
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 1000 }}
+        dir="ltr"
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 1000, direction: 'ltr' }}
       >
-        <div className="header-inner">
+        <div className="header-inner" style={{ direction: 'ltr' }}>
           {/* Mobile: cart on left */}
           <Link href="/cart" className="btn-icon mob-only" title="Panier" style={{ position: 'relative' }}>
             <ShoppingCart size={20} />
@@ -185,34 +186,42 @@ export default function Header() {
             )}
           </Link>
 
-          <nav className="header-nav-center">
-            <Link href="/" className={pathname === '/' ? 'active' : ''}>{currentT.home}</Link>
-            <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>{currentT.offers}</Link>
+          <nav className="header-nav-center" style={{ direction: 'ltr' }}>
+            <Link href="/" className={pathname === '/' ? 'active' : ''}>
+              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.home}</span>
+            </Link>
+            <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>
+              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.offers}</span>
+            </Link>
             <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee', '/niveaux/primaire', '/niveaux/college', '/niveaux/lycee'].some(p => pathname.startsWith(p)) ? 'active' : ''}`}>
               <button className="nav-dropdown-btn">
-                {currentT.levels}
+                <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.levels}</span>
                 <ChevronDown size={14} style={{ marginLeft: '4px' }} />
               </button>
               <div className="nav-dropdown-menu">
                 <Link href="/niveaux/primaire" className={pathname.includes('primaire') ? 'active' : ''}>
                   <span className="nav-dropdown-icon"><Backpack size={18} /></span>
-                  {currentT.primaire}
+                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.primaire}</span>
                 </Link>
                 <Link href="/niveaux/college" className={pathname.includes('college') ? 'active' : ''}>
                   <span className="nav-dropdown-icon"><BookOpen size={18} /></span>
-                  {currentT.college}
+                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.college}</span>
                 </Link>
                 <Link href="/niveaux/lycee" className={pathname.includes('lycee') ? 'active' : ''}>
                   <span className="nav-dropdown-icon"><GraduationCap size={18} /></span>
-                  {currentT.lycee}
+                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.lycee}</span>
                 </Link>
               </div>
             </div>
-            <Link href="/about" className={pathname === '/about' ? 'active' : ''}>{currentT.about}</Link>
-            <Link href="/contact" className={pathname === '/contact' ? 'active' : ''}>{currentT.contact}</Link>
+            <Link href="/about" className={pathname === '/about' ? 'active' : ''}>
+              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.about}</span>
+            </Link>
+            <Link href="/contact" className={pathname === '/contact' ? 'active' : ''}>
+              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.contact}</span>
+            </Link>
           </nav>
 
-          <div className="header-actions">
+          <div className="header-actions" style={{ direction: 'ltr' }}>
             <button className="btn-icon proexcel-btn-home-search-btn" title="Rechercher" onClick={() => setSearchOpen(v => !v)}>
               <Search size={20} />
             </button>
@@ -264,7 +273,7 @@ export default function Header() {
         </div>
       </header>
 
-      <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`} id="mobileNav">
+      <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`} id="mobileNav" dir="ltr" style={{ direction: 'ltr' }}>
         <Link href="/" onClick={() => setMenuOpen(false)}>{currentT.home}</Link>
         <Link href="/best-offers" onClick={() => setMenuOpen(false)}>{currentT.offers}</Link>
         <div className="mobile-nav-section">{currentT.levels}</div>

@@ -575,13 +575,13 @@ export default function BestOffersClient({
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-500 hidden sm:block">Trier par :</label>
+            <div className="flex items-center gap-2 text-sm">
+              <label className="sort-label-custom font-medium hidden sm:block">Trier par :</label>
               <div className="relative">
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="appearance-none border border-gray-200 rounded-xl pl-4 pr-9 py-2.5 text-sm font-medium bg-white focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none cursor-pointer"
+                  className="appearance-none sort-select-custom rounded-xl pl-3.5 pr-9 py-2 text-sm font-semibold outline-none cursor-pointer h-[38px]"
                 >
                   <option value="default">Par défaut</option>
                   <option value="price_asc">Prix croissant</option>
@@ -589,7 +589,7 @@ export default function BestOffersClient({
                   <option value="newest">Nouveautés</option>
                   <option value="popular">Popularité</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sort-chevron-custom pointer-events-none" />
               </div>
             </div>
           </div>

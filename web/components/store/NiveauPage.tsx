@@ -120,23 +120,10 @@ function CheckRow({
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className={`flex items-center gap-3 rounded-[14px] cursor-pointer select-none transition-all duration-[180ms] ${!selected ? 'hover:bg-[#f8fafc]' : ''}`}
-      style={{
-        padding: '10px 12px',
-        marginBottom: '6px',
-        background: selected ? '#fff1f2' : undefined,
-        border: selected ? '1px solid #fecdd3' : '1px solid transparent',
-      }}
+      className={`check-row ${selected ? 'selected' : ''}`}
     >
       {/* Custom checkbox */}
-      <div
-        className="flex-shrink-0 flex items-center justify-center transition-all duration-[180ms]"
-        style={{
-          width: '20px', height: '20px', borderRadius: '6px',
-          border: selected ? '2px solid #ef233c' : '2px solid #cbd5e1',
-          background: selected ? '#ef233c' : '#ffffff',
-        }}
-      >
+      <div className="check-row-box">
         {selected && (
           <Check style={{ width: '11px', height: '11px', color: '#fff', strokeWidth: 3 }} />
         )}
@@ -194,7 +181,7 @@ function FilterPanel({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c', flexShrink: 0 }} strokeWidth={2.2} />
-          <span style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', letterSpacing: '-0.01em' }}>Filtres</span>
+          <span style={{ fontWeight: 700, fontSize: '16px', color: 'var(--text)', letterSpacing: '-0.01em' }}>Filtres</span>
           {activeFilterCount > 0 && (
             <span style={{
               background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
@@ -233,9 +220,10 @@ function FilterPanel({
           placeholder="Rechercher..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="filter-search-input"
           style={{
-            width: '100%', height: '48px', boxSizing: 'border-box',
-            paddingLeft: '44px', paddingRight: searchQuery ? '40px' : '16px',
+            paddingLeft: '44px',
+            paddingRight: searchQuery ? '40px' : '16px',
             fontSize: '14px', fontWeight: 500, color: '#1e293b',
             background: '#f8fafc', border: '1.5px solid #e5e7eb',
             borderRadius: '14px', outline: 'none',
@@ -617,13 +605,13 @@ export default function NiveauPage({
                 produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-500 hidden sm:block">Trier par :</label>
+            <div className="flex items-center gap-2 text-sm">
+              <label className="sort-label-custom font-medium hidden sm:block">Trier par :</label>
               <div className="relative">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none border border-gray-200 rounded-xl pl-4 pr-9 py-2.5 text-sm font-medium bg-white focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none cursor-pointer"
+                  className="appearance-none sort-select-custom rounded-xl pl-3.5 pr-9 py-2 text-sm font-semibold outline-none cursor-pointer h-[38px]"
                 >
                   <option value="default">Par défaut</option>
                   <option value="price_asc">Prix croissant</option>
@@ -631,7 +619,7 @@ export default function NiveauPage({
                   <option value="newest">Nouveautés</option>
                   <option value="popular">Popularité</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sort-chevron-custom pointer-events-none" />
               </div>
             </div>
           </div>

@@ -36,7 +36,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       {/* Header is fixed-position — rendered outside the flex column so it never
           participates in flow layout, not even during initial HTML parse */}
       <Header />
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: isHome ? '#030712' : undefined }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: isHome ? 'var(--home-bg, #030712)' : undefined }}>
         <div
           key={pathname}
           className={isHome ? 'store-main-home' : 'store-main-page'}

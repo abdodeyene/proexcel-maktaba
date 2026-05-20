@@ -1016,3 +1016,9 @@ body { font-family: 'Inter', sans-serif; }
   background: var(--a-primary); color: #fff; font-size: 0.55rem;
   padding: 0.1rem 0.35rem; border-radius: 4px; font-weight: 700;
 }
+
+/* Force LTR and align left for admin root */
+.admin-root {
+  direction: ltr !important;
+  text-align: left;
+}
