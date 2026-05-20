@@ -197,6 +197,21 @@ button {
   }
 }
 
+/* Desktop RTL: icons stay on the RIGHT in the same visual order as French (LTR) */
+@media (min-width: 769px) {
+  [dir="rtl"] .header-inner {
+    flex-direction: row;
+  }
+  [dir="rtl"] .header-nav-center {
+    flex-direction: row;
+  }
+  [dir="rtl"] .header-actions {
+    direction: ltr;
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
 [dir="rtl"] .slide-content {
   text-align: right;
 }
@@ -318,10 +333,13 @@ header.at-hero {
   padding-top: 0;
 }
 
-/* Force dark background fallback behind homepage hero */
-body.is-home-page,
+/* Dark fallback behind homepage hero (prevents flash on initial load in dark mode) */
+body.is-home-page {
+  background: #050505;
+}
+/* Light mode: let body use its proper light background so sections below hero are readable */
 [data-theme="light"] body.is-home-page {
-  background: #050505 !important;
+  background: var(--bg) !important;
 }
 
 /* ─── HERO IMAGE — mobile repositioning ─── */
@@ -353,6 +371,10 @@ header.at-hero .nav-dropdown-wrap.active .nav-dropdown-btn {
 /* Icon buttons — no pill backgrounds at all */
 header.at-hero .btn-icon { color: rgba(255,255,255,0.8); background: none; border: none; }
 header.at-hero .btn-icon:hover { color: #fff; background: none; }
+
+/* Hamburger / mobile-menu-btn — force white over hero image in both light and dark mode */
+header.at-hero .mobile-menu-btn { color: rgba(255,255,255,0.9); }
+header.at-hero .mobile-menu-btn:hover { color: #fff; }
 
 /* Lang button — strip border and background */
 header.at-hero .lang-btn {

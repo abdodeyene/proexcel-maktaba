@@ -21,6 +21,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <head>
+        {/* Apply saved theme + dir BEFORE first paint to prevent flash */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var _t=localStorage.getItem('proexcel_theme');if(_t)document.documentElement.setAttribute('data-theme',_t);var _l=localStorage.getItem('proexcel_lang');if(_l==='ar'){document.documentElement.setAttribute('dir','rtl');document.documentElement.setAttribute('lang','ar');}}catch(e){}` }} />
         <link rel="manifest" href="/manifest.json" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#050505" />
