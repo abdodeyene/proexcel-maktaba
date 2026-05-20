@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
         {/* Apply saved theme + dir BEFORE first paint to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: `try{var _t=localStorage.getItem('proexcel_theme');if(_t)document.documentElement.setAttribute('data-theme',_t);var _l=localStorage.getItem('proexcel_lang');if(_l==='ar'){document.documentElement.setAttribute('dir','rtl');document.documentElement.setAttribute('lang','ar');}}catch(e){}` }} />
