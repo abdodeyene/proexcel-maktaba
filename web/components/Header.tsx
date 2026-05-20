@@ -33,7 +33,7 @@ export default function Header() {
   const [isSearching, setIsSearching] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
-  const isHome = pathname === '/'
+  const isHome = pathname === '/' || (typeof window !== 'undefined' && window.location.pathname === '/')
   const { lang, setLang } = useLang()
   const langRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -153,11 +153,16 @@ export default function Header() {
   const currentT = t[lang as keyof typeof t] ?? t.fr
   const isAr = lang === 'ar'
 
+  const headerClass = [
+    isHome ? 'header-home' : '',
+    atHero ? 'at-hero' : '',
+  ].filter(Boolean).join(' ')
+
   return (
     <>
       <header
-        className={atHero ? 'at-hero' : ''}
-        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 1000, paddingTop: isHome ? 0 : 'min(env(safe-area-inset-top, 0px), 60px)' }}
+        className={headerClass}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 1000 }}
       >
         <div className="header-inner">
           {/* Mobile: cart on left */}
