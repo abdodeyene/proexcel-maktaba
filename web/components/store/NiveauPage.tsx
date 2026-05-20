@@ -454,12 +454,6 @@ export default function NiveauPage({
     emoji: '📘',
   }
 
-  // Light mode for this page
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'light')
-    return () => document.documentElement.removeAttribute('data-theme')
-  }, [])
-
   // Load products for this niveau
   useEffect(() => {
     fetch(`/api/products?niveau=${encodeURIComponent(niveau)}`)
@@ -588,10 +582,10 @@ export default function NiveauPage({
           style={{ width: '300px', position: 'sticky', top: '88px' }}
         >
           <div style={{
-            background: '#ffffff',
+            background: 'var(--card)',
             borderRadius: '24px',
             padding: '24px',
-            border: '1px solid #eef0f4',
+            border: '1px solid var(--border)',
             boxShadow: '0 18px 45px rgba(15,23,42,0.08)',
             overflow: 'hidden',
           }}>
@@ -731,13 +725,13 @@ export default function NiveauPage({
             onClick={() => setFilterOpen(false)}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 bg-white flex flex-col shadow-2xl"
-            style={{ borderRadius: '24px 24px 0 0', maxHeight: '85vh' }}
+            className="absolute bottom-0 left-0 right-0 flex flex-col shadow-2xl"
+            style={{ borderRadius: '24px 24px 0 0', maxHeight: '85vh', background: 'var(--card)' }}
           >
             {/* Mobile drawer header */}
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '20px 20px 16px', borderBottom: '1px solid #f1f5f9', flexShrink: 0,
+              padding: '20px 20px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c' }} strokeWidth={2.2} />
