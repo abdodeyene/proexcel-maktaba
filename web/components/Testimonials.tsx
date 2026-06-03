@@ -141,26 +141,36 @@ export default function Testimonials() {
           {allItems.map((item, index) => (
             <div
               key={index}
-              className="flex-shrink-0 w-[300px] sm:w-[360px] bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl rounded-3xl p-6 flex flex-col gap-4"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+              className="flex-shrink-0 w-[270px] sm:w-[310px] bg-white rounded-2xl p-5 flex flex-col gap-3 transition-all duration-300 cursor-default"
+              style={{ boxShadow: '0 2px 14px rgba(0,0,0,0.10)', border: '1.5px solid #f0f0f0' }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.boxShadow = '0 8px 28px rgba(0,0,0,0.14), inset 3px 0 0 #E8352A'
+                el.style.borderColor = '#fecaca'
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.boxShadow = '0 2px 14px rgba(0,0,0,0.10)'
+                el.style.borderColor = '#f0f0f0'
+              }}
             >
               {/* Rating stars */}
-              <div className="flex gap-1" dir="ltr">
+              <div className="flex gap-0.5" dir="ltr">
                 {[...Array(item.rating)].map((_, i) => <StarIcon key={i} />)}
               </div>
 
               {/* Review Text */}
-              <p className="text-sm sm:text-base leading-relaxed text-gray-200 italic flex-1" dir={isAr ? 'rtl' : 'ltr'}>
+              <p className="text-sm leading-relaxed text-gray-600 italic flex-1" dir={isAr ? 'rtl' : 'ltr'}>
                 &ldquo;{isAr ? item.textAr : item.textFr}&rdquo;
               </p>
 
               {/* User Row */}
-              <div className="flex items-center gap-3 border-t border-white/10 pt-4" dir={isAr ? 'rtl' : 'ltr'}>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#e8352a] to-[#a81c13] text-white font-black text-sm flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="flex items-center gap-3 border-t border-gray-100 pt-3" dir={isAr ? 'rtl' : 'ltr'}>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#e8352a] to-[#a81c13] text-white font-black text-sm flex items-center justify-center flex-shrink-0">
                   {item.name.charAt(0)}
                 </div>
-                <div className="flex flex-col text-left">
-                  <h4 className="text-sm font-bold text-white leading-tight">{item.name}</h4>
+                <div className="flex flex-col">
+                  <h4 className="text-sm font-bold text-gray-900 leading-tight">{item.name}</h4>
                   <span className="text-xs text-gray-400 mt-0.5">{isAr ? item.roleAr : item.roleFr}</span>
                 </div>
               </div>

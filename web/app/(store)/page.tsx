@@ -228,54 +228,53 @@ export default function HomePage() {
       <InfoStrip lang={lang} />
 
       <style>{`
-        .hp-section { width: 100%; padding: 5rem 0; }
-        @media (min-width: 768px) { .hp-section { padding: 7rem 0; } }
-        .hp-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
-        @media (min-width: 640px) { .hp-inner { padding: 0 1.75rem; } }
-        .hp-bg-a { background: var(--bg); }
-        .hp-bg-b { background: var(--bg2); }
-        .hp-header { text-align: center; margin-bottom: 3.5rem; }
+        .hp-section { width: 100%; padding: 4.5rem 0; }
+        @media (min-width: 768px) { .hp-section { padding: 5.5rem 0; } }
+        .hp-inner { max-width: 1100px; margin: 0 auto; padding: 0 1.25rem; }
+        @media (min-width: 640px) { .hp-inner { padding: 0 2rem; } }
+        .hp-bg-a { background: #ffffff; }
+        .hp-bg-b { background: #f8fafc; }
+        .hp-header { text-align: center; margin-bottom: 2.75rem; }
         .hp-label {
-          display: inline-block; font-size: 0.68rem; font-weight: 700;
+          display: inline-block; font-size: 0.67rem; font-weight: 700;
           letter-spacing: 0.22em; text-transform: uppercase;
-          color: #E8352A; margin-bottom: 0.85rem;
+          color: #E8352A; margin-bottom: 0.65rem;
         }
         .hp-h2 {
-          font-size: clamp(1.8rem, 4vw, 2.75rem); font-weight: 900;
-          letter-spacing: -0.03em; line-height: 1.12; color: var(--text);
+          font-size: clamp(1.65rem, 3.5vw, 2.4rem); font-weight: 900;
+          letter-spacing: -0.03em; line-height: 1.12; color: #111827;
         }
         .hp-divider {
-          width: 44px; height: 3px; background: #E8352A;
-          border-radius: 9999px; margin: 1rem auto 0;
+          width: 38px; height: 3px; background: #E8352A;
+          border-radius: 9999px; margin: 0.75rem auto 0;
         }
         .hp-sub {
-          color: var(--text2); font-size: 0.975rem; line-height: 1.65;
-          max-width: 500px; margin: 0.85rem auto 0;
+          color: #6b7280; font-size: 0.92rem; line-height: 1.65;
+          max-width: 460px; margin: 0.65rem auto 0;
         }
         .hp-card {
-          background: var(--card);
-          border: 1.5px solid var(--border);
-          border-radius: 1.25rem;
+          background: #ffffff;
+          border: 1.5px solid #e8ecf0;
+          border-radius: 1rem;
           transition: box-shadow 0.22s ease, border-color 0.22s ease;
         }
-        .hp-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.11); }
-        [data-theme="dark"] .hp-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
-        .hp-card-title { font-weight: 900; color: var(--text); }
-        .hp-card-desc  { color: var(--text2); font-size: 0.875rem; line-height: 1.65; }
+        .hp-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.09); }
+        .hp-card-title { font-weight: 900; color: #111827; }
+        .hp-card-desc  { color: #6b7280; font-size: 0.85rem; line-height: 1.65; }
         .hp-btn-red {
-          display: inline-flex; align-items: center; gap: 0.6rem;
-          padding: 0.875rem 2rem; border-radius: 9999px; background: #E8352A;
-          color: #fff; font-weight: 700; font-size: 0.875rem;
+          display: inline-flex; align-items: center; gap: 0.55rem;
+          padding: 0.75rem 1.75rem; border-radius: 9999px; background: #E8352A;
+          color: #fff; font-weight: 700; font-size: 0.85rem;
           transition: background 0.2s, transform 0.18s;
-          box-shadow: 0 6px 20px rgba(232,53,42,0.25);
+          box-shadow: 0 5px 18px rgba(232,53,42,0.28);
         }
         .hp-btn-red:hover { background: #c9281f; transform: translateY(-1px); }
         .hp-btn-indigo {
-          display: inline-flex; align-items: center; gap: 0.6rem;
-          padding: 0.875rem 2rem; border-radius: 9999px; background: #4F46E5;
-          color: #fff; font-weight: 700; font-size: 0.875rem;
+          display: inline-flex; align-items: center; gap: 0.55rem;
+          padding: 0.75rem 1.75rem; border-radius: 9999px; background: #4F46E5;
+          color: #fff; font-weight: 700; font-size: 0.85rem;
           transition: background 0.2s, transform 0.18s;
-          box-shadow: 0 6px 20px rgba(79,70,229,0.25);
+          box-shadow: 0 5px 18px rgba(79,70,229,0.28);
         }
         .hp-btn-indigo:hover { background: #4338CA; transform: translateY(-1px); }
       `}</style>
@@ -297,7 +296,7 @@ export default function HomePage() {
                 <ScrollReveal key={lvl.key} delay={i * 0.1}>
                   <Link
                     href={lvl.href}
-                    className="hp-card group flex flex-col p-7 md:p-8 h-full"
+                    className="hp-card group flex flex-col p-5 md:p-6 h-full"
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = c.accent }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '' }}
                   >
@@ -334,9 +333,9 @@ export default function HomePage() {
             <p className="hp-sub">{T.catSub}</p>
           </ScrollReveal>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {categories.map((cat, idx) => (
-              <ScrollReveal key={cat.id} delay={(idx % 4) * 0.07}>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {categories.slice(0, 9).map((cat, idx) => (
+              <ScrollReveal key={cat.id} delay={(idx % 3) * 0.07}>
                 <Link
                   href={`/best-offers?cat=${encodeURIComponent(cat.name)}`}
                   className="group relative flex flex-col justify-end rounded-2xl overflow-hidden"
@@ -382,9 +381,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
               {featured.map(p => (
-                <ScrollReveal key={p.id}>
-                  <ProductCard {...p} />
-                </ScrollReveal>
+                <ProductCard key={p.id} {...p} />
               ))}
             </div>
 
@@ -414,9 +411,7 @@ export default function HomePage() {
 
             <div className={`grid grid-cols-2 ${promos.length <= 2 ? 'md:grid-cols-2 max-w-[640px] mx-auto' : 'md:grid-cols-3 lg:grid-cols-4'} gap-4 md:gap-5`}>
               {promos.map(p => (
-                <ScrollReveal key={p.id}>
-                  <ProductCard {...p} />
-                </ScrollReveal>
+                <ProductCard key={p.id} {...p} />
               ))}
             </div>
 
@@ -473,7 +468,7 @@ export default function HomePage() {
           <ScrollReveal delay={0.1}>
             <div className="hp-card flex flex-col lg:flex-row overflow-hidden" style={{ minHeight: '420px' }}>
               {/* Map */}
-              <div className="w-full lg:w-[55%] h-[260px] md:h-[300px] lg:h-auto relative" style={{ background: 'var(--bg2)' }}>
+              <div className="w-full lg:w-[55%] h-[260px] md:h-[300px] lg:h-auto relative" style={{ background: '#f1f5f9' }}>
                 {settings?.store_map_iframe ? (
                   <div
                     className="w-full h-full [&>iframe]:w-full [&>iframe]:h-full"
@@ -516,46 +511,46 @@ export default function HomePage() {
                     </span>
                   ) : null}
                 >
-                  <div className="flex flex-col gap-1.5 text-sm" style={{ color: 'var(--text2)' }}>
+                  <div className="flex flex-col gap-1.5 text-sm" style={{ color: '#6b7280' }}>
                     {settings ? (
                       <>
-                        <div className="flex justify-between gap-4"><span>{T.monFri}</span><span className="font-semibold" style={{ color: 'var(--text)' }}>{settings.hours_mon}</span></div>
-                        <div className="flex justify-between gap-4"><span>{T.sat}</span><span className="font-semibold" style={{ color: 'var(--text)' }}>{settings.hours_sat}</span></div>
+                        <div className="flex justify-between gap-4"><span>{T.monFri}</span><span className="font-semibold" style={{ color: '#374151' }}>{settings.hours_mon}</span></div>
+                        <div className="flex justify-between gap-4"><span>{T.sat}</span><span className="font-semibold" style={{ color: '#374151' }}>{settings.hours_sat}</span></div>
                         <div className="flex justify-between gap-4"><span>{T.sun}</span><span className="font-semibold text-red-500">{settings.hours_sun}</span></div>
                       </>
                     ) : (
                       [[T.monFri, '08:30 – 19:00'], [T.sat, '09:00 – 18:00'], [T.sun, T.closed]].map(([day, time]) => (
                         <div key={day} className="flex justify-between gap-4">
                           <span>{day}</span>
-                          <span className={`font-semibold ${time === T.closed ? 'text-red-500' : ''}`} style={time !== T.closed ? { color: 'var(--text)' } : undefined}>{time}</span>
+                          <span className={`font-semibold ${time === T.closed ? 'text-red-500' : ''}`} style={time !== T.closed ? { color: '#374151' } : undefined}>{time}</span>
                         </div>
                       ))
                     )}
                   </div>
                 </InfoRow>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2.5">
                   <a
                     href={`https://maps.google.com/?q=${encodeURIComponent(settings?.store_address || T.realAddr)}`}
                     target="_blank" rel="noopener noreferrer"
-                    className="flex-1 flex justify-center items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-colors"
-                    style={{ background: 'var(--bg2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#E8352A' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '' }}
+                    className="flex-1 flex justify-center items-center gap-1.5 px-4 py-2.5 rounded-lg font-semibold text-[0.8rem] transition-colors"
+                    style={{ background: '#f1f5f9', color: '#374151', border: '1.5px solid #e2e8f0' }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#e2e8f0'; el.style.borderColor = '#E8352A'; el.style.color = '#E8352A'; }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#f1f5f9'; el.style.borderColor = '#e2e8f0'; el.style.color = '#374151'; }}
                   >
-                    <Navigation size={16} />
+                    <Navigation size={14} />
                     {T.openMap}
                   </a>
                   {settings?.store_whatsapp && (
                     <a
                       href={`https://wa.me/${settings.store_whatsapp.replace(/\+/g, '').replace(/\s+/g, '')}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="flex-1 flex justify-center items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all"
-                      style={{ background: 'rgba(37,211,102,0.08)', color: '#15803d', border: '1.5px solid rgba(37,211,102,0.2)' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(37,211,102,0.15)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(37,211,102,0.08)' }}
+                      className="flex-1 flex justify-center items-center gap-1.5 px-4 py-2.5 rounded-lg font-semibold text-[0.8rem] transition-all"
+                      style={{ background: '#f0fdf4', color: '#15803d', border: '1.5px solid #bbf7d0' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#dcfce7'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f0fdf4'; }}
                     >
-                      <MessageCircle size={16} />
+                      <MessageCircle size={14} />
                       {T.chatWhatsapp}
                     </a>
                   )}
@@ -586,7 +581,7 @@ function InfoRow({ icon, color, title, children, extra }: {
       </div>
       <div className="flex-1 flex flex-col gap-1.5">
         <div className="flex items-center gap-2 flex-wrap">
-          <h4 className="font-bold text-sm" style={{ color: 'var(--text)' }}>{title}</h4>
+          <h4 className="font-bold text-sm" style={{ color: '#111827' }}>{title}</h4>
           {extra}
         </div>
         {children}
