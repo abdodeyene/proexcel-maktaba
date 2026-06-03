@@ -116,7 +116,7 @@ export default function AdminSettings() {
   const [activeBtnPage, setActiveBtnPage] = useState('home')
   const [slides, setSlides] = useState<Slide[]>([
     { tag: 'Rentrée Scolaire 2026', title: 'Tous vos manuels', span: 'en un seul endroit', sub: 'Découvrez notre sélection complète de livres scolaires.', btn1: 'Explorer le catalogue ›', btn1Link: '/best-offers', btn2: 'En savoir plus', btn2Link: '/#about', image: '', bgColor1: '#0e1e3a', bgColor2: '#070B14' },
-    { tag: 'Offres Spéciales', title: 'Économisez jusqu\'à', span: '30% sur les packs', sub: 'Livraison gratuite pour les commandes supérieures à 499 DH.', btn1: 'Voir les offres ›', btn1Link: '/best-offers', btn2: '', btn2Link: '', image: '', bgColor1: '#1a0a10', bgColor2: '#070B14' },
+    { tag: 'Offres Spéciales', title: 'Économisez jusqu\'à', span: '30% sur les packs', sub: 'Livraison Gratuite dès 499 DH d\'achat.', btn1: 'Voir les offres ›', btn1Link: '/best-offers', btn2: '', btn2Link: '', image: '', bgColor1: '#1a0a10', bgColor2: '#070B14' },
   ])
   const [slideUploading, setSlideUploading] = useState<number | null>(null)
   const [uploadError, setUploadError] = useState('')
@@ -175,7 +175,7 @@ export default function AdminSettings() {
     delivery_delay: '48h – 72h',
 
     home_feat_tag: 'Tendances',
-    home_feat_title: 'Livres en Vedette',
+    home_feat_title: 'Fournitures en Vedette',
     home_feat_sub: 'Les manuels les plus demandés cette saison',
     home_cat_tag: 'Catégories',
     home_cat_title: 'Parcourez nos rayons',
@@ -1335,7 +1335,7 @@ export default function AdminSettings() {
               <div className="settings-panel active">
                 <div className="sp-section-title">Sections de la page d'accueil</div>
                 {[
-                  { id: 'feat', label: 'Section Tendances / Livres en Vedette', prefix: 'home_feat' },
+                  { id: 'feat', label: 'Section Tendances / Fournitures en Vedette', prefix: 'home_feat' },
                   { id: 'cat', label: 'Section Rayons / Catégories', prefix: 'home_cat' }
                 ].map(sec => (
                   <div key={sec.id} className="settings-card" style={{ marginBottom: '1.25rem' }}>

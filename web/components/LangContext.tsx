@@ -19,15 +19,14 @@ const LangContext = createContext<LangContextType>({
 })
 
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>('fr')
+  const [lang, setLangState] = useState<Lang>('ar')
 
   useEffect(() => {
     const saved = localStorage.getItem('proexcel_lang') as Lang | null
-    if (saved === 'ar' || saved === 'fr' || saved === 'en') {
-      setLangState(saved)
-      document.documentElement.setAttribute('dir', saved === 'ar' ? 'rtl' : 'ltr')
-      document.documentElement.setAttribute('lang', saved)
-    }
+    const defaultLang = (saved === 'ar' || saved === 'fr' || saved === 'en') ? saved : 'ar'
+    setLangState(defaultLang)
+    document.documentElement.setAttribute('dir', defaultLang === 'ar' ? 'rtl' : 'ltr')
+    document.documentElement.setAttribute('lang', defaultLang)
     // Listen for language change events from Header
     const handler = (e: Event) => {
       const newLang = (e as CustomEvent).detail as Lang

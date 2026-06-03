@@ -92,7 +92,27 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
-    return NextResponse.json({ products, total, page, totalPages: Math.ceil(total / limit) })
+    const mappedProducts = products.map((p) => {
+      let resolvedImages: any[] = []
+      const media = p.media
+      if (Array.isArray(media)) {
+        resolvedImages = media
+      } else if (typeof media === 'string') {
+        try {
+          resolvedImages = JSON.parse(media)
+        } catch {
+          resolvedImages = [media]
+        }
+      } else if (media) {
+        resolvedImages = [media]
+      }
+      return {
+        ...p,
+        images: resolvedImages,
+      }
+    })
+
+    return NextResponse.json({ products: mappedProducts, total, page, totalPages: Math.ceil(total / limit) })
 
   } catch (error) {
     console.error('[/api/products] FULL ERROR:', error)

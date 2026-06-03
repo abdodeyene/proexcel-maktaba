@@ -30,6 +30,7 @@ type Product = {
   isNew?: boolean | null
   isBestOffer?: boolean | null
   variants?: unknown
+  niveau?: string | null
 }
 
 type Category = {
@@ -57,26 +58,18 @@ function CheckRow({
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className={`flex items-center gap-3 rounded-[14px] cursor-pointer select-none transition-all duration-[180ms] ${!selected ? 'hover:bg-[#f8fafc]' : ''}`}
-      style={{
-        padding: '10px 12px',
-        marginBottom: '6px',
-        background: selected ? '#fff1f2' : undefined,
-        border: selected ? '1px solid #fecdd3' : '1px solid transparent',
-      }}
+      className={`flex items-center gap-3 rounded-[16px] px-3 py-2.5 mb-1.5 cursor-pointer select-none transition-all duration-[200ms] border ${
+        selected
+          ? 'bg-red-50/60 border-red-200 dark:bg-red-900/20 dark:border-red-800/50 shadow-sm'
+          : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/60'
+      }`}
     >
-      {/* Custom checkbox */}
       <div
-        className="flex-shrink-0 flex items-center justify-center transition-all duration-[180ms]"
-        style={{
-          width: '20px', height: '20px', borderRadius: '6px',
-          border: selected ? '2px solid #ef233c' : '2px solid #cbd5e1',
-          background: selected ? '#ef233c' : '#ffffff',
-        }}
+        className={`flex-shrink-0 flex items-center justify-center w-[22px] h-[22px] rounded-[8px] transition-all duration-[200ms] ${
+          selected ? 'bg-red-600 border-none shadow-[0_2px_8px_rgba(220,38,38,0.3)]' : 'bg-white dark:bg-zinc-900 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-red-400'
+        }`}
       >
-        {selected && (
-          <Check style={{ width: '11px', height: '11px', color: '#fff', strokeWidth: 3 }} />
-        )}
+        {selected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
       </div>
       {children}
     </div>
@@ -87,10 +80,7 @@ function CheckRow({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{
-      fontSize: '12px', fontWeight: 800, textTransform: 'uppercase',
-      letterSpacing: '0.12em', color: '#ef233c', marginBottom: '12px',
-    }}>
+    <p className="text-[12px] font-extrabold uppercase tracking-[0.12em] text-red-600 dark:text-red-500 mb-3">
       {children}
     </p>
   )
@@ -112,6 +102,9 @@ function FilterPanel({
   hasActiveFilters,
   activeFilterCount,
   onApply,
+  niveauFilter, setNiveauFilter,
+  categoryFilter, setCategoryFilter,
+  brandFilter, setBrandFilter,
 }: {
   categories: Category[]
   selectedCats: string[]
@@ -126,6 +119,9 @@ function FilterPanel({
   hasActiveFilters: boolean
   activeFilterCount: number
   onApply?: () => void
+  niveauFilter: string; setNiveauFilter: (v: string) => void
+  categoryFilter: string; setCategoryFilter: (v: string) => void
+  brandFilter: string; setBrandFilter: (v: string) => void
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -134,7 +130,7 @@ function FilterPanel({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c', flexShrink: 0 }} strokeWidth={2.2} />
-          <span style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', letterSpacing: '-0.01em' }}>Filtres</span>
+          <span className="font-bold text-[16px] text-slate-900 dark:text-white tracking-[-0.01em]">Filtres</span>
           {activeFilterCount > 0 && (
             <span style={{
               background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
@@ -173,24 +169,7 @@ function FilterPanel({
           placeholder="Rechercher..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: '100%', height: '48px', boxSizing: 'border-box',
-            paddingLeft: '44px', paddingRight: searchQuery ? '40px' : '16px',
-            fontSize: '14px', fontWeight: 500, color: '#1e293b',
-            background: '#f8fafc', border: '1.5px solid #e5e7eb',
-            borderRadius: '14px', outline: 'none',
-            transition: 'border-color 150ms, box-shadow 150ms',
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = '#ef233c'
-            e.target.style.boxShadow = '0 0 0 3px rgba(239,35,60,0.1)'
-            e.target.style.background = '#fff'
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = '#e5e7eb'
-            e.target.style.boxShadow = 'none'
-            e.target.style.background = '#f8fafc'
-          }}
+          className="w-full h-[46px] pl-[42px] pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 shadow-inner"
         />
         {searchQuery && (
           <button
@@ -200,6 +179,70 @@ function FilterPanel({
             <X style={{ width: '14px', height: '14px' }} />
           </button>
         )}
+      </div>
+      
+      {/* ── Dropdowns ─────────────────────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '26px' }}>
+        {/* Niveau Scolaire */}
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 ml-1">Niveau Scolaire</label>
+          <div className="relative">
+            <select
+              value={niveauFilter}
+              onChange={(e) => setNiveauFilter(e.target.value)}
+              className="w-full h-[46px] pl-4 pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer"
+            >
+              <option value="all">Tous les niveaux</option>
+              <option value="primaire">Primaire</option>
+              <option value="college">Collège</option>
+              <option value="lycee">Lycée</option>
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Catégorie */}
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 ml-1">Type Catégorie</label>
+          <div className="relative">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full h-[46px] pl-4 pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer"
+            >
+              <option value="all">Toutes les catégories</option>
+              <option value="manuels">Manuels / Livres</option>
+              <option value="outils scolaires">Outils Scolaires</option>
+              <option value="accessoires">Accessoires</option>
+              <option value="cahiers">Cahiers</option>
+              <option value="cartables">Cartables</option>
+              <option value="trousses">Trousses</option>
+              <option value="romans">Romans</option>
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Marque */}
+        <div>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 ml-1">Marque</label>
+          <div className="relative">
+            <select
+              value={brandFilter}
+              onChange={(e) => setBrandFilter(e.target.value)}
+              className="w-full h-[46px] pl-4 pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer"
+            >
+              <option value="all">Toutes les marques</option>
+              <option value="deli">Deli</option>
+              <option value="maped">Maped</option>
+              <option value="faber-castell">Faber-Castell</option>
+              <option value="uhu">UHU</option>
+              <option value="navigator">Navigator</option>
+              <option value="other">Autre / Sans marque</option>
+            </select>
+            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+          </div>
+        </div>
       </div>
 
       {/* ── Categories ──────────────────────────────────────────────────── */}
@@ -214,24 +257,21 @@ function FilterPanel({
                 <CheckRow key={cat.id} selected={selected} onClick={() => toggleCategory(cat.name)}>
                   {/* Thumbnail */}
                   <div style={{
-                    width: '34px', height: '34px', borderRadius: '10px', flexShrink: 0,
-                    overflow: 'hidden', background: '#f1f5f9', border: '1px solid #e5e7eb',
+                    width: '36px', height: '36px', borderRadius: '12px', flexShrink: 0,
+                    overflow: 'hidden', background: '#f8fafc', border: '1px solid #f1f5f9',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
                   }}>
                     {cat.image ? (
-                      <Image src={cat.image} alt={cat.name} width={34} height={34} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                      <Image src={cat.image} alt={cat.name} width={36} height={36} style={{ objectFit: 'contain', width: '100%', height: '100%', padding: '4px' }} />
                     ) : cat.emoji ? (
-                      <span style={{ fontSize: '16px', lineHeight: 1 }}>{cat.emoji}</span>
+                      <span style={{ fontSize: '18px', lineHeight: 1 }}>{cat.emoji}</span>
                     ) : (
-                      <span style={{ fontSize: '14px', color: '#94a3b8' }}>📁</span>
+                      <span style={{ fontSize: '15px', color: '#94a3b8' }}>📁</span>
                     )}
                   </div>
                   {/* Name */}
-                  <span style={{
-                    fontSize: '15px', fontWeight: 700, flex: 1,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    color: selected ? '#dc2626' : '#1e293b', transition: 'color 150ms',
-                  }}>
+                  <span className={`text-[15px] font-bold flex-1 overflow-hidden text-ellipsis whitespace-nowrap transition-colors ${selected ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'}`}>
                     {titleCase(cat.name)}
                   </span>
                   {/* Count */}
@@ -258,14 +298,7 @@ function FilterPanel({
             max={9999}
             placeholder="0"
             onChange={(e) => setPriceMin(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
-            style={{
-              flex: 1, height: '44px', borderRadius: '12px', boxSizing: 'border-box',
-              border: '1.5px solid #e5e7eb', background: '#f8fafc',
-              textAlign: 'center', fontWeight: 700, fontSize: '14px', color: '#1e293b',
-              outline: 'none', padding: '0 8px',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = '#ef233c'; e.target.style.background = '#fff' }}
-            onBlur={(e) => { e.target.style.borderColor = '#e5e7eb'; e.target.style.background = '#f8fafc' }}
+            className="flex-1 h-11 rounded-xl border-[1.5px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center font-bold text-sm text-slate-900 dark:text-white outline-none focus:border-red-500 focus:bg-white dark:focus:bg-slate-800 transition-colors"
           />
           <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '18px', flexShrink: 0, lineHeight: 1 }}>—</span>
           <input
@@ -275,14 +308,7 @@ function FilterPanel({
             max={9999}
             placeholder="9 999"
             onChange={(e) => setPriceMax(e.target.value === '' ? 9999 : Math.max(0, Number(e.target.value)))}
-            style={{
-              flex: 1, height: '44px', borderRadius: '12px', boxSizing: 'border-box',
-              border: '1.5px solid #e5e7eb', background: '#f8fafc',
-              textAlign: 'center', fontWeight: 700, fontSize: '14px', color: '#1e293b',
-              outline: 'none', padding: '0 8px',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = '#ef233c'; e.target.style.background = '#fff' }}
-            onBlur={(e) => { e.target.style.borderColor = '#e5e7eb'; e.target.style.background = '#f8fafc' }}
+            className="flex-1 h-11 rounded-xl border-[1.5px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center font-bold text-sm text-slate-900 dark:text-white outline-none focus:border-red-500 focus:bg-white dark:focus:bg-slate-800 transition-colors"
           />
         </div>
         <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', margin: 0 }}>
@@ -298,10 +324,7 @@ function FilterPanel({
           { id: 'onSale',  label: 'En promotion',        value: promoOnly,   set: setPromoOnly  },
         ].map((opt) => (
           <CheckRow key={opt.id} selected={opt.value} onClick={() => opt.set(!opt.value)}>
-            <span style={{
-              fontSize: '15px', fontWeight: 700,
-              color: opt.value ? '#dc2626' : '#1e293b', transition: 'color 150ms',
-            }}>
+            <span className={`text-[15px] font-bold transition-colors ${opt.value ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'}`}>
               {opt.label}
             </span>
           </CheckRow>
@@ -353,6 +376,30 @@ function FilterPanel({
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
                 En promo
                 <button onClick={() => setPromoOnly(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
+                </button>
+              </span>
+            )}
+            {niveauFilter !== 'all' && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+                Niveau: {titleCase(niveauFilter)}
+                <button onClick={() => setNiveauFilter('all')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
+                </button>
+              </span>
+            )}
+            {categoryFilter !== 'all' && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+                Cat: {titleCase(categoryFilter)}
+                <button onClick={() => setCategoryFilter('all')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
+                </button>
+              </span>
+            )}
+            {brandFilter !== 'all' && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+                Marque: {titleCase(brandFilter)}
+                <button onClick={() => setBrandFilter('all')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
@@ -412,6 +459,10 @@ export default function BestOffersClient({
   const [priceMax,     setPriceMax]     = useState(9999)
   const [sort,         setSort]         = useState('default')
   const [filterOpen,   setFilterOpen]   = useState(false)
+  
+  const [niveauFilter,   setNiveauFilter]   = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [brandFilter,    setBrandFilter]    = useState('all')
 
   // Read URL params on mount
   useEffect(() => {
@@ -478,12 +529,16 @@ export default function BestOffersClient({
     setPriceMin(0)
     setPriceMax(9999)
     setSort('default')
+    setNiveauFilter('all')
+    setCategoryFilter('all')
+    setBrandFilter('all')
     router.push(pageTitle ? window.location.pathname : '/best-offers')
   }
 
   const hasActiveFilters =
     selectedCats.length > 0 || inStockOnly || promoOnly ||
-    searchQuery.length > 0  || priceMin > 0 || priceMax < 9999
+    searchQuery.length > 0  || priceMin > 0 || priceMax < 9999 ||
+    niveauFilter !== 'all' || categoryFilter !== 'all' || brandFilter !== 'all'
 
   const activeFilterCount =
     selectedCats.length +
@@ -491,97 +546,154 @@ export default function BestOffersClient({
     (promoOnly ? 1 : 0) +
     (searchQuery ? 1 : 0) +
     (priceMin > 0 ? 1 : 0) +
-    (priceMax < 9999 ? 1 : 0)
+    (priceMax < 9999 ? 1 : 0) +
+    (niveauFilter !== 'all' ? 1 : 0) +
+    (categoryFilter !== 'all' ? 1 : 0) +
+    (brandFilter !== 'all' ? 1 : 0)
 
   // Local sort + priceMin filter (API handles the rest)
   const filtered = useMemo(() => {
     let list = [...products]
     if (priceMin > 0) list = list.filter((p) => p.price >= priceMin)
+
+    // Niveau filter client-side
+    if (niveauFilter !== 'all') {
+      list = list.filter((p) => {
+        if (p.niveau) {
+          return p.niveau.toLowerCase() === niveauFilter.toLowerCase()
+        }
+        const cat = (p.category || '').toLowerCase()
+        if (cat.includes('manuel') || cat.includes('livre') || cat.includes('roman')) {
+          const titleLower = p.title.toLowerCase()
+          if (niveauFilter === 'primaire') {
+            return titleLower.includes('primaire') || titleLower.includes('aep') || /([1-6])(er|ère|ème)?\s*année/.test(titleLower)
+          }
+          if (niveauFilter === 'college') {
+            return titleLower.includes('collège') || titleLower.includes('college') || titleLower.includes('ac') || /([1-3])(er|ère|ème)?\s*année\s*collège/.test(titleLower)
+          }
+          if (niveauFilter === 'lycee') {
+            return titleLower.includes('lycée') || titleLower.includes('lycee') || titleLower.includes('bac') || titleLower.includes('tronc commun')
+          }
+          return false
+        }
+        return true
+      })
+    }
+
+    // Category filter dropdown client-side
+    if (categoryFilter !== 'all') {
+      list = list.filter((p) => {
+        const cat = (p.category || '').toLowerCase()
+        if (categoryFilter === 'manuels') {
+          return cat.includes('manuel') || cat.includes('livre') || cat.includes('scolaire')
+        }
+        if (categoryFilter === 'outils scolaires') {
+          return cat.includes('outil') || cat.includes('scolaire') || cat.includes('fourniture')
+        }
+        return cat === categoryFilter.toLowerCase()
+      })
+    }
+
+    // Brand filter client-side
+    if (brandFilter !== 'all') {
+      list = list.filter((p) => {
+        const titleLower = p.title.toLowerCase()
+        if (brandFilter === 'other') {
+          const knownBrands = ['deli', 'maped', 'faber-castell', 'uhu', 'navigator', 'faber castell']
+          return !knownBrands.some(brand => titleLower.includes(brand))
+        }
+        if (brandFilter === 'faber-castell') {
+          return titleLower.includes('faber-castell') || titleLower.includes('faber castell')
+        }
+        return titleLower.includes(brandFilter.toLowerCase())
+      })
+    }
+
     if (sort === 'price_asc' || sort === 'price-asc')     list.sort((a, b) => a.price - b.price)
     else if (sort === 'price_desc' || sort === 'price-desc') list.sort((a, b) => b.price - a.price)
     else if (sort === 'newest' || sort === 'new')  list.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
     else if (sort === 'popular' || sort === 'rating') list.sort((a, b) => (b.rating || 0) - (a.rating || 0))
     return list
-  }, [products, priceMin, sort])
+  }, [products, priceMin, sort, niveauFilter, categoryFilter, brandFilter])
 
   const filterProps = {
     categories, selectedCats, toggleCategory, isCatSelected,
     inStockOnly, setInStockOnly, promoOnly, setPromoOnly,
     priceMin, setPriceMin, priceMax, setPriceMax,
     searchQuery, setSearchQuery, clearFilters, hasActiveFilters, activeFilterCount,
+    niveauFilter, setNiveauFilter,
+    categoryFilter, setCategoryFilter,
+    brandFilter, setBrandFilter,
   }
 
   return (
-    <>
-      {/* ── PAGE HERO ──────────────────────────────────────────────────── */}
-      <div className="page-hero">
-        <div className="page-hero-inner">
-          <div className="breadcrumb-nav">
-            <Link href="/">Accueil</Link>
+    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0f0f11]">
+      
+      {/* ── HERO SECTION (WHITE) ────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-[#18181b] border-b border-gray-100 dark:border-white/5 pt-8 pb-10 mb-8">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 flex flex-col items-center text-center">
+          <nav className="flex items-center gap-2 text-[13px] font-medium text-gray-400 dark:text-gray-500 mb-6">
+            <Link href="/" className="hover:text-gray-900 dark:hover:text-gray-200 transition-colors">Accueil</Link>
             <span>›</span>
-            <span>{pageTitle || 'Meilleures Offres'}</span>
-          </div>
-          <h1>{pageTitle || 'Meilleures Offres'}</h1>
-          <p>
-            {pageSubtitle ||
-              'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}
+            <span className="text-gray-900 dark:text-white">{pageTitle || 'Meilleures Offres'}</span>
+          </nav>
+          
+          <h1 className="text-[32px] md:text-[42px] font-bold text-gray-900 dark:text-white tracking-tight mb-3">
+            {pageTitle || 'Meilleures Offres'}
+          </h1>
+          
+          <p className="text-[15px] text-gray-500 dark:text-gray-400 max-w-2xl">
+            {pageSubtitle || 'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}
           </p>
         </div>
       </div>
 
-      {/* ── LAYOUT ────────────────────────────────────────────────────── */}
-      <div className="offers-layout">
+      {/* ── LAYOUT ──────────────────────────────────────────────────────── */}
+      <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 w-full max-w-[1400px] mx-auto pb-24 px-4 lg:px-6">
 
-        {/* ── DESKTOP SIDEBAR ───────────────────────────────────────── */}
+        {/* ── DESKTOP SIDEBAR ─────────────────────────────────────────── */}
         <aside
-          className="hidden md:block sticky self-start flex-shrink-0"
-          style={{ top: '88px', width: '300px' }}
+          className="hidden lg:block sticky self-start flex-shrink-0 w-[280px]"
+          style={{ top: '96px' }}
         >
-          <div style={{
-            background: 'var(--card)',
-            borderRadius: '24px',
-            padding: '24px',
-            border: '1px solid var(--border)',
-            boxShadow: '0 18px 45px rgba(15,23,42,0.08)',
-            overflow: 'hidden',
-          }}>
+          <div className="bg-white dark:bg-[#18181b] rounded-[20px] p-6 shadow-sm border border-gray-100 dark:border-white/5">
             <FilterPanel {...filterProps} />
           </div>
         </aside>
 
-        {/* ── RESULTS ───────────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
+        {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
+        <div className="flex-1 min-w-0 w-full">
 
           {/* Sort bar */}
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 bg-white dark:bg-[#18181b] p-4 lg:px-6 lg:py-4 rounded-[20px] shadow-sm border border-gray-100 dark:border-white/5">
+            <div className="flex items-center gap-4">
               {/* Mobile filter button */}
               <button
                 onClick={() => setFilterOpen(true)}
-                className="md:hidden flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white shadow-sm hover:border-red-300 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-white/5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors lg:hidden"
               >
                 <SlidersHorizontal className="w-4 h-4 text-red-600" />
                 Filtres
                 {activeFilterCount > 0 && (
-                  <span className="bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center ml-1">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
 
-              <p className="text-sm text-gray-500">
-                <span className="font-bold text-gray-900">{filtered.length}</span>{' '}
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <span className="font-bold text-gray-900 dark:text-white mr-1">{filtered.length}</span>
                 produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <label className="sort-label-custom font-medium hidden sm:block">Trier par :</label>
-              <div className="relative">
+            <div className="flex items-center gap-3 text-sm w-full sm:w-auto">
+              <label className="font-medium text-gray-500 dark:text-gray-400 hidden sm:block">Trier par :</label>
+              <div className="relative w-full sm:w-48">
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="appearance-none sort-select-custom rounded-xl pl-3.5 pr-9 py-2 text-sm font-semibold outline-none cursor-pointer h-[38px]"
+                  className="w-full appearance-none pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-[#0f0f11] border border-transparent dark:border-white/5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 focus:border-red-500 focus:ring-1 focus:ring-red-500/20 outline-none transition-all cursor-pointer"
                 >
                   <option value="default">Par défaut</option>
                   <option value="price_asc">Prix croissant</option>
@@ -589,7 +701,7 @@ export default function BestOffersClient({
                   <option value="newest">Nouveautés</option>
                   <option value="popular">Popularité</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sort-chevron-custom pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -637,29 +749,53 @@ export default function BestOffersClient({
                   </button>
                 </div>
               )}
+              {niveauFilter !== 'all' && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                  <span>Niveau: {titleCase(niveauFilter)}</span>
+                  <button onClick={() => setNiveauFilter('all')} className="text-red-400 hover:text-red-700 transition-colors">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              {categoryFilter !== 'all' && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                  <span>Cat: {titleCase(categoryFilter)}</span>
+                  <button onClick={() => setCategoryFilter('all')} className="text-red-400 hover:text-red-700 transition-colors">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              {brandFilter !== 'all' && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                  <span>Marque: {titleCase(brandFilter)}</span>
+                  <button onClick={() => setBrandFilter('all')} className="text-red-400 hover:text-red-700 transition-colors">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {/* Products grid */}
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-[#18181b] rounded-[20px] border border-gray-100 dark:border-white/5">
+              <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-[#0f0f11] flex items-center justify-center mb-4">
                 <Search className="w-7 h-7 text-gray-400" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-1">Aucun produit trouvé</h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Aucun produit trouvé</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Aucun produit ne correspond à vos filtres.
               </p>
               <button
                 onClick={clearFilters}
-                className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1"
+                className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Réinitialiser les filtres
               </button>
             </div>
           ) : (
-            <div className="products-grid">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p as any} index={i} />
               ))}
@@ -670,14 +806,14 @@ export default function BestOffersClient({
 
       {/* ── MOBILE BOTTOM SHEET ───────────────────────────────────────── */}
       {filterOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
             onClick={() => setFilterOpen(false)}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 flex flex-col shadow-2xl"
-            style={{ borderRadius: '24px 24px 0 0', maxHeight: '85vh', background: 'var(--card)' }}
+            className="relative mr-auto h-full w-[310px] max-w-[85vw] flex flex-col shadow-2xl animate-slide-in-left"
+            style={{ background: 'var(--bg)', borderRight: '1px solid var(--border)' }}
           >
             {/* Mobile drawer header */}
             <div style={{
@@ -686,7 +822,7 @@ export default function BestOffersClient({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c' }} strokeWidth={2.2} />
-                <span style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>Filtres</span>
+                <span className="font-bold text-base text-gray-900 dark:text-white tracking-tight">Filtres</span>
                 {activeFilterCount > 0 && (
                   <span style={{
                     background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
@@ -701,8 +837,8 @@ export default function BestOffersClient({
                 onClick={() => setFilterOpen(false)}
                 style={{
                   width: '32px', height: '32px', borderRadius: '50%',
-                  background: '#f1f5f9', border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b',
+                  background: 'var(--bg2)', border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text2)',
                 }}
               >
                 <X style={{ width: '16px', height: '16px' }} />
@@ -716,6 +852,6 @@ export default function BestOffersClient({
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

@@ -432,6 +432,7 @@ export default function NiveauPage({
   const [priceMax,         setPriceMax]         = useState(9999)
   const [sortBy,           setSortBy]           = useState('default')
   const [filterOpen,       setFilterOpen]       = useState(false)
+  const [sortOpen,         setSortOpen]         = useState(false)
 
   const subjects = NIVEAU_SUBJECTS[niveau.toLowerCase()] ?? []
   const meta = NIVEAU_META[niveau.toLowerCase()] ?? {
@@ -531,7 +532,7 @@ export default function NiveauPage({
   }
 
   return (
-    <div className="niveau-page">
+    <div className="niveau-page bg-white dark:bg-[#0a0a0a]">
 
       {/* ── HERO BANNER ─────────────────────────────────────────────────── */}
       <div className="niveau-banner">
@@ -590,7 +591,7 @@ export default function NiveauPage({
               {/* Mobile filter button */}
               <button
                 onClick={() => setFilterOpen(true)}
-                className="md:hidden flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white shadow-sm hover:border-red-300 transition-colors"
+                className="premium-filter-btn md:hidden"
               >
                 <SlidersHorizontal className="w-4 h-4 text-red-600" />
                 Filtres
@@ -601,25 +602,61 @@ export default function NiveauPage({
                 )}
               </button>
               <p className="text-sm text-gray-500">
-                <span className="font-bold text-gray-900">{filtered.length}</span>{' '}
+                <span className="font-bold text-gray-900 dark:text-gray-100">{filtered.length}</span>{' '}
                 produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
               </p>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <label className="sort-label-custom font-medium hidden sm:block">Trier par :</label>
               <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none sort-select-custom rounded-xl pl-3.5 pr-9 py-2 text-sm font-semibold outline-none cursor-pointer h-[38px]"
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className="premium-filter-btn"
                 >
-                  <option value="default">Par défaut</option>
-                  <option value="price_asc">Prix croissant</option>
-                  <option value="price_desc">Prix décroissant</option>
-                  <option value="newest">Nouveautés</option>
-                  <option value="popular">Popularité</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 sort-chevron-custom pointer-events-none" />
+                  <span>
+                    {sortBy === 'price_asc'
+                      ? 'Prix croissant'
+                      : sortBy === 'price_desc'
+                      ? 'Prix décroissant'
+                      : sortBy === 'newest'
+                      ? 'Nouveautés'
+                      : sortBy === 'popular'
+                      ? 'Popularité'
+                      : 'Par défaut'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {sortOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />
+                    <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-lg py-1.5 z-50 animate-fade-in-up">
+                      {[
+                        { value: 'default', label: 'Par défaut' },
+                        { value: 'price_asc', label: 'Prix croissant' },
+                        { value: 'price_desc', label: 'Prix décroissant' },
+                        { value: 'newest', label: 'Nouveautés' },
+                        { value: 'popular', label: 'Popularité' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => {
+                            setSortBy(opt.value)
+                            setSortOpen(false)
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors duration-150 flex items-center justify-between cursor-pointer ${
+                            sortBy === opt.value
+                              ? 'text-red-600 bg-red-50/50 dark:bg-red-950/20'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800/50'
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {sortBy === opt.value && <Check className="w-3.5 h-3.5 text-red-600" />}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -630,42 +667,42 @@ export default function NiveauPage({
               {selectedSubjects.map((sid) => {
                 const label = subjects.find(s => s.id === sid)?.label ?? sid
                 return (
-                  <div key={`chip-${sid}`} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                  <div key={`chip-${sid}`} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
                     <span>{label}</span>
-                    <button onClick={() => toggleSubject(sid)} className="text-red-400 hover:text-red-700 transition-colors">
+                    <button onClick={() => toggleSubject(sid)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )
               })}
               {priceMin > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div key="chip-min" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
                   <span>Min {priceMin} DH</span>
-                  <button onClick={() => setPriceMin(0)} className="text-red-400 hover:text-red-700 transition-colors">
+                  <button onClick={() => setPriceMin(0)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
               {priceMax < 9999 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div key="chip-max" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
                   <span>Max {priceMax} DH</span>
-                  <button onClick={() => setPriceMax(9999)} className="text-red-400 hover:text-red-700 transition-colors">
+                  <button onClick={() => setPriceMax(9999)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
               {inStockOnly && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div key="chip-stock" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
                   <span>En stock</span>
-                  <button onClick={() => setInStockOnly(false)} className="text-red-400 hover:text-red-700 transition-colors">
+                  <button onClick={() => setInStockOnly(false)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
               {promoOnly && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div key="chip-promo" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
                   <span>En promotion</span>
-                  <button onClick={() => setPromoOnly(false)} className="text-red-400 hover:text-red-700 transition-colors">
+                  <button onClick={() => setPromoOnly(false)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -676,11 +713,11 @@ export default function NiveauPage({
           {/* Products grid */}
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
                 <Search className="w-7 h-7 text-gray-400" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-1">Aucun produit trouvé</h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Aucun produit trouvé</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 {hasActiveFilters
                   ? 'Aucun produit ne correspond à vos filtres.'
                   : `Aucun produit pour le niveau ${meta.fr} pour le moment.`}
@@ -688,7 +725,7 @@ export default function NiveauPage({
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1"
+                  className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   Réinitialiser les filtres
@@ -696,7 +733,7 @@ export default function NiveauPage({
               )}
             </div>
           ) : (
-            <div className="products-grid">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-8 lg:gap-10">
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p as any} index={i} />
               ))}
@@ -705,16 +742,16 @@ export default function NiveauPage({
         </div>
       </div>
 
-      {/* ── MOBILE FILTER DRAWER ────────────────────────────────────────── */}
+      {/* ── MOBILE FILTER DRAWER (SLIDES FROM LEFT) ─────────────────── */}
       {filterOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
             onClick={() => setFilterOpen(false)}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 flex flex-col shadow-2xl"
-            style={{ borderRadius: '24px 24px 0 0', maxHeight: '85vh', background: 'var(--card)' }}
+            className="relative mr-auto h-full w-[310px] max-w-[85vw] flex flex-col shadow-2xl animate-slide-in-left"
+            style={{ background: 'var(--bg)', borderRight: '1px solid var(--border)' }}
           >
             {/* Mobile drawer header */}
             <div style={{
@@ -723,7 +760,7 @@ export default function NiveauPage({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c' }} strokeWidth={2.2} />
-                <span style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>Filtres</span>
+                <span className="font-bold text-base text-gray-900 dark:text-white tracking-tight">Filtres</span>
                 {activeFilterCount > 0 && (
                   <span style={{
                     background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
@@ -738,8 +775,8 @@ export default function NiveauPage({
                 onClick={() => setFilterOpen(false)}
                 style={{
                   width: '32px', height: '32px', borderRadius: '50%',
-                  background: '#f1f5f9', border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b',
+                  background: 'var(--bg2)', border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text2)',
                 }}
               >
                 <X style={{ width: '16px', height: '16px' }} />

@@ -4,9 +4,12 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Star, ShoppingCart, Check, Eye } from 'lucide-react'
+import { Heart, Star, ShoppingCart, Check, Eye } from 'lucide-react'
 import { useLang } from '@/components/LangContext'
-import './ProductCard.css'
+
+// NOTE: All CSS for this component is injected server-side via the <style> tag
+// in app/(store)/antigravity/page.tsx using class prefix "pxcard-" and "pxcard".
+// Do NOT add Tailwind classes or runtime style injection here.
 
 interface ProductCardProps {
   id?: string | number
@@ -67,7 +70,8 @@ function getSubtitle(
   return t('Qualité Premium', 'جودة ممتازة')
 }
 
-export default function ProductCard(props: ProductCardProps) {
+export default function AntigravityProductCard(props: ProductCardProps) {
+  const [wishlisted, setWishlisted] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const { lang, t } = useLang()
   const router = useRouter()
@@ -86,7 +90,6 @@ export default function ProductCard(props: ProductCardProps) {
   const imgSrc = resolveImageUrl(images)
   const stock = product ? product.stock : (props.stock ?? 1)
   const isNew = product ? product.isNew : props.isNew
-  const isFeatured = product ? product.isBestOffer : props.isFeatured
   const isBestOffer = product ? product.isBestOffer : props.isBestOffer
   const isPromo = product ? product.isPromo : props.isPromo
   const rating = (product ? product.rating : props.rating) ?? 0
@@ -110,7 +113,7 @@ export default function ProductCard(props: ProductCardProps) {
 
   const productLink = `/product/${slug}`
   const currencyText = t('DH', 'د.م.')
-  const subtitle = getSubtitle(category, isNew, isFeatured || isBestOffer, isPromo, t)
+  const subtitle = getSubtitle(category, isNew, isBestOffer, isPromo, t)
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleCardClick = (e: React.MouseEvent) => {
@@ -160,7 +163,7 @@ export default function ProductCard(props: ProductCardProps) {
               src={imgSrc}
               alt={name || 'Product'}
               fill
-              style={{ objectFit: 'cover' }}
+              style={{ objectFit: 'contain', padding: '12px' }}
               sizes="(max-width:560px) 100vw,(max-width:900px) 50vw,33vw"
               priority={props.index !== undefined && props.index < 3}
             />
@@ -182,12 +185,26 @@ export default function ProductCard(props: ProductCardProps) {
         {!hasDiscount && isNew && (
           <span className="pxcard-badge pxcard-badge-new">{t('Nouveau', 'جديد')}</span>
         )}
-        {!hasDiscount && !isNew && (isFeatured || isBestOffer || isPromo) && (
+        {!hasDiscount && !isNew && (isBestOffer || isPromo) && (
           <span className="pxcard-badge pxcard-badge-hot">{t('Hot', 'رائج')}</span>
         )}
 
-        {/* ── 2 Floating action icons (top-right, stacked) ── */}
+        {/* ── 3 Floating action icons (top-right, stacked) ── */}
         <div className="pxcard-actions">
+
+          {/* 1. Wishlist */}
+          <button
+            type="button"
+            className={`pxcard-icon pxcard-icon-wish${wishlisted ? ' wl-on' : ''}`}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setWishlisted(p => !p) }}
+            aria-label={t('Favoris', 'المفضلة')}
+          >
+            <Heart
+              size={16}
+              fill={wishlisted ? 'currentColor' : 'none'}
+              strokeWidth={wishlisted ? 0 : 2}
+            />
+          </button>
 
           {/* 2. Quick view */}
           <button
@@ -223,6 +240,9 @@ export default function ProductCard(props: ProductCardProps) {
       {/* ══ PRODUCT INFO (open, below image) ════════════════════════════════ */}
       <div className="pxcard-info">
 
+        {/* Bold brand subtitle / Category */}
+        <p className="pxcard-subtitle">{subtitle}</p>
+
         {/* Row: product name left + star rating right */}
         <div className="pxcard-name-row">
           <Link href={productLink} className="pxcard-name">
@@ -235,9 +255,6 @@ export default function ProductCard(props: ProductCardProps) {
             </div>
           )}
         </div>
-
-        {/* Bold brand subtitle */}
-        <p className="pxcard-subtitle">{subtitle}</p>
 
         {/* Price row */}
         <div className="pxcard-prices">
@@ -268,7 +285,7 @@ export default function ProductCard(props: ProductCardProps) {
                 {selectedColor === color && (
                   <Check
                     size={9}
-                    style={{ color: ['#ffffff', '#fff', '#ffff00', '#fefefe'].includes(color.toLowerCase()) ? '#111' : '#fff', display: 'block' }}
+                    style={{ color: ['#ffffff','#fff','#ffff00','#fefefe'].includes(color.toLowerCase()) ? '#111' : '#fff', display: 'block' }}
                   />
                 )}
               </button>

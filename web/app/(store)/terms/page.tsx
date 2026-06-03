@@ -37,7 +37,7 @@ La disponibilité des produits est indiquée sur chaque fiche produit. En cas d'
       content: `**Délais de livraison :** 24 à 48 heures ouvrables après confirmation de paiement, partout au Maroc.
 
 **Frais de livraison :**
-• Livraison gratuite pour toute commande ≥ 499 DH
+• **Livraison Gratuite dès 499 DH d'achat**
 • 25 DH pour les commandes inférieures à 499 DH
 
 **Zones de livraison :** Nous livrons dans toutes les villes du Maroc via nos partenaires de transport (Amana, Chronopost, CTM...).
@@ -135,7 +135,7 @@ Contactez-nous immédiatement avec des photos du dommage. Nous vous enverrons un
       content: `**مواعيد التوصيل:** من 24 إلى 48 ساعة عمل بعد تأكيد الدفع، في جميع أنحاء المغرب.
 
 **تكاليف التوصيل:**
-• توصيل مجاني لكل طلب يساوي أو يتجاوز 499 درهم
+• **توصيل مجاني ابتداءً من 499 درهم**
 • 25 درهم للطلبات التي تقل عن 499 درهم
 
 **مناطق التوصيل:** نوصّل إلى جميع مدن المغرب عبر شركاء النقل لدينا (أمانة، كرونوبوست، CTM...).

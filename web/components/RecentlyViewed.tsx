@@ -31,7 +31,7 @@ export default function RecentlyViewed({ currentId }: { currentId: number }) {
   if (products.length === 0) return null
 
   return (
-    <section style={{ marginTop: '10rem' }}>
+    <section style={{ marginTop: '10rem' }} className="bg-white dark:bg-[#0a0a0a]">
       <div style={{ marginBottom: '4rem' }}>
         <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
           {isAr ? 'شوهد مؤخراً' : 'Consultés Récemment'}
@@ -40,8 +40,10 @@ export default function RecentlyViewed({ currentId }: { currentId: number }) {
           {isAr ? 'تكملة تسوقك' : 'Poursuivre vos achats'}
         </h2>
       </div>
-      <div className="products-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-        {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        {products.map((p) => (
+          <ProductCard key={p.id} {...p} />
+        ))}
       </div>
     </section>
   )

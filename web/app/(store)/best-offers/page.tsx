@@ -5,21 +5,26 @@ import { Suspense } from 'react'
 export const dynamic = 'force-dynamic'
 
 export default async function BestOffersPage() {
-  let products: unknown[] = []
-  let categories: unknown[] = []
+  let products: any[] = []
+  let categories: any[] = []
+
+  const timeout = (ms: number) => new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Query timeout')), ms))
 
   try {
-    ;[products, categories] = await Promise.all([
-      prisma.product.findMany({ orderBy: { createdAt: 'desc' } }),
-      prisma.category.findMany({ orderBy: { name: 'asc' } }),
-    ])
-  } catch {
-    // DB not reachable at build time — return empty lists
+    ;[products, categories] = await Promise.race([
+      Promise.all([
+        prisma.product.findMany({ take: 100, orderBy: { createdAt: 'desc' } }),
+        prisma.category.findMany({ orderBy: { name: 'asc' } }),
+      ]),
+      timeout(3000)
+    ]) as any
+  } catch (err) {
+    console.error('BestOffersPage server-side query failed or timed out:', err)
   }
 
   return (
     <Suspense fallback={<div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text2)' }}>Chargement du catalogue...</div>}>
-      <BestOffersClient products={products as any} categories={categories as any} />
+      <BestOffersClient products={products} categories={categories} />
     </Suspense>
   )
 }

@@ -64,7 +64,7 @@ export default function ContactPage() {
     hoursTitle: t('Horaires d\'Ouverture', 'ساعات العمل'),
     deliveryTitle: t('Livraison', 'التوصيل'),
     deliveryInfo: t('Partout au Maroc en 24-48h', 'في جميع أنحاء المغرب خلال 24-48 ساعة'), 
-    deliveryFree: t('Gratuite ≥ 499 DH', 'مجاني عند الطلب ≥ 499 درهم'), 
+    deliveryFree: t('Livraison Gratuite dès 499 DH d\'achat', 'توصيل مجاني ابتداءً من 499 درهم'), 
     deliveryFees: t('Frais: 25 DH sinon', 'رسوم: 25 درهم خلاف ذلك'),
   }
 
