@@ -140,20 +140,20 @@ button {
 }
 
 /* ─── RTL / ARABIC FONTS ─── */
-[dir="rtl"] body,
-[dir="rtl"] button,
-[dir="rtl"] input,
-[dir="rtl"] textarea,
-[dir="rtl"] select {
-  font-family: var(--font-arabic);
-  letter-spacing: 0;
+[dir="rtl"],
+[dir="rtl"] * {
+  font-family: var(--font-arabic) !important;
 }
 
 [dir="rtl"] h1,
 [dir="rtl"] h2,
 [dir="rtl"] h3,
-[dir="rtl"] h4 {
-  font-family: var(--font-heading-arabic);
+[dir="rtl"] h4,
+[dir="rtl"] h1 *,
+[dir="rtl"] h2 *,
+[dir="rtl"] h3 *,
+[dir="rtl"] h4 * {
+  font-family: var(--font-heading-arabic) !important;
   font-weight: 700;
   letter-spacing: 0;
 }
