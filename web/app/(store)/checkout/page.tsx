@@ -30,6 +30,7 @@ type CartItem = {
   productId: number
   id: number
   title: string
+  name?: string
   variant: string
   price: number
   qty: number
