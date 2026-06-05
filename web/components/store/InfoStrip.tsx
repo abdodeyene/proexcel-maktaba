@@ -72,27 +72,36 @@ export default function InfoStrip({ lang = 'fr' }: InfoStripProps) {
           position: relative;
           border-radius: 24px;
           padding: 1px;
-          background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 40px rgba(14, 165, 233, 0.05);
+          background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(14, 165, 233, 0.08);
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="light"] .info-strip-wrapper {
+          background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 100%);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 0 40px rgba(14, 165, 233, 0.04);
         }
 
         .info-strip-wrapper:hover {
           box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 50px rgba(239, 68, 68, 0.1);
         }
+        
+        [data-theme="light"] .info-strip-wrapper:hover {
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12), 0 0 50px rgba(239, 68, 68, 0.06);
+        }
 
         .info-strip {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
-          background: rgba(10, 15, 26, 0.65);
+          background: rgba(10, 15, 26, 0.4);
           border-radius: 23px;
           overflow: hidden;
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
+          backdrop-filter: blur(32px) saturate(180%);
+          -webkit-backdrop-filter: blur(32px) saturate(180%);
         }
 
         [data-theme="light"] .info-strip {
-          background: rgba(255, 255, 255, 0.75);
+          background: rgba(255, 255, 255, 0.45);
         }
 
         .info-strip-item {

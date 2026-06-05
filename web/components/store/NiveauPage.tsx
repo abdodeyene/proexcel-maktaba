@@ -120,10 +120,9 @@ function CheckRow({
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className={`check-row ${selected ? 'selected' : ''}`}
+      className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 mb-3 cursor-pointer select-none transition-all duration-200 border filter-check-row ${selected ? 'selected' : ''}`}
     >
-      {/* Custom checkbox */}
-      <div className="check-row-box">
+      <div className="filter-checkbox">
         {selected && (
           <Check style={{ width: '11px', height: '11px', color: '#fff', strokeWidth: 3 }} />
         )}
@@ -137,10 +136,7 @@ function CheckRow({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{
-      fontSize: '12px', fontWeight: 800, textTransform: 'uppercase',
-      letterSpacing: '0.12em', color: '#ef233c', marginBottom: '12px',
-    }}>
+    <p className="filter-section-title">
       {children}
     </p>
   )
@@ -175,33 +171,26 @@ function FilterPanel({
   onApply?: () => void
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="flex flex-col">
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c', flexShrink: 0 }} strokeWidth={2.2} />
-          <span style={{ fontWeight: 700, fontSize: '16px', color: 'var(--text)', letterSpacing: '-0.01em' }}>Filtres</span>
+      <div className="filter-header">
+        <div className="filter-header-left">
+          <SlidersHorizontal style={{ width: '18px', height: '18px', color: 'var(--primary)', flexShrink: 0 }} strokeWidth={2.2} />
+          <span className="filter-title">Filtres</span>
           {activeFilterCount > 0 && (
-            <span style={{
-              background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
-              minWidth: '20px', height: '20px', padding: '0 6px',
-              borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
-            }}>
+            <span className="filter-active-badge">
               {activeFilterCount}
             </span>
           )}
         </div>
         <button
           onClick={clearFilters}
+          className="filter-reset-btn"
           style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            fontSize: '13px', fontWeight: 700,
-            color: hasActiveFilters ? '#ef233c' : '#94a3b8',
-            cursor: hasActiveFilters ? 'pointer' : 'default',
-            background: 'none', border: 'none', padding: 0,
-            transition: 'color 150ms',
+            color: hasActiveFilters ? 'var(--primary)' : 'var(--text2)',
             pointerEvents: hasActiveFilters ? 'auto' : 'none',
+            cursor: hasActiveFilters ? 'pointer' : 'default',
           }}
         >
           <RotateCcw style={{ width: '13px', height: '13px' }} strokeWidth={2.3} />
@@ -210,40 +199,20 @@ function FilterPanel({
       </div>
 
       {/* ── Search ──────────────────────────────────────────────────────── */}
-      <div style={{ position: 'relative', marginBottom: '26px' }}>
-        <Search
-          style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#94a3b8', pointerEvents: 'none', flexShrink: 0 }}
-          strokeWidth={2}
-        />
+      <div className="filter-search-wrapper">
+        <Search className="filter-search-icon" strokeWidth={2} />
         <input
           type="text"
           placeholder="Rechercher..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="filter-search-input"
-          style={{
-            paddingLeft: '44px',
-            paddingRight: searchQuery ? '40px' : '16px',
-            fontSize: '14px', fontWeight: 500, color: '#1e293b',
-            background: '#f8fafc', border: '1.5px solid #e5e7eb',
-            borderRadius: '14px', outline: 'none',
-            transition: 'border-color 150ms, box-shadow 150ms',
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = '#ef233c'
-            e.target.style.boxShadow = '0 0 0 3px rgba(239,35,60,0.1)'
-            e.target.style.background = '#fff'
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = '#e5e7eb'
-            e.target.style.boxShadow = 'none'
-            e.target.style.background = '#f8fafc'
-          }}
+          style={{ paddingRight: searchQuery ? '40px' : '16px' }}
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', padding: '4px' }}
+            className="filter-search-clear"
           >
             <X style={{ width: '14px', height: '14px' }} />
           </button>
@@ -252,17 +221,14 @@ function FilterPanel({
 
       {/* ── Matière ─────────────────────────────────────────────────────── */}
       {subjects.length > 0 && (
-        <div style={{ marginBottom: '26px' }}>
+        <div className="filter-section-wrapper">
           <SectionTitle>Matière</SectionTitle>
           <div>
             {subjects.map((sub) => {
               const selected = selectedSubjects.includes(sub.id)
               return (
                 <CheckRow key={sub.id} selected={selected} onClick={() => toggleSubject(sub.id)}>
-                  <span style={{
-                    fontSize: '15px', fontWeight: 700, flex: 1,
-                    color: selected ? '#dc2626' : '#1e293b', transition: 'color 150ms',
-                  }}>
+                  <span className="filter-cat-name">
                     {sub.label}
                   </span>
                 </CheckRow>
@@ -273,9 +239,9 @@ function FilterPanel({
       )}
 
       {/* ── Price ───────────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: '26px' }}>
+      <div className="filter-section-wrapper">
         <SectionTitle>Prix</SectionTitle>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+        <div className="filter-price-wrapper">
           <input
             type="number"
             value={priceMin === 0 ? '' : priceMin}
@@ -283,16 +249,9 @@ function FilterPanel({
             max={9999}
             placeholder="0"
             onChange={(e) => setPriceMin(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
-            style={{
-              flex: 1, height: '44px', borderRadius: '12px', boxSizing: 'border-box',
-              border: '1.5px solid #e5e7eb', background: '#f8fafc',
-              textAlign: 'center', fontWeight: 700, fontSize: '14px', color: '#1e293b',
-              outline: 'none', padding: '0 8px',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = '#ef233c'; e.target.style.background = '#fff' }}
-            onBlur={(e) => { e.target.style.borderColor = '#e5e7eb'; e.target.style.background = '#f8fafc' }}
+            className="filter-price-input"
           />
-          <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '18px', flexShrink: 0, lineHeight: 1 }}>—</span>
+          <span className="filter-price-sep">—</span>
           <input
             type="number"
             value={priceMax === 9999 ? '' : priceMax}
@@ -300,33 +259,23 @@ function FilterPanel({
             max={9999}
             placeholder="9 999"
             onChange={(e) => setPriceMax(e.target.value === '' ? 9999 : Math.max(0, Number(e.target.value)))}
-            style={{
-              flex: 1, height: '44px', borderRadius: '12px', boxSizing: 'border-box',
-              border: '1.5px solid #e5e7eb', background: '#f8fafc',
-              textAlign: 'center', fontWeight: 700, fontSize: '14px', color: '#1e293b',
-              outline: 'none', padding: '0 8px',
-            }}
-            onFocus={(e) => { e.target.style.borderColor = '#ef233c'; e.target.style.background = '#fff' }}
-            onBlur={(e) => { e.target.style.borderColor = '#e5e7eb'; e.target.style.background = '#f8fafc' }}
+            className="filter-price-input"
           />
         </div>
-        <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+        <p className="filter-price-range-text">
           {priceMin > 0 ? priceMin : 0} DH — {priceMax === 9999 ? '9 999' : priceMax} DH
         </p>
       </div>
 
       {/* ── Availability ────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: '8px' }}>
+      <div className="filter-section-wrapper" style={{ marginBottom: '8px' }}>
         <SectionTitle>Disponibilité</SectionTitle>
         {[
           { id: 'inStock', label: 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
           { id: 'onSale',  label: 'En promotion',        value: promoOnly,   set: setPromoOnly  },
         ].map((opt) => (
           <CheckRow key={opt.id} selected={opt.value} onClick={() => opt.set(!opt.value)}>
-            <span style={{
-              fontSize: '15px', fontWeight: 700,
-              color: opt.value ? '#dc2626' : '#1e293b', transition: 'color 150ms',
-            }}>
+            <span className="filter-cat-name">
               {opt.label}
             </span>
           </CheckRow>
@@ -335,52 +284,48 @@ function FilterPanel({
 
       {/* ── Active filters ───────────────────────────────────────────────── */}
       {hasActiveFilters && (
-        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px', marginTop: '12px' }}>
+        <div className="filter-active-chips-container">
           <SectionTitle>Filtres actifs</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {selectedSubjects.map((sid) => {
               const label = subjects.find(s => s.id === sid)?.label ?? sid
               return (
-                <span key={sid} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3',
-                  borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800,
-                }}>
+                <span key={sid} className="filter-active-chip">
                   {label}
-                  <button onClick={() => toggleSubject(sid)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                  <button onClick={() => toggleSubject(sid)}>
                     <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                   </button>
                 </span>
               )
             })}
             {priceMin > 0 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-min" className="filter-active-chip">
                 Min {priceMin} DH
-                <button onClick={() => setPriceMin(0)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setPriceMin(0)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             )}
             {priceMax < 9999 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-max" className="filter-active-chip">
                 Max {priceMax} DH
-                <button onClick={() => setPriceMax(9999)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setPriceMax(9999)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             )}
             {inStockOnly && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-stock" className="filter-active-chip">
                 En stock
-                <button onClick={() => setInStockOnly(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setInStockOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             )}
             {promoOnly && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-promo" className="filter-active-chip">
                 En promo
-                <button onClick={() => setPromoOnly(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setPromoOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
@@ -532,7 +477,7 @@ export default function NiveauPage({
   }
 
   return (
-    <div className="niveau-page bg-white dark:bg-[#0a0a0a]">
+    <div className="niveau-page">
 
       {/* ── HERO BANNER ─────────────────────────────────────────────────── */}
       <div className="niveau-banner">
@@ -570,14 +515,7 @@ export default function NiveauPage({
           className="hidden md:block self-start flex-shrink-0"
           style={{ width: '300px', position: 'sticky', top: '88px' }}
         >
-          <div style={{
-            background: 'var(--card)',
-            borderRadius: '24px',
-            padding: '24px',
-            border: '1px solid var(--border)',
-            boxShadow: '0 18px 45px rgba(15,23,42,0.08)',
-            overflow: 'hidden',
-          }}>
+          <div className="filter-card-container">
             <FilterPanel {...filterProps} />
           </div>
         </aside>
@@ -608,7 +546,7 @@ export default function NiveauPage({
             </div>
             <div className="flex items-center gap-2 text-sm">
               <label className="sort-label-custom font-medium hidden sm:block">Trier par :</label>
-              <div className="relative">
+              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
                   className="premium-filter-btn"
@@ -630,7 +568,7 @@ export default function NiveauPage({
                 {sortOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-lg py-1.5 z-50 animate-fade-in-up">
+                    <div className="sort-dropdown-container">
                       {[
                         { value: 'default', label: 'Par défaut' },
                         { value: 'price_asc', label: 'Prix croissant' },
@@ -644,11 +582,7 @@ export default function NiveauPage({
                             setSortBy(opt.value)
                             setSortOpen(false)
                           }}
-                          className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors duration-150 flex items-center justify-between cursor-pointer ${
-                            sortBy === opt.value
-                              ? 'text-red-600 bg-red-50/50 dark:bg-red-950/20'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800/50'
-                          }`}
+                          className={`sort-dropdown-option ${sortBy === opt.value ? 'selected' : ''}`}
                         >
                           <span>{opt.label}</span>
                           {sortBy === opt.value && <Check className="w-3.5 h-3.5 text-red-600" />}
@@ -667,42 +601,42 @@ export default function NiveauPage({
               {selectedSubjects.map((sid) => {
                 const label = subjects.find(s => s.id === sid)?.label ?? sid
                 return (
-                  <div key={`chip-${sid}`} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                  <div key={`chip-${sid}`} className="filter-chip">
                     <span>{label}</span>
-                    <button onClick={() => toggleSubject(sid)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
+                    <button onClick={() => toggleSubject(sid)}>
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )
               })}
               {priceMin > 0 && (
-                <div key="chip-min" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                <div key="chip-min" className="filter-chip">
                   <span>Min {priceMin} DH</span>
-                  <button onClick={() => setPriceMin(0)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
+                  <button onClick={() => setPriceMin(0)}>
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
               {priceMax < 9999 && (
-                <div key="chip-max" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                <div key="chip-max" className="filter-chip">
                   <span>Max {priceMax} DH</span>
-                  <button onClick={() => setPriceMax(9999)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
+                  <button onClick={() => setPriceMax(9999)}>
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
               {inStockOnly && (
-                <div key="chip-stock" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                <div key="chip-stock" className="filter-chip">
                   <span>En stock</span>
-                  <button onClick={() => setInStockOnly(false)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
+                  <button onClick={() => setInStockOnly(false)}>
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
               {promoOnly && (
-                <div key="chip-promo" className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100 dark:bg-red-950/20 dark:border-red-900/40 dark:text-red-400">
+                <div key="chip-promo" className="filter-chip">
                   <span>En promotion</span>
-                  <button onClick={() => setPromoOnly(false)} className="text-red-400 hover:text-red-700 transition-colors cursor-pointer">
+                  <button onClick={() => setPromoOnly(false)}>
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>

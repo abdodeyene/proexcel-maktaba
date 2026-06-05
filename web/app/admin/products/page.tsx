@@ -518,7 +518,7 @@ export default function AdminProducts() {
                   className="cp-title-input"
                   placeholder="عنوان المنتج (بالعربية)"
                   dir="rtl"
-                  style={{ marginTop: '0.6rem', fontFamily: "'Noto Kufi Arabic', 'Cairo', sans-serif", fontSize: '1rem' }}
+                  style={{ marginTop: '0.6rem', fontFamily: "var(--font-arabic)", fontSize: '1rem' }}
                   value={form.titleAr}
                   onChange={e => setForm({ ...form, titleAr: e.target.value })}
                 />

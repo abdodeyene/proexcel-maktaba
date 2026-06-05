@@ -138,7 +138,7 @@ export default function ProductDetailClient({
       related: 'Complétez votre collection', relatedTag: 'Sélection ProExcel',
       savings: (n: number) => `Économisez ${formatMoroccanPrice(n)}`,
       reviews_count: (n: number) => `${n} avis vérifiés`,
-      freeShipping: 'Livraison Gratuite dès 499 DH d\'achat',
+      freeShipping: 'Livraison gratuite dès 499 DH',
       secureCheckout: 'Transactions sécurisées SSL',
       share: 'Partager', wishlist: 'Favoris', sku: 'Référence', categories: 'Catégories', stock: 'Disponibilité'
     },
@@ -563,7 +563,7 @@ export default function ProductDetailClient({
 
       {/* RELATED PRODUCTS */}
       {relatedProducts.length > 0 && (
-        <section style={{ marginTop: '10rem' }} className="bg-white dark:bg-[#0a0a0a]">
+        <section style={{ marginTop: '10rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
             <div>
               <div style={{ color: 'var(--primary)', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{T.relatedTag}</div>
@@ -573,10 +573,8 @@ export default function ProductDetailClient({
               VOIR TOUT <ArrowRight size={16} />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8">
-            {relatedProducts.map((p) => (
-              <ProductCard key={p.id} {...p} />
-            ))}
+          <div className="products-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+            {relatedProducts.map((p, i) => <ProductCard key={p.id} product={p as any} index={i} />)}
           </div>
         </section>
       )}

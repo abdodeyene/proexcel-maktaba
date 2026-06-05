@@ -795,12 +795,23 @@ export default function AdminSettings() {
     publishButtonStyles({ ...buttonStyles, ...nextDrafts })
   }
 
-  function commitBtnStyle(id: string) {
+  async function commitBtnStyle(id: string) {
     const draft = draftButtonStyles[id]
     if (!draft) return
     const next = sanitizeButtonStyles({ ...buttonStyles, [id]: draft })
     setButtonStyles(next)
     publishButtonStyles(next)
+    
+    try {
+      await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ button_styles: JSON.stringify(next) })
+      })
+    } catch (e) {
+      console.error(e)
+    }
+
     setEditingBtn(null)
   }
 
@@ -810,12 +821,22 @@ export default function AdminSettings() {
     setDraftButtonStyles(next)
   }
 
-  function resetBtnStyle(id: string) {
+  async function resetBtnStyle(id: string) {
     const next = { ...buttonStyles }
     delete next[id]
     const cleaned = sanitizeButtonStyles(next)
     setButtonStyles(cleaned)
     publishButtonStyles(cleaned)
+    
+    try {
+      await fetch('/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ button_styles: JSON.stringify(cleaned) })
+      })
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   function previewBg(style: ButtonStyle) {

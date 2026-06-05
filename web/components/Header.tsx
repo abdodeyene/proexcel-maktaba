@@ -19,7 +19,6 @@ import {
   BookOpen,
   GraduationCap
 } from '@/components/LucideIcons'
-import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0)
@@ -39,9 +38,6 @@ export default function Header() {
   const langRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const searchPanelRef = useRef<HTMLDivElement>(null)
-  const [open, setOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   useEffect(() => {
     const updateCart = () => {
@@ -57,14 +53,8 @@ export default function Header() {
     if (savedTheme) {
       setTheme(savedTheme)
       document.documentElement.setAttribute('data-theme', savedTheme)
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
     } else {
       document.documentElement.setAttribute('data-theme', 'dark')
-      document.documentElement.classList.add('dark')
     }
 
     fetch('/api/settings')
@@ -100,18 +90,6 @@ export default function Header() {
     document.addEventListener('mousedown', onOutside)
     return () => document.removeEventListener('mousedown', onOutside)
   }, [])
-
-  // Close levels dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
 
   // Focus search input when panel opens
   useEffect(() => {
@@ -158,11 +136,6 @@ export default function Header() {
     setTheme(newTheme)
     localStorage.setItem('proexcel_theme', newTheme)
     document.documentElement.setAttribute('data-theme', newTheme)
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
   }
 
   // Transparent when at the top of the home page and no panels are open
@@ -179,28 +152,6 @@ export default function Header() {
   }
   const currentT = t[lang as keyof typeof t] ?? t.fr
   const isAr = lang === 'ar'
-
-  const levels = [
-    {
-      href: '/niveaux/primaire',
-      label: currentT.primaire,
-      Icon: Backpack,
-      description: isAr ? 'السنة 1 - 6' : '1ère à 6ème année'
-    },
-    {
-      href: '/niveaux/college',
-      label: currentT.college,
-      Icon: BookOpen,
-      description: isAr ? 'السنة 7 - 9' : '7ème à 9ème année'
-    },
-    {
-      href: '/niveaux/lycee',
-      label: currentT.lycee,
-      Icon: GraduationCap,
-      description: isAr ? 'التعليم الثانوي' : 'Tronc commun & Bac'
-    }
-  ]
-
 
   const headerClass = [
     isHome ? 'header-home' : '',
@@ -235,115 +186,37 @@ export default function Header() {
             )}
           </Link>
 
-          <nav className="header-nav-center relative" style={{ direction: 'ltr' }} onMouseLeave={() => setHoveredIdx(null)}>
-            <Link 
-              href="/" 
-              className={`relative z-10 ${pathname === '/' ? 'active' : ''}`}
-              onMouseEnter={() => setHoveredIdx(0)}
-            >
-              {hoveredIdx === 0 && (
-                <motion.span
-                  layoutId="nav-hover-pill"
-                  className="absolute inset-0 bg-white/5 dark:bg-white/5 rounded-lg -z-10"
-                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                />
-              )}
+          <nav className="header-nav-center" style={{ direction: 'ltr' }}>
+            <Link href="/" className={pathname === '/' ? 'active' : ''}>
               <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.home}</span>
             </Link>
-            <Link 
-              href="/best-offers" 
-              className={`relative z-10 ${pathname === '/best-offers' ? 'active' : ''}`}
-              onMouseEnter={() => setHoveredIdx(1)}
-            >
-              {hoveredIdx === 1 && (
-                <motion.span
-                  layoutId="nav-hover-pill"
-                  className="absolute inset-0 bg-white/5 dark:bg-white/5 rounded-lg -z-10"
-                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                />
-              )}
+            <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>
               <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.offers}</span>
             </Link>
-            <div
-              ref={dropdownRef}
-              className={`nav-dropdown-wrap relative z-10 ${['/primaire', '/college', '/lycee', '/niveaux/primaire', '/niveaux/college', '/niveaux/lycee'].some(p => pathname.startsWith(p)) ? 'active' : ''}`}
-              onMouseEnter={() => setHoveredIdx(2)}
-            >
-              <button
-                className="nav-dropdown-btn relative"
-                onClick={() => setOpen(v => !v)}
-              >
-                {hoveredIdx === 2 && (
-                  <motion.span
-                    layoutId="nav-hover-pill"
-                    className="absolute inset-0 bg-white/5 dark:bg-white/5 rounded-lg -z-10"
-                    style={{ top: '-4px', bottom: '-4px', left: '-8px', right: '-8px' }}
-                    transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                  />
-                )}
+            <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee', '/niveaux/primaire', '/niveaux/college', '/niveaux/lycee'].some(p => pathname.startsWith(p)) ? 'active' : ''}`}>
+              <button className="nav-dropdown-btn">
                 <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.levels}</span>
                 <ChevronDown size={14} style={{ marginLeft: '4px' }} />
               </button>
-              <AnimatePresence>
-                {open && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-[#1c1c1c] border border-gray-100 dark:border-white/[0.08] rounded-2xl shadow-xl dark:shadow-black/50 p-2 min-w-[200px] z-50"
-                  >
-                    {levels.map(level => (
-                      <Link
-                        key={level.href}
-                        href={level.href}
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-white/[0.06] group"
-                      >
-                        <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
-                          <level.Icon className="w-4 h-4 text-red-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-800 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-                            {level.label}
-                          </p>
-                          {level.description && (
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                              {level.description}
-                            </p>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div className="nav-dropdown-menu">
+                <Link href="/niveaux/primaire" className={pathname.includes('primaire') ? 'active' : ''}>
+                  <span className="nav-dropdown-icon"><Backpack size={18} /></span>
+                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.primaire}</span>
+                </Link>
+                <Link href="/niveaux/college" className={pathname.includes('college') ? 'active' : ''}>
+                  <span className="nav-dropdown-icon"><BookOpen size={18} /></span>
+                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.college}</span>
+                </Link>
+                <Link href="/niveaux/lycee" className={pathname.includes('lycee') ? 'active' : ''}>
+                  <span className="nav-dropdown-icon"><GraduationCap size={18} /></span>
+                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.lycee}</span>
+                </Link>
+              </div>
             </div>
-            <Link 
-              href="/about" 
-              className={`relative z-10 ${pathname === '/about' ? 'active' : ''}`}
-              onMouseEnter={() => setHoveredIdx(3)}
-            >
-              {hoveredIdx === 3 && (
-                <motion.span
-                  layoutId="nav-hover-pill"
-                  className="absolute inset-0 bg-white/5 dark:bg-white/5 rounded-lg -z-10"
-                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                />
-              )}
+            <Link href="/about" className={pathname === '/about' ? 'active' : ''}>
               <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.about}</span>
             </Link>
-            <Link 
-              href="/contact" 
-              className={`relative z-10 ${pathname === '/contact' ? 'active' : ''}`}
-              onMouseEnter={() => setHoveredIdx(4)}
-            >
-              {hoveredIdx === 4 && (
-                <motion.span
-                  layoutId="nav-hover-pill"
-                  className="absolute inset-0 bg-white/5 dark:bg-white/5 rounded-lg -z-10"
-                  transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-                />
-              )}
+            <Link href="/contact" className={pathname === '/contact' ? 'active' : ''}>
               <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.contact}</span>
             </Link>
           </nav>
@@ -393,137 +266,45 @@ export default function Header() {
             </Link>
 
             {/* Mobile: hamburger on right */}
-            <button 
-              className="mobile-menu-btn flex items-center justify-center" 
-              aria-label="Menu" 
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <motion.line
-                  x1="2"
-                  y1="5"
-                  x2="18"
-                  y2="5"
-                  animate={{
-                    rotate: menuOpen ? 45 : 0,
-                    y: menuOpen ? 5 : 0
-                  }}
-                  transition={{ duration: 0.28, ease: "easeInOut" }}
-                  style={{ originX: '10px', originY: '5px' }}
-                />
-                <motion.line
-                  x1="2"
-                  y1="10"
-                  x2="18"
-                  y2="10"
-                  animate={{
-                    opacity: menuOpen ? 0 : 1,
-                    scaleX: menuOpen ? 0 : 1
-                  }}
-                  transition={{ duration: 0.2 }}
-                />
-                <motion.line
-                  x1="2"
-                  y1="15"
-                  x2="18"
-                  y2="15"
-                  animate={{
-                    rotate: menuOpen ? -45 : 0,
-                    y: menuOpen ? -5 : 0
-                  }}
-                  transition={{ duration: 0.28, ease: "easeInOut" }}
-                  style={{ originX: '10px', originY: '15px' }}
-                />
-              </svg>
+            <button className="mobile-menu-btn" aria-label="Menu" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </header>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.nav 
-            initial={{ opacity: 0, height: 0, y: -20 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -20 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-            className="mobile-nav open" 
-            id="mobileNav" 
-            dir="ltr" 
-            style={{ 
-              direction: 'ltr',
-              display: 'block',
-              visibility: 'visible',
-              transform: 'none',
-              zIndex: 999,
-              position: 'fixed',
-              top: '68px',
-              left: 0,
-              right: 0,
-            }}
-          >
-            <motion.div
-              initial="closed"
-              animate="open"
-              variants={{
-                open: { transition: { staggerChildren: 0.05 } },
-                closed: { transition: { staggerChildren: 0.05, staggerDirection: -1 } }
-              }}
-            >
-              {[
-                <Link key="home" href="/" onClick={() => setMenuOpen(false)}>{currentT.home}</Link>,
-                <Link key="offers" href="/best-offers" onClick={() => setMenuOpen(false)}>{currentT.offers}</Link>,
-                <div key="levels-sec" className="mobile-nav-section">{currentT.levels}</div>,
-                <Link key="prim" href="/niveaux/primaire" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎒 {currentT.primaire}</Link>,
-                <Link key="coll" href="/niveaux/college" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>📚 {currentT.college}</Link>,
-                <Link key="lyc" href="/niveaux/lycee" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎓 {currentT.lycee}</Link>,
-                <Link key="ab" href="/about" onClick={() => setMenuOpen(false)}>{currentT.about}</Link>,
-                <Link key="cont" href="/contact" onClick={() => setMenuOpen(false)}>{currentT.contact}</Link>
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={{
-                    open: { opacity: 1, x: 0 },
-                    closed: { opacity: 0, x: -10 }
-                  }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                >
-                  {item}
-                </motion.div>
-              ))}
+      <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`} id="mobileNav" dir="ltr" style={{ direction: 'ltr' }}>
+        <Link href="/" onClick={() => setMenuOpen(false)}>{currentT.home}</Link>
+        <Link href="/best-offers" onClick={() => setMenuOpen(false)}>{currentT.offers}</Link>
+        <div className="mobile-nav-section">{currentT.levels}</div>
+        <Link href="/niveaux/primaire" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎒 {currentT.primaire}</Link>
+        <Link href="/niveaux/college" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>📚 {currentT.college}</Link>
+        <Link href="/niveaux/lycee" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎓 {currentT.lycee}</Link>
+        <Link href="/about" onClick={() => setMenuOpen(false)}>{currentT.about}</Link>
+        <Link href="/contact" onClick={() => setMenuOpen(false)}>{currentT.contact}</Link>
+        <div className="mobile-nav-extras">
+          <button className="btn-theme btn-theme-mob" onClick={toggleTheme}>
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
-              <motion.div 
-                className="mobile-nav-extras"
-                variants={{
-                  open: { opacity: 1, y: 0 },
-                  closed: { opacity: 0, y: 10 }
-                }}
+          {/* Mobile lang buttons */}
+          <div style={{ display: 'flex', gap: '0.3rem' }}>
+            {LANGS.map(opt => (
+              <button
+                key={opt.code}
+                className={`lang-mob-btn ${lang === opt.code ? 'active' : ''}`}
+                onClick={() => { setLang(opt.code); setMenuOpen(false) }}
               >
-                <button className="btn-theme btn-theme-mob" onClick={toggleTheme}>
-                  {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                </button>
+                {opt.flag} {opt.code.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-                {/* Mobile lang buttons */}
-                <div style={{ display: 'flex', gap: '0.3rem' }}>
-                  {LANGS.map(opt => (
-                    <button
-                      key={opt.code}
-                      className={`lang-mob-btn ${lang === opt.code ? 'active' : ''}`}
-                      onClick={() => { setLang(opt.code); setMenuOpen(false) }}
-                    >
-                      {opt.flag} {opt.code.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-
-                <Link href="/login" className="btn-icon" style={{ display: 'flex', marginLeft: 'auto' }} onClick={() => setMenuOpen(false)} title={currentT.login}>
-                  <User size={18} />
-                </Link>
-              </motion.div>
-            </motion.div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+          <Link href="/login" className="btn-icon" style={{ display: 'flex', marginLeft: 'auto' }} onClick={() => setMenuOpen(false)} title={currentT.login}>
+            <User size={18} />
+          </Link>
+        </div>
+      </nav>
 
       {/* Search backdrop */}
       {searchOpen && (

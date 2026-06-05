@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useLang } from '@/components/LangContext'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,18 +85,16 @@ const DEFAULT_SLIDES: Slide[] = [
   {
     id: 1, ...SLIDE_DEFAULTS,
     tag: 'Librairie scolaire de référence',
-    title: 'Tous vos manuels et fournitures\nen un seul endroit',
-    subtitle: 'Préparez votre rentrée avec ProExcel. Des milliers de livres livrés en 24/48h partout au Maroc.',
-    ctaText: 'Découvrir le catalogue',
+    title: 'Tous vos manuels\nscolaires,',
+    subtitle: 'Des milliers de livres et fournitures scolaires livrés en 48h partout au Maroc.',
+    ctaText: 'Explorer le catalogue',
     ctaLink: '/best-offers',
-    ctaText2: 'Voir les offres',
-    ctaLink2: '/best-offers',
     imageUrl: null, bgPosition: 'center',
   },
   {
     id: 2, ...SLIDE_DEFAULTS,
     tag: 'Offres spéciales',
-    title: 'Des économies sur\ntous vos livres',
+    title: 'Des économies sur\ntous vos livres.',
     subtitle: 'Packs et manuels scolaires à prix réduits pour tous les niveaux.',
     ctaText: 'Voir les promotions',
     ctaLink: '/best-offers',
@@ -107,37 +104,7 @@ const DEFAULT_SLIDES: Slide[] = [
 
 const DURATION = 5000
 
-function MagneticButton({ children }: { children: React.ReactNode }) {
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const springX = useSpring(x, { damping: 15, stiffness: 150, mass: 0.1 })
-  const springY = useSpring(y, { damping: 15, stiffness: 150, mass: 0.1 })
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY, currentTarget } = e
-    const { left, top, width, height } = currentTarget.getBoundingClientRect()
-    const centerX = left + width / 2
-    const centerY = top + height / 2
-    x.set((clientX - centerX) * 0.35)
-    y.set((clientY - centerY) * 0.35)
-  }
-
-  const handleMouseLeave = () => {
-    x.set(0)
-    y.set(0)
-  }
-
-  return (
-    <motion.div
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{ x: springX, y: springY }}
-      className="inline-block"
-    >
-      {children}
-    </motion.div>
-  )
-}
+// ─── CTA Button ───────────────────────────────────────────────────────────────
 
 function SliderCTAButton({
   text, href, buttonStyle, secondary = false,
@@ -146,41 +113,37 @@ function SliderCTAButton({
 }) {
   if (!text) return null
 
-  const btnContent = secondary ? (
+  if (secondary) {
+    return (
+      <Link
+        href={href || '/'}
+        className="inline-flex items-center gap-2 border border-white/40 text-white/90 font-semibold transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5"
+        style={{ borderRadius: buttonStyle.borderRadius, padding: `${buttonStyle.paddingY} ${buttonStyle.paddingX}`, fontSize: buttonStyle.fontSize }}
+      >
+        {text}
+      </Link>
+    )
+  }
+
+  const bg = buttonStyle.bgType === 'gradient'
+    ? `linear-gradient(${buttonStyle.bgGradientDirection}, ${buttonStyle.bgGradientStart}, ${buttonStyle.bgGradientEnd})`
+    : buttonStyle.bgColor
+
+  return (
     <Link
       href={href || '/'}
-      className="inline-flex items-center gap-2 font-semibold transition-all duration-300 hover:scale-105 shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] group"
+      className="inline-flex items-center gap-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg group"
       style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-        color: '#ffffff',
-        borderRadius: buttonStyle.borderRadius,
-        padding: `${buttonStyle.paddingY} ${buttonStyle.paddingX}`,
-        fontSize: buttonStyle.fontSize,
-        border: '1px solid rgba(255,255,255,0.15)'
-      }}
-    >
-      {text}
-    </Link>
-  ) : (
-    <Link
-      href={href || '/'}
-      className="inline-flex items-center gap-2.5 transition-all duration-300 hover:scale-105 group"
-      style={{
-        background: buttonStyle.bgType === 'gradient'
-          ? `linear-gradient(${buttonStyle.bgGradientDirection}, ${buttonStyle.bgGradientStart}, ${buttonStyle.bgGradientEnd})`
-          : buttonStyle.bgColor,
-        color: buttonStyle.textColor,
+        background: bg, color: buttonStyle.textColor,
         borderRadius: buttonStyle.borderRadius,
         padding: `${buttonStyle.paddingY} ${buttonStyle.paddingX}`,
         fontSize: buttonStyle.fontSize, fontWeight: buttonStyle.fontWeight,
-        boxShadow: '0 4px 20px rgba(225, 29, 46, 0.4)',
+        boxShadow: '0 4px 20px rgba(0,0,0,.25)',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 30px rgba(225, 29, 46, 0.6)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(225, 29, 46, 0.4)'; }}
     >
       {buttonStyle.showArrowDot && (
         <span
-          className="w-7 h-7 rounded-full flex items-center justify-center text-sm group-hover:translate-x-1 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+          className="w-7 h-7 rounded-full flex items-center justify-center text-sm group-hover:translate-x-0.5 transition-transform"
           style={{ background: buttonStyle.arrowDotColor, color: '#fff' }}
         >
           →
@@ -189,8 +152,6 @@ function SliderCTAButton({
       {text}
     </Link>
   )
-
-  return <MagneticButton>{btnContent}</MagneticButton>
 }
 
 // ─── HeroSlider ───────────────────────────────────────────────────────────────
@@ -302,35 +263,12 @@ export default function HeroSlider() {
       {slides.map((slide, i) => {
         const isActive   = i === current
         const overlay    = OVERLAYS[slide.overlayStrength] ?? OVERLAYS.medium
+        const align      = slide.textAlign === 'left' ? 'left' : 'center'
+        const flexAlign  = align === 'left' ? 'items-start' : 'items-center'
         const tagColor   = slide.tagColor      || 'rgba(255,255,255,0.75)'
         const titleColor = slide.titleColor    || '#ffffff'
         const subColor   = slide.subtitleColor || 'rgba(255,255,255,0.75)'
         const cta1text   = t(slide.ctaText, slide.ctaTextAr)
-
-        const containerVariants = {
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.12,
-              delayChildren: 0.15
-            }
-          }
-        }
-
-        const itemVariants = {
-          hidden: { opacity: 0, y: 25, scale: 0.97 },
-          visible: {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: {
-              type: 'spring' as const,
-              stiffness: 110,
-              damping: 18
-            }
-          }
-        }
 
         return (
           <div
@@ -341,70 +279,64 @@ export default function HeroSlider() {
           >
             {/* Background — Ken Burns — z:0 */}
             <div
-              className={`absolute inset-[-5%] bg-cover bg-no-repeat transition-transform duration-[12000ms] ease-linear hero-slide-bg ${isActive ? 'ken-burns' : ''}`}
+              className="absolute inset-[-5%] bg-cover bg-no-repeat transition-transform duration-[8000ms] ease-linear hero-slide-bg"
               style={{
                 backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : GRADIENTS[i % GRADIENTS.length],
                 backgroundPosition: slide.bgPosition || 'center 30%',
+                transform: isActive ? 'scale(1)' : 'scale(1.08)',
                 zIndex: 0,
               }}
             />
 
             {/* Dark overlay — z:1 — must be between image and content */}
-            <div className="absolute inset-0 hero-overlay" style={{ background: overlay, zIndex: 1 }} />
+            <div className="absolute inset-0" style={{ background: overlay, zIndex: 1 }} />
 
             {/* Content — z:2 — above overlay */}
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate={isActive ? "visible" : "hidden"}
-              className="absolute inset-0 z-[2] flex flex-col items-center justify-center text-center px-6 md:px-12 pt-16 md:pt-24"
+            <div
+              className={`absolute inset-0 flex flex-col ${flexAlign} justify-center px-6 md:px-20 pt-16 md:pt-20 transition-all duration-[900ms] delay-300`}
+              style={{
+                textAlign: align,
+                opacity: isActive ? 1 : 0,
+                transform: isActive ? 'none' : 'translateY(20px)',
+                zIndex: 2,
+              }}
               dir={lang === 'ar' ? 'rtl' : 'ltr'}
             >
               {t(slide.tag, slide.tagAr) && (
-                <motion.span
-                  variants={itemVariants}
-                  className="inline-block text-[0.68rem] md:text-[0.75rem] font-bold tracking-[3px] uppercase bg-white/10 backdrop-blur-md border border-white/20 px-5 py-2 rounded-full mb-5 md:mb-7 shadow-[0_0_20px_rgba(255,255,255,0.12)]"
+                <span
+                  className="inline-block text-[.7rem] font-bold tracking-[2px] uppercase bg-white/10 backdrop-blur-md border border-white/15 px-4 py-1.5 rounded-full mb-4 md:mb-5 animate-fadeInUp"
                   style={{ color: tagColor }}
                 >
                   {t(slide.tag, slide.tagAr)}
-                </motion.span>
+                </span>
               )}
 
-              <motion.h1
-                variants={itemVariants}
-                className="text-[clamp(2.2rem,6vw,5.5rem)] font-norsal text-white leading-[1.05] tracking-[-0.04em] max-w-[360px] md:max-w-[860px] mb-4 md:mb-6 text-glow"
-                style={{
-                  color: titleColor,
-                  whiteSpace: 'pre-line'
-                }}
+              <h1
+                className="text-[clamp(1.8rem,5vw,4.8rem)] font-extrabold leading-[1.2] md:leading-[1.1] tracking-[-0.03em] max-w-[820px] mb-4 md:mb-6 animate-fadeInUp [animation-delay:100ms]"
+                style={{ color: titleColor, textShadow: '0 2px 24px rgba(0,0,0,.3)', whiteSpace: 'pre-line' }}
               >
                 {t(slide.title, slide.titleAr)}
-              </motion.h1>
+              </h1>
 
               {t(slide.subtitle, slide.subtitleAr) && (
-                <motion.p
-                  variants={itemVariants}
-                  className="text-[clamp(0.9rem,2.2vw,1.2rem)] text-white/80 max-w-[300px] md:max-w-[580px] leading-relaxed mb-8 md:mb-10 font-medium"
-                  style={{
-                    color: subColor,
-                    textShadow: '0 2px 10px rgba(0,0,0,0.4)'
-                  }}
+                <p
+                  className="text-[clamp(.82rem,1.8vw,1.05rem)] max-w-[320px] md:max-w-[560px] mb-6 md:mb-8 leading-[1.7] font-normal animate-fadeInUp [animation-delay:200ms]"
+                  style={{ color: subColor }}
                 >
                   {t(slide.subtitle, slide.subtitleAr)}
-                </motion.p>
+                </p>
               )}
 
-              <motion.div
-                variants={itemVariants}
-                className="flex flex-wrap gap-4 md:gap-5 items-center"
-                style={{ justifyContent: 'center' }}
+              <div
+                className="mt-4 md:mt-6 flex flex-wrap gap-4 animate-fadeInUp [animation-delay:300ms]"
+                style={{ justifyContent: align === 'left' ? 'flex-start' : 'center' }}
               >
                 <SliderCTAButton text={cta1text} href={slide.ctaLink} buttonStyle={btnStyle} />
                 {slide.ctaText2 && (
                   <SliderCTAButton text={slide.ctaText2} href={slide.ctaLink2 || '/'} buttonStyle={btnStyle} secondary />
                 )}
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         )
       })}

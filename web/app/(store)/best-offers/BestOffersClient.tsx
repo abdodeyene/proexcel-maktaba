@@ -30,7 +30,6 @@ type Product = {
   isNew?: boolean | null
   isBestOffer?: boolean | null
   variants?: unknown
-  niveau?: string | null
 }
 
 type Category = {
@@ -58,18 +57,12 @@ function CheckRow({
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className={`flex items-center gap-3 rounded-[16px] px-3 py-2.5 mb-1.5 cursor-pointer select-none transition-all duration-[200ms] border ${
-        selected
-          ? 'bg-red-50/60 border-red-200 dark:bg-red-900/20 dark:border-red-800/50 shadow-sm'
-          : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/60'
-      }`}
+      className={`filter-check-row ${selected ? 'selected' : ''}`}
     >
-      <div
-        className={`flex-shrink-0 flex items-center justify-center w-[22px] h-[22px] rounded-[8px] transition-all duration-[200ms] ${
-          selected ? 'bg-red-600 border-none shadow-[0_2px_8px_rgba(220,38,38,0.3)]' : 'bg-white dark:bg-zinc-900 border-[1.5px] border-slate-300 dark:border-slate-600 hover:border-red-400'
-        }`}
-      >
-        {selected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+      <div className="filter-checkbox">
+        {selected && (
+          <Check style={{ width: '11px', height: '11px', color: '#fff', strokeWidth: 3 }} />
+        )}
       </div>
       {children}
     </div>
@@ -80,7 +73,7 @@ function CheckRow({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[12px] font-extrabold uppercase tracking-[0.12em] text-red-600 dark:text-red-500 mb-3">
+    <p className="filter-section-title">
       {children}
     </p>
   )
@@ -102,9 +95,6 @@ function FilterPanel({
   hasActiveFilters,
   activeFilterCount,
   onApply,
-  niveauFilter, setNiveauFilter,
-  categoryFilter, setCategoryFilter,
-  brandFilter, setBrandFilter,
 }: {
   categories: Category[]
   selectedCats: string[]
@@ -119,38 +109,28 @@ function FilterPanel({
   hasActiveFilters: boolean
   activeFilterCount: number
   onApply?: () => void
-  niveauFilter: string; setNiveauFilter: (v: string) => void
-  categoryFilter: string; setCategoryFilter: (v: string) => void
-  brandFilter: string; setBrandFilter: (v: string) => void
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="flex flex-col">
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c', flexShrink: 0 }} strokeWidth={2.2} />
-          <span className="font-bold text-[16px] text-slate-900 dark:text-white tracking-[-0.01em]">Filtres</span>
+      <div className="filter-header">
+        <div className="filter-header-left">
+          <SlidersHorizontal style={{ width: '18px', height: '18px', color: 'var(--primary)', flexShrink: 0 }} strokeWidth={2.2} />
+          <span className="filter-title">Filtres</span>
           {activeFilterCount > 0 && (
-            <span style={{
-              background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
-              minWidth: '20px', height: '20px', padding: '0 6px',
-              borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
-            }}>
+            <span className="filter-active-badge">
               {activeFilterCount}
             </span>
           )}
         </div>
         <button
           onClick={clearFilters}
+          className="filter-reset-btn"
           style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            fontSize: '13px', fontWeight: 700,
-            color: hasActiveFilters ? '#ef233c' : '#94a3b8',
-            cursor: hasActiveFilters ? 'pointer' : 'default',
-            background: 'none', border: 'none', padding: 0,
-            transition: 'color 150ms',
+            color: hasActiveFilters ? 'var(--primary)' : 'var(--text2)',
             pointerEvents: hasActiveFilters ? 'auto' : 'none',
+            cursor: hasActiveFilters ? 'pointer' : 'default',
           }}
         >
           <RotateCcw style={{ width: '13px', height: '13px' }} strokeWidth={2.3} />
@@ -159,95 +139,29 @@ function FilterPanel({
       </div>
 
       {/* ── Search ──────────────────────────────────────────────────────── */}
-      <div style={{ position: 'relative', marginBottom: '26px' }}>
-        <Search
-          style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#94a3b8', pointerEvents: 'none', flexShrink: 0 }}
-          strokeWidth={2}
-        />
+      <div className="filter-search-wrapper">
+        <Search className="filter-search-icon" strokeWidth={2} />
         <input
           type="text"
           placeholder="Rechercher..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-[46px] pl-[42px] pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 shadow-inner"
+          className="filter-search-input"
+          style={{ paddingRight: searchQuery ? '40px' : '16px' }}
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', padding: '4px' }}
+            className="filter-search-clear"
           >
             <X style={{ width: '14px', height: '14px' }} />
           </button>
         )}
       </div>
-      
-      {/* ── Dropdowns ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '26px' }}>
-        {/* Niveau Scolaire */}
-        <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 ml-1">Niveau Scolaire</label>
-          <div className="relative">
-            <select
-              value={niveauFilter}
-              onChange={(e) => setNiveauFilter(e.target.value)}
-              className="w-full h-[46px] pl-4 pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer"
-            >
-              <option value="all">Tous les niveaux</option>
-              <option value="primaire">Primaire</option>
-              <option value="college">Collège</option>
-              <option value="lycee">Lycée</option>
-            </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Catégorie */}
-        <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 ml-1">Type Catégorie</label>
-          <div className="relative">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full h-[46px] pl-4 pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer"
-            >
-              <option value="all">Toutes les catégories</option>
-              <option value="manuels">Manuels / Livres</option>
-              <option value="outils scolaires">Outils Scolaires</option>
-              <option value="accessoires">Accessoires</option>
-              <option value="cahiers">Cahiers</option>
-              <option value="cartables">Cartables</option>
-              <option value="trousses">Trousses</option>
-              <option value="romans">Romans</option>
-            </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Marque */}
-        <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 ml-1">Marque</label>
-          <div className="relative">
-            <select
-              value={brandFilter}
-              onChange={(e) => setBrandFilter(e.target.value)}
-              className="w-full h-[46px] pl-4 pr-10 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-slate-900 dark:text-white focus:border-red-500 focus:ring-4 focus:ring-red-500/15 focus:bg-white dark:focus:bg-slate-800 appearance-none cursor-pointer"
-            >
-              <option value="all">Toutes les marques</option>
-              <option value="deli">Deli</option>
-              <option value="maped">Maped</option>
-              <option value="faber-castell">Faber-Castell</option>
-              <option value="uhu">UHU</option>
-              <option value="navigator">Navigator</option>
-              <option value="other">Autre / Sans marque</option>
-            </select>
-            <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-          </div>
-        </div>
-      </div>
 
       {/* ── Categories ──────────────────────────────────────────────────── */}
       {categories.length > 0 && (
-        <div style={{ marginBottom: '26px' }}>
+        <div className="filter-section-wrapper">
           <SectionTitle>Catégorie</SectionTitle>
           <div>
             {categories.map((cat) => {
@@ -256,27 +170,22 @@ function FilterPanel({
               return (
                 <CheckRow key={cat.id} selected={selected} onClick={() => toggleCategory(cat.name)}>
                   {/* Thumbnail */}
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '12px', flexShrink: 0,
-                    overflow: 'hidden', background: '#f8fafc', border: '1px solid #f1f5f9',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
-                  }}>
+                  <div className="filter-cat-thumb">
                     {cat.image ? (
-                      <Image src={cat.image} alt={cat.name} width={36} height={36} style={{ objectFit: 'contain', width: '100%', height: '100%', padding: '4px' }} />
+                      <Image src={cat.image} alt={cat.name} width={34} height={34} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                     ) : cat.emoji ? (
-                      <span style={{ fontSize: '18px', lineHeight: 1 }}>{cat.emoji}</span>
+                      <span className="text-base leading-none">{cat.emoji}</span>
                     ) : (
-                      <span style={{ fontSize: '15px', color: '#94a3b8' }}>📁</span>
+                      <span className="text-sm text-[var(--text2)]">📁</span>
                     )}
                   </div>
                   {/* Name */}
-                  <span className={`text-[15px] font-bold flex-1 overflow-hidden text-ellipsis whitespace-nowrap transition-colors ${selected ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                  <span className="filter-cat-name">
                     {titleCase(cat.name)}
                   </span>
                   {/* Count */}
                   {count > 0 && (
-                    <span style={{ fontSize: '12px', flexShrink: 0, color: selected ? '#dc2626' : '#94a3b8' }}>
+                    <span className="filter-cat-count">
                       {count}
                     </span>
                   )}
@@ -288,9 +197,9 @@ function FilterPanel({
       )}
 
       {/* ── Price ───────────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: '26px' }}>
+      <div className="filter-section-wrapper">
         <SectionTitle>Prix</SectionTitle>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+        <div className="filter-price-wrapper">
           <input
             type="number"
             value={priceMin === 0 ? '' : priceMin}
@@ -298,9 +207,9 @@ function FilterPanel({
             max={9999}
             placeholder="0"
             onChange={(e) => setPriceMin(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
-            className="flex-1 h-11 rounded-xl border-[1.5px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center font-bold text-sm text-slate-900 dark:text-white outline-none focus:border-red-500 focus:bg-white dark:focus:bg-slate-800 transition-colors"
+            className="filter-price-input"
           />
-          <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '18px', flexShrink: 0, lineHeight: 1 }}>—</span>
+          <span className="filter-price-sep">—</span>
           <input
             type="number"
             value={priceMax === 9999 ? '' : priceMax}
@@ -308,23 +217,23 @@ function FilterPanel({
             max={9999}
             placeholder="9 999"
             onChange={(e) => setPriceMax(e.target.value === '' ? 9999 : Math.max(0, Number(e.target.value)))}
-            className="flex-1 h-11 rounded-xl border-[1.5px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center font-bold text-sm text-slate-900 dark:text-white outline-none focus:border-red-500 focus:bg-white dark:focus:bg-slate-800 transition-colors"
+            className="filter-price-input"
           />
         </div>
-        <p style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8', margin: 0 }}>
+        <p className="filter-price-range-text">
           {priceMin > 0 ? priceMin : 0} DH — {priceMax === 9999 ? '9 999' : priceMax} DH
         </p>
       </div>
 
       {/* ── Availability ────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: '8px' }}>
+      <div className="filter-section-wrapper" style={{ marginBottom: '8px' }}>
         <SectionTitle>Disponibilité</SectionTitle>
         {[
           { id: 'inStock', label: 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
           { id: 'onSale',  label: 'En promotion',        value: promoOnly,   set: setPromoOnly  },
         ].map((opt) => (
           <CheckRow key={opt.id} selected={opt.value} onClick={() => opt.set(!opt.value)}>
-            <span className={`text-[15px] font-bold transition-colors ${opt.value ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'}`}>
+            <span className="filter-cat-name">
               {opt.label}
             </span>
           </CheckRow>
@@ -333,73 +242,45 @@ function FilterPanel({
 
       {/* ── Active filters ───────────────────────────────────────────────── */}
       {hasActiveFilters && (
-        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px', marginTop: '12px' }}>
+        <div className="filter-active-chips-container">
           <SectionTitle>Filtres actifs</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {selectedCats.map((catName) => (
-              <span key={catName} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3',
-                borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800,
-              }}>
+              <span key={catName} className="filter-active-chip">
                 {titleCase(catName)}
-                <button onClick={() => toggleCategory(catName)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => toggleCategory(catName)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             ))}
             {priceMin > 0 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-min" className="filter-active-chip">
                 Min {priceMin} DH
-                <button onClick={() => setPriceMin(0)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setPriceMin(0)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             )}
             {priceMax < 9999 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-max" className="filter-active-chip">
                 Max {priceMax} DH
-                <button onClick={() => setPriceMax(9999)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setPriceMax(9999)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             )}
             {inStockOnly && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-stock" className="filter-active-chip">
                 En stock
-                <button onClick={() => setInStockOnly(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setInStockOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
             )}
             {promoOnly && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
+              <span key="active-promo" className="filter-active-chip">
                 En promo
-                <button onClick={() => setPromoOnly(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-            {niveauFilter !== 'all' && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
-                Niveau: {titleCase(niveauFilter)}
-                <button onClick={() => setNiveauFilter('all')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-            {categoryFilter !== 'all' && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
-                Cat: {titleCase(categoryFilter)}
-                <button onClick={() => setCategoryFilter('all')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-            {brandFilter !== 'all' && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#fff1f2', color: '#dc2626', border: '1px solid #fecdd3', borderRadius: '999px', padding: '7px 10px', fontSize: '12px', fontWeight: 800 }}>
-                Marque: {titleCase(brandFilter)}
-                <button onClick={() => setBrandFilter('all')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', display: 'flex', padding: 0 }}>
+                <button onClick={() => setPromoOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
               </span>
@@ -459,10 +340,7 @@ export default function BestOffersClient({
   const [priceMax,     setPriceMax]     = useState(9999)
   const [sort,         setSort]         = useState('default')
   const [filterOpen,   setFilterOpen]   = useState(false)
-  
-  const [niveauFilter,   setNiveauFilter]   = useState('all')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-  const [brandFilter,    setBrandFilter]    = useState('all')
+  const [sortOpen,     setSortOpen]     = useState(false)
 
   // Read URL params on mount
   useEffect(() => {
@@ -529,16 +407,12 @@ export default function BestOffersClient({
     setPriceMin(0)
     setPriceMax(9999)
     setSort('default')
-    setNiveauFilter('all')
-    setCategoryFilter('all')
-    setBrandFilter('all')
     router.push(pageTitle ? window.location.pathname : '/best-offers')
   }
 
   const hasActiveFilters =
     selectedCats.length > 0 || inStockOnly || promoOnly ||
-    searchQuery.length > 0  || priceMin > 0 || priceMax < 9999 ||
-    niveauFilter !== 'all' || categoryFilter !== 'all' || brandFilter !== 'all'
+    searchQuery.length > 0  || priceMin > 0 || priceMax < 9999
 
   const activeFilterCount =
     selectedCats.length +
@@ -546,230 +420,188 @@ export default function BestOffersClient({
     (promoOnly ? 1 : 0) +
     (searchQuery ? 1 : 0) +
     (priceMin > 0 ? 1 : 0) +
-    (priceMax < 9999 ? 1 : 0) +
-    (niveauFilter !== 'all' ? 1 : 0) +
-    (categoryFilter !== 'all' ? 1 : 0) +
-    (brandFilter !== 'all' ? 1 : 0)
+    (priceMax < 9999 ? 1 : 0)
 
   // Local sort + priceMin filter (API handles the rest)
   const filtered = useMemo(() => {
     let list = [...products]
     if (priceMin > 0) list = list.filter((p) => p.price >= priceMin)
-
-    // Niveau filter client-side
-    if (niveauFilter !== 'all') {
-      list = list.filter((p) => {
-        if (p.niveau) {
-          return p.niveau.toLowerCase() === niveauFilter.toLowerCase()
-        }
-        const cat = (p.category || '').toLowerCase()
-        if (cat.includes('manuel') || cat.includes('livre') || cat.includes('roman')) {
-          const titleLower = p.title.toLowerCase()
-          if (niveauFilter === 'primaire') {
-            return titleLower.includes('primaire') || titleLower.includes('aep') || /([1-6])(er|ère|ème)?\s*année/.test(titleLower)
-          }
-          if (niveauFilter === 'college') {
-            return titleLower.includes('collège') || titleLower.includes('college') || titleLower.includes('ac') || /([1-3])(er|ère|ème)?\s*année\s*collège/.test(titleLower)
-          }
-          if (niveauFilter === 'lycee') {
-            return titleLower.includes('lycée') || titleLower.includes('lycee') || titleLower.includes('bac') || titleLower.includes('tronc commun')
-          }
-          return false
-        }
-        return true
-      })
-    }
-
-    // Category filter dropdown client-side
-    if (categoryFilter !== 'all') {
-      list = list.filter((p) => {
-        const cat = (p.category || '').toLowerCase()
-        if (categoryFilter === 'manuels') {
-          return cat.includes('manuel') || cat.includes('livre') || cat.includes('scolaire')
-        }
-        if (categoryFilter === 'outils scolaires') {
-          return cat.includes('outil') || cat.includes('scolaire') || cat.includes('fourniture')
-        }
-        return cat === categoryFilter.toLowerCase()
-      })
-    }
-
-    // Brand filter client-side
-    if (brandFilter !== 'all') {
-      list = list.filter((p) => {
-        const titleLower = p.title.toLowerCase()
-        if (brandFilter === 'other') {
-          const knownBrands = ['deli', 'maped', 'faber-castell', 'uhu', 'navigator', 'faber castell']
-          return !knownBrands.some(brand => titleLower.includes(brand))
-        }
-        if (brandFilter === 'faber-castell') {
-          return titleLower.includes('faber-castell') || titleLower.includes('faber castell')
-        }
-        return titleLower.includes(brandFilter.toLowerCase())
-      })
-    }
-
     if (sort === 'price_asc' || sort === 'price-asc')     list.sort((a, b) => a.price - b.price)
     else if (sort === 'price_desc' || sort === 'price-desc') list.sort((a, b) => b.price - a.price)
     else if (sort === 'newest' || sort === 'new')  list.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
     else if (sort === 'popular' || sort === 'rating') list.sort((a, b) => (b.rating || 0) - (a.rating || 0))
     return list
-  }, [products, priceMin, sort, niveauFilter, categoryFilter, brandFilter])
+  }, [products, priceMin, sort])
 
   const filterProps = {
     categories, selectedCats, toggleCategory, isCatSelected,
     inStockOnly, setInStockOnly, promoOnly, setPromoOnly,
     priceMin, setPriceMin, priceMax, setPriceMax,
     searchQuery, setSearchQuery, clearFilters, hasActiveFilters, activeFilterCount,
-    niveauFilter, setNiveauFilter,
-    categoryFilter, setCategoryFilter,
-    brandFilter, setBrandFilter,
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0f0f11]">
-      
-      {/* ── HERO SECTION (WHITE) ────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-[#18181b] border-b border-gray-100 dark:border-white/5 pt-8 pb-10 mb-8">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 flex flex-col items-center text-center">
-          <nav className="flex items-center gap-2 text-[13px] font-medium text-gray-400 dark:text-gray-500 mb-6">
-            <Link href="/" className="hover:text-gray-900 dark:hover:text-gray-200 transition-colors">Accueil</Link>
+    <>
+      {/* ── PAGE HERO ──────────────────────────────────────────────────── */}
+      <div className="page-hero">
+        <div className="page-hero-inner">
+          <div className="breadcrumb-nav">
+            <Link href="/">Accueil</Link>
             <span>›</span>
-            <span className="text-gray-900 dark:text-white">{pageTitle || 'Meilleures Offres'}</span>
-          </nav>
-          
-          <h1 className="text-[32px] md:text-[42px] font-bold text-gray-900 dark:text-white tracking-tight mb-3">
-            {pageTitle || 'Meilleures Offres'}
-          </h1>
-          
-          <p className="text-[15px] text-gray-500 dark:text-gray-400 max-w-2xl">
-            {pageSubtitle || 'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}
+            <span>{pageTitle || 'Meilleures Offres'}</span>
+          </div>
+          <h1>{pageTitle || 'Meilleures Offres'}</h1>
+          <p>
+            {pageSubtitle ||
+              'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}
           </p>
         </div>
       </div>
 
-      {/* ── LAYOUT ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 w-full max-w-[1400px] mx-auto pb-24 px-4 lg:px-6">
+      {/* ── LAYOUT ────────────────────────────────────────────────────── */}
+      <div className="offers-layout">
 
-        {/* ── DESKTOP SIDEBAR ─────────────────────────────────────────── */}
+        {/* ── DESKTOP SIDEBAR ───────────────────────────────────────── */}
         <aside
-          className="hidden lg:block sticky self-start flex-shrink-0 w-[280px]"
-          style={{ top: '96px' }}
+          className="hidden md:block sticky self-start flex-shrink-0"
+          style={{ top: '88px', width: '300px' }}
         >
-          <div className="bg-white dark:bg-[#18181b] rounded-[20px] p-6 shadow-sm border border-gray-100 dark:border-white/5">
+          <div style={{
+            background: 'var(--card)',
+            borderRadius: '24px',
+            padding: '24px',
+            border: '1px solid var(--border)',
+            boxShadow: '0 18px 45px rgba(15,23,42,0.08)',
+            overflow: 'hidden',
+          }}>
             <FilterPanel {...filterProps} />
           </div>
         </aside>
 
-        {/* ── MAIN CONTENT ────────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0 w-full">
+        {/* ── RESULTS ───────────────────────────────────────────────── */}
+        <div className="flex-1 min-w-0">
 
           {/* Sort bar */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 bg-white dark:bg-[#18181b] p-4 lg:px-6 lg:py-4 rounded-[20px] shadow-sm border border-gray-100 dark:border-white/5">
-            <div className="flex items-center gap-4">
+          <div className="sort-bar">
+            <div className="sort-bar-left">
               {/* Mobile filter button */}
               <button
                 onClick={() => setFilterOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-white/5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors lg:hidden"
+                className="mobile-filter-trigger"
               >
-                <SlidersHorizontal className="w-4 h-4 text-red-600" />
-                Filtres
+                <SlidersHorizontal style={{ width: '16px', height: '16px', color: 'var(--primary)' }} strokeWidth={2.2} />
+                <span>Filtres</span>
                 {activeFilterCount > 0 && (
-                  <span className="bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center ml-1">
-                    {activeFilterCount}
-                  </span>
+                  <span className="mobile-filter-count">{activeFilterCount}</span>
                 )}
               </button>
 
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                <span className="font-bold text-gray-900 dark:text-white mr-1">{filtered.length}</span>
+              <p className="sort-bar-count">
+                <span className="sort-bar-count-num">{filtered.length}</span>{' '}
                 produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 text-sm w-full sm:w-auto">
-              <label className="font-medium text-gray-500 dark:text-gray-400 hidden sm:block">Trier par :</label>
-              <div className="relative w-full sm:w-48">
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value)}
-                  className="w-full appearance-none pl-4 pr-10 py-2.5 bg-gray-50 dark:bg-[#0f0f11] border border-transparent dark:border-white/5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 focus:border-red-500 focus:ring-1 focus:ring-red-500/20 outline-none transition-all cursor-pointer"
+            <div className="sort-bar-right">
+              <label className="sort-label-text">Trier par :</label>
+              <div className="sort-dropdown-wrapper">
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className={`sort-trigger-btn ${sortOpen ? 'open' : ''}`}
                 >
-                  <option value="default">Par défaut</option>
-                  <option value="price_asc">Prix croissant</option>
-                  <option value="price_desc">Prix décroissant</option>
-                  <option value="newest">Nouveautés</option>
-                  <option value="popular">Popularité</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <span>
+                    {sort === 'price_asc' || sort === 'price-asc'
+                      ? 'Prix croissant'
+                      : sort === 'price_desc' || sort === 'price-desc'
+                      ? 'Prix décroissant'
+                      : sort === 'newest' || sort === 'new'
+                      ? 'Nouveautés'
+                      : sort === 'popular' || sort === 'rating'
+                      ? 'Popularité'
+                      : 'Par défaut'}
+                  </span>
+                  <ChevronDown
+                    style={{
+                      width: '15px', height: '15px',
+                      transition: 'transform 0.25s ease',
+                      transform: sortOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    }}
+                    strokeWidth={2.5}
+                  />
+                </button>
+
+                {sortOpen && (
+                  <>
+                    <div className="sort-dropdown-backdrop" onClick={() => setSortOpen(false)} />
+                    <div className="sort-dropdown-menu">
+                      {[
+                        { value: 'default', label: 'Par défaut' },
+                        { value: 'price_asc', label: 'Prix croissant' },
+                        { value: 'price_desc', label: 'Prix décroissant' },
+                        { value: 'newest', label: 'Nouveautés' },
+                        { value: 'popular', label: 'Popularité' },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => {
+                            setSort(opt.value)
+                            setSortOpen(false)
+                          }}
+                          className={`sort-dropdown-item ${sort === opt.value ? 'active' : ''}`}
+                        >
+                          <span>{opt.label}</span>
+                          {sort === opt.value && (
+                            <Check style={{ width: '14px', height: '14px', color: 'var(--primary)' }} strokeWidth={2.5} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Active Filter Chips */}
           {hasActiveFilters && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="active-chips-bar">
               {selectedCats.map((cat) => (
-                <div key={`chip-cat-${cat}`} className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div key={`chip-cat-${cat}`} className="filter-chip">
                   <span>{titleCase(cat)}</span>
-                  <button onClick={() => toggleCategory(cat)} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => toggleCategory(cat)}>
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               ))}
               {priceMin > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div className="filter-chip">
                   <span>Min {priceMin} DH</span>
-                  <button onClick={() => setPriceMin(0)} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => setPriceMin(0)}>
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {priceMax < 9999 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div className="filter-chip">
                   <span>Max {priceMax} DH</span>
-                  <button onClick={() => setPriceMax(9999)} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => setPriceMax(9999)}>
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {inStockOnly && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div className="filter-chip">
                   <span>En stock</span>
-                  <button onClick={() => setInStockOnly(false)} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => setInStockOnly(false)}>
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {promoOnly && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
+                <div className="filter-chip">
                   <span>En promotion</span>
-                  <button onClick={() => setPromoOnly(false)} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-              {niveauFilter !== 'all' && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
-                  <span>Niveau: {titleCase(niveauFilter)}</span>
-                  <button onClick={() => setNiveauFilter('all')} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-              {categoryFilter !== 'all' && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
-                  <span>Cat: {titleCase(categoryFilter)}</span>
-                  <button onClick={() => setCategoryFilter('all')} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-              {brandFilter !== 'all' && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 text-xs font-semibold rounded-lg border border-red-100">
-                  <span>Marque: {titleCase(brandFilter)}</span>
-                  <button onClick={() => setBrandFilter('all')} className="text-red-400 hover:text-red-700 transition-colors">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => setPromoOnly(false)}>
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -778,24 +610,24 @@ export default function BestOffersClient({
 
           {/* Products grid */}
           {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-[#18181b] rounded-[20px] border border-gray-100 dark:border-white/5">
-              <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-[#0f0f11] flex items-center justify-center mb-4">
-                <Search className="w-7 h-7 text-gray-400" />
+            <div className="empty-state-container">
+              <div className="empty-state-icon">
+                <Search style={{ width: '28px', height: '28px', color: 'var(--text2)' }} />
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Aucun produit trouvé</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <h3 className="empty-state-title">Aucun produit trouvé</h3>
+              <p className="empty-state-text">
                 Aucun produit ne correspond à vos filtres.
               </p>
               <button
                 onClick={clearFilters}
-                className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
+                className="empty-state-reset"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw style={{ width: '14px', height: '14px' }} strokeWidth={2.2} />
                 Réinitialiser les filtres
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="products-grid">
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p as any} index={i} />
               ))}
@@ -806,14 +638,14 @@ export default function BestOffersClient({
 
       {/* ── MOBILE BOTTOM SHEET ───────────────────────────────────────── */}
       {filterOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex">
+        <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setFilterOpen(false)}
           />
           <div
-            className="relative mr-auto h-full w-[310px] max-w-[85vw] flex flex-col shadow-2xl animate-slide-in-left"
-            style={{ background: 'var(--bg)', borderRight: '1px solid var(--border)' }}
+            className="absolute bottom-0 left-0 right-0 flex flex-col shadow-2xl"
+            style={{ borderRadius: '24px 24px 0 0', maxHeight: '85vh', background: 'var(--card)' }}
           >
             {/* Mobile drawer header */}
             <div style={{
@@ -822,7 +654,7 @@ export default function BestOffersClient({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c' }} strokeWidth={2.2} />
-                <span className="font-bold text-base text-gray-900 dark:text-white tracking-tight">Filtres</span>
+                <span style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>Filtres</span>
                 {activeFilterCount > 0 && (
                   <span style={{
                     background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
@@ -837,8 +669,8 @@ export default function BestOffersClient({
                 onClick={() => setFilterOpen(false)}
                 style={{
                   width: '32px', height: '32px', borderRadius: '50%',
-                  background: 'var(--bg2)', border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text2)',
+                  background: '#f1f5f9', border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b',
                 }}
               >
                 <X style={{ width: '16px', height: '16px' }} />
@@ -852,6 +684,6 @@ export default function BestOffersClient({
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

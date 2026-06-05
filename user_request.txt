@@ -1,0 +1,126 @@
+﻿<USER_REQUEST>
+Fix 4 specific issues in ProductCard. 
+Keep exact same design â€” only fix what's listed below.
+
+READ FIRST:
+components/store/ProductCard.tsx â€” read completely
+
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+FIX 1 â€” DELETE CATEGORY LABEL
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+Find and DELETE this element from card body.
+It shows "OUTILS SCOLAIRES" above product name:
+
+Search for any JSX that renders:
+- category?.name
+- product.category
+- cat.name
+- categoryName
+
+Delete the ENTIRE element that renders it.
+Example of what to delete:
+
+<p className="... uppercase ... text-xs ...">
+  {category?.name}
+</p>
+
+After deleting: card body order must be:
+1. Product name (h3)
+2. Stars row
+3. Price row
+
+Nothing else.
+
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+FIX 2 â€” AJOUTER AU PANIER â€” HOVER ONLY
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+PROBLEM: Button shows permanently on image.
+
+Find the "Ajouter au panier" overlay div.
+Add these exact inline styles:
+
+<div
+  style={{
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    paddingBottom: '16px',
+    zIndex: 20,
+    opacity: hovered ? 1 : 0,
+    transform: hovered ? 'translateY(0)' : 'translateY(8px)',
+    pointerEvents: hovered ? 'auto' : 'none',
+    transition: 'opacity 0.25s ease, transform 0.25s ease',
+  }}
+>
+  <button ...>
+    <ShoppingCart className="w-4 h-4" />
+    Ajouter au panier
+  </button>
+</div>
+
+Make sure card wrapper has:
+onMouseEnter={() => setHovered(true)}
+onMouseLeave={() => setHovered(false)}
+
+And component has:
+const [hovered, setHovered] = useState(false)
+
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+<truncated 1780 bytes>
+
+                     text-gray-600 dark:text-gray-400 ml-1.5">
+      {(rating ?? 0).toFixed(1)}
+    </span>
+    <span className="text-[.72rem] text-gray-400 ml-0.5">
+      ({reviewCount ?? 0})
+    </span>
+  </div>
+
+  {/* Price */}
+  <div className="flex items-baseline gap-2 flex-wrap">
+    <span className="text-[.95rem] font-extrabold text-red-600">
+      {price.toFixed(0)} DH
+    </span>
+    {hasDiscount && compareAtPrice && (
+      <span className="text-[.8rem] text-gray-400 line-through">
+        {compareAtPrice.toFixed(0)} DH
+      </span>
+    )}
+  </div>
+
+</div>
+
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+DO NOT CHANGE
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+âœ“ Card white background + rounded-2xl
+âœ“ Shadow at rest, stronger shadow on hover
+âœ“ Hover: card lifts -translate-y-0.5
+âœ“ Image: 1:1 square ratio
+âœ“ Discount badge: red pill, top-left
+âœ“ Heart button: gray circle, bottom-right, turns red on click
+âœ“ Grid layout
+
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+VERIFY
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+[ ] NO "OUTILS SCOLAIRES" category text in card
+[ ] "Ajouter au panier" hidden at rest, shows on hover only
+[ ] Full product image visible â€” not cropped
+[ ] Card body: name â†’ stars â†’ price, tight spacing
+[ ] No extra empty space inside card body
+[ ] npm run build â†’ 0 errors
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-05-27T01:37:09+01:00.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from Gemini 3.5 Flash (High) to Gemini 3.1 Pro (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>
