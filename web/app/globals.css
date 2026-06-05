@@ -23,9 +23,9 @@
   --t: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
   --font-latin: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  --font-arabic: 'IBM Plex Arabic', sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
   --font-heading-latin: 'Outfit', sans-serif;
-  --font-heading-arabic: 'IBM Plex Arabic', sans-serif;
+  --font-heading-arabic: 'IBM Plex Sans Arabic', sans-serif;
 
   /* Button defaults used before per-button admin styles load */
   --btn-grad1: #e8352a;
