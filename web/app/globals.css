@@ -154,16 +154,16 @@ button {
 [dir="rtl"] h3,
 [dir="rtl"] h4 {
   font-family: var(--font-heading-arabic);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
 }
 
 [dir="rtl"] .section-title {
-  font-weight: 900;
+  font-weight: 700;
 }
 
 [dir="rtl"] .product-detail-title {
-  font-weight: 900;
+  font-weight: 700;
 }
 
 [dir="rtl"] .product-name {
