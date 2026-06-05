@@ -45,7 +45,16 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
     return []
   }, [product.variants])
 
+  const parsedColors = useMemo(() => {
+    if (Array.isArray(product.colors)) return product.colors as string[]
+    if (typeof product.colors === 'string') {
+      try { return JSON.parse(product.colors) as string[] } catch { return [] }
+    }
+    return []
+  }, [product.colors])
+
   const hasVariants = parsedVariants.length > 0 && parsedVariants[0].toLowerCase() !== 'standard'
+  const hasColors = parsedColors.length > 0
 
   // Scroll-in animation with stagger
   useEffect(() => {
@@ -175,14 +184,33 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
           {product.title}
         </h3>
 
-        {/* ── VARIANTS PILLS ── */}
-        {hasVariants && (
-          <div className="pcard-variants-row">
-            {parsedVariants.slice(0, 3).map((v, i) => (
-              <span key={i} className="pcard-variant-pill">{v}</span>
-            ))}
-            {parsedVariants.length > 3 && (
-              <span className="pcard-variant-more">+{parsedVariants.length - 3}</span>
+        {/* ── VARIANTS & COLORS PILLS ── */}
+        {(hasVariants || hasColors) && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            {hasColors ? (
+              <>
+                {parsedColors.slice(0, 4).map((c, i) => (
+                  <span 
+                    key={i} 
+                    className="w-4 h-4 rounded-full border border-black/15 dark:border-white/20 shadow-sm hover:scale-110 transition-transform cursor-default"
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+                {parsedColors.length > 4 && (
+                  <span className="text-[0.65rem] font-bold text-[var(--text2)] opacity-80 pl-0.5">
+                    +{parsedColors.length - 4}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                {parsedVariants.slice(0, 3).map((v, i) => (
+                  <span key={i} className="pcard-variant-pill">{v}</span>
+                ))}
+                {parsedVariants.length > 3 && (
+                  <span className="pcard-variant-more">+{parsedVariants.length - 3}</span>
+                )}
+              </>
             )}
           </div>
         )}
