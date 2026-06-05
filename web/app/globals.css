@@ -7658,6 +7658,17 @@ textarea.form-input {
   right: auto;
   left: 0;
 }
+
+@media (max-width: 640px) {
+  .sort-dropdown-menu {
+    right: auto;
+    left: 0;
+  }
+  [dir="rtl"] .sort-dropdown-menu {
+    right: 0;
+    left: auto;
+  }
+}
 @keyframes sortDropIn {
   from {
     opacity: 0;
