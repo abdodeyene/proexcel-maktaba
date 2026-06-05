@@ -5917,18 +5917,7 @@ textarea.form-input {
 
 /* scroll-wrap on home page uses regular grid, no horizontal override */
 
-/* ─── CAIRO ARABIC FORCE ─── */
-:lang(ar),
-[dir="rtl"] {
-  font-family: 'Cairo', 'Inter', sans-serif !important;
-}
 
-[dir="rtl"] h1,
-[dir="rtl"] h2,
-[dir="rtl"] h3,
-[dir="rtl"] h4 {
-  font-family: 'Cairo', sans-serif !important;
-}
 
 /* ─── UTILITIES ─── */
 @keyframes fadeInUp {
