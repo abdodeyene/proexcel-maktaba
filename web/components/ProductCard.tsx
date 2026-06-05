@@ -45,7 +45,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
     return []
   }, [product.variants])
 
-  const hasVariants = parsedVariants.length > 1
+  const hasVariants = parsedVariants.length > 0 && parsedVariants[0].toLowerCase() !== 'standard'
 
   // Scroll-in animation with stagger
   useEffect(() => {
