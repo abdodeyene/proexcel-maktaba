@@ -241,7 +241,7 @@ function FilterPanel({
       {/* ── Price ───────────────────────────────────────────────────────── */}
       <div className="filter-section-wrapper">
         <SectionTitle>Prix</SectionTitle>
-        <div className="filter-price-wrapper">
+        <div className="filter-price-wrapper" dir="ltr">
           <input
             type="number"
             value={priceMin === 0 ? '' : priceMin}
@@ -262,7 +262,7 @@ function FilterPanel({
             className="filter-price-input"
           />
         </div>
-        <p className="filter-price-range-text">
+        <p className="filter-price-range-text" dir="ltr" style={{ textAlign: 'right' }}>
           {priceMin > 0 ? priceMin : 0} DH — {priceMax === 9999 ? '9 999' : priceMax} DH
         </p>
       </div>

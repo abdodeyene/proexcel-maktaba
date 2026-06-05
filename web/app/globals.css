@@ -7438,13 +7438,9 @@ textarea.form-input {
   margin-bottom: 8px;
 }
 
-[dir="rtl"] .filter-price-wrapper {
-  justify-content: space-between;
-  gap: 0;
-}
-
 .filter-price-input {
   flex: 1;
+  min-width: 0;
   height: 44px;
   border-radius: 12px;
   box-sizing: border-box;
@@ -7459,11 +7455,6 @@ textarea.form-input {
   transition: border-color 150ms, background-color 150ms;
 }
 
-[dir="rtl"] .filter-price-input {
-  flex: none;
-  width: 42%;
-}
-
 .filter-price-input:focus {
   border-color: var(--primary);
   background: var(--card);
@@ -7472,14 +7463,8 @@ textarea.form-input {
 .filter-price-sep {
   color: var(--text2);
   font-weight: 500;
-}
-
-[dir="rtl"] .filter-price-sep {
-  margin: 0 12px;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0 4px;
 }
 
 .filter-price-range-text {
