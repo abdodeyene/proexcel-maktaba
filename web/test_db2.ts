@@ -1,0 +1,1 @@
+import { prisma } from './lib/prisma'; async function run() { const products = await prisma.product.findMany({ take: 5, select: { title: true, variants: true, colors: true } }); console.log(JSON.stringify(products, null, 2)); } run();

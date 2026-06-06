@@ -6,6 +6,8 @@ import ProductCard from '@/components/ProductCard'
 import HeroSlider from '@/components/store/HeroSlider'
 import StatsBar from '@/components/store/StatsBar'
 import InfoStrip from '@/components/store/InfoStrip'
+import AvisClients from '@/components/store/AvisClients'
+import PourquoiProExcel from '@/components/store/PourquoiProExcel'
 import Link from 'next/link'
 import { useLang } from '@/components/LangContext'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
@@ -370,25 +372,11 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── ENGAGEMENTS ── */}
-      <div className="engage-section" style={{ background: 'var(--bg2)', borderTop: '1px solid var(--border)' }}>
-        <div className="engage-inner">
-          <div className="section-header scroll-reveal">
-            <div className="section-tag">{T.engageTag}</div>
-            <h2 className="section-title">{T.engageTitle}</h2>
-            <p className="section-sub">{T.engageSub}</p>
-          </div>
-          <div className="engage-grid">
-            {ENGAGEMENTS.map((e, i) => (
-              <div key={e.key} className={`engage-item scroll-reveal ${STAGGER[i + 1]}`}>
-                <div className="engage-icon">{e.icon}</div>
-                <div className="engage-title">{e.title}</div>
-                <div className="engage-desc">{e.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* ── ENGAGEMENTS (Pourquoi ProExcel) ── */}
+      <PourquoiProExcel />
+
+      {/* ── AVIS CLIENTS ── */}
+      <AvisClients />
 
       {/* ── NOTRE BOUTIQUE ── */}
       <div className="store-section">

@@ -13,6 +13,7 @@ import {
   Check,
   ChevronDown,
 } from '@/components/LucideIcons'
+import { useLang } from '@/components/LangContext'
 
 type Product = {
   id: number
@@ -110,14 +111,17 @@ function FilterPanel({
   activeFilterCount: number
   onApply?: () => void
 }) {
+  const { lang } = useLang()
+  const isAr = lang === 'ar'
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="filter-header">
         <div className="filter-header-left">
           <SlidersHorizontal style={{ width: '18px', height: '18px', color: 'var(--primary)', flexShrink: 0 }} strokeWidth={2.2} />
-          <span className="filter-title">Filtres</span>
+          <span className="filter-title">{isAr ? 'تصفية' : 'Filtres'}</span>
           {activeFilterCount > 0 && (
             <span className="filter-active-badge">
               {activeFilterCount}
@@ -134,7 +138,7 @@ function FilterPanel({
           }}
         >
           <RotateCcw style={{ width: '13px', height: '13px' }} strokeWidth={2.3} />
-          Réinitialiser
+          {isAr ? 'إعادة ضبط' : 'Réinitialiser'}
         </button>
       </div>
 
@@ -143,7 +147,7 @@ function FilterPanel({
         <Search className="filter-search-icon" strokeWidth={2} />
         <input
           type="text"
-          placeholder="Rechercher..."
+          placeholder={isAr ? 'بحث...' : 'Rechercher...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="filter-search-input"
@@ -162,7 +166,7 @@ function FilterPanel({
       {/* ── Categories ──────────────────────────────────────────────────── */}
       {categories.length > 0 && (
         <div className="filter-section-wrapper">
-          <SectionTitle>Catégorie</SectionTitle>
+          <SectionTitle>{isAr ? 'الفئة' : 'Catégorie'}</SectionTitle>
           <div>
             {categories.map((cat) => {
               const selected = isCatSelected(cat.name)
@@ -198,7 +202,7 @@ function FilterPanel({
 
       {/* ── Price ───────────────────────────────────────────────────────── */}
       <div className="filter-section-wrapper">
-        <SectionTitle>Prix</SectionTitle>
+        <SectionTitle>{isAr ? 'السعر' : 'Prix'}</SectionTitle>
         <div className="filter-price-wrapper" dir="ltr">
           <input
             type="number"
@@ -227,10 +231,10 @@ function FilterPanel({
 
       {/* ── Availability ────────────────────────────────────────────────── */}
       <div className="filter-section-wrapper" style={{ marginBottom: '8px' }}>
-        <SectionTitle>Disponibilité</SectionTitle>
+        <SectionTitle>{isAr ? 'التوفر' : 'Disponibilité'}</SectionTitle>
         {[
-          { id: 'inStock', label: 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
-          { id: 'onSale',  label: 'En promotion',        value: promoOnly,   set: setPromoOnly  },
+          { id: 'inStock', label: isAr ? 'متوفر في المخزون' : 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
+          { id: 'onSale',  label: isAr ? 'في تخفيض' : 'En promotion',        value: promoOnly,   set: setPromoOnly  },
         ].map((opt) => (
           <CheckRow key={opt.id} selected={opt.value} onClick={() => opt.set(!opt.value)}>
             <span className="filter-cat-name">
@@ -243,7 +247,7 @@ function FilterPanel({
       {/* ── Active filters ───────────────────────────────────────────────── */}
       {hasActiveFilters && (
         <div className="filter-active-chips-container">
-          <SectionTitle>Filtres actifs</SectionTitle>
+          <SectionTitle>{isAr ? 'عوامل التصفية النشطة' : 'Filtres actifs'}</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {selectedCats.map((catName) => (
               <span key={catName} className="filter-active-chip">
@@ -255,7 +259,7 @@ function FilterPanel({
             ))}
             {priceMin > 0 && (
               <span key="active-min" className="filter-active-chip">
-                Min {priceMin} DH
+                {isAr ? `الأدنى ${priceMin} درهم` : `Min ${priceMin} DH`}
                 <button onClick={() => setPriceMin(0)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -263,7 +267,7 @@ function FilterPanel({
             )}
             {priceMax < 9999 && (
               <span key="active-max" className="filter-active-chip">
-                Max {priceMax} DH
+                {isAr ? `الأقصى ${priceMax} درهم` : `Max ${priceMax} DH`}
                 <button onClick={() => setPriceMax(9999)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -271,7 +275,7 @@ function FilterPanel({
             )}
             {inStockOnly && (
               <span key="active-stock" className="filter-active-chip">
-                En stock
+                {isAr ? 'متوفر' : 'En stock'}
                 <button onClick={() => setInStockOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -279,7 +283,7 @@ function FilterPanel({
             )}
             {promoOnly && (
               <span key="active-promo" className="filter-active-chip">
-                En promo
+                {isAr ? 'في تخفيض' : 'En promo'}
                 <button onClick={() => setPromoOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -304,7 +308,7 @@ function FilterPanel({
           }}
         >
           <Check style={{ width: '16px', height: '16px' }} strokeWidth={2.5} />
-          Appliquer les filtres
+          {isAr ? 'تطبيق الفلاتر' : 'Appliquer les filtres'}
           {activeFilterCount > 0 && ` (${activeFilterCount})`}
         </button>
       )}
@@ -327,6 +331,8 @@ export default function BestOffersClient({
 }) {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { lang } = useLang()
+  const isAr = lang === 'ar'
 
   const [products,   setProducts]   = useState<Product[]>(initialProducts)
   const [categories, setCategories] = useState<Category[]>(initialCategories)
@@ -445,15 +451,15 @@ export default function BestOffersClient({
       {/* ── PAGE HERO ──────────────────────────────────────────────────── */}
       <div className="page-hero">
         <div className="page-hero-inner">
-          <div className="breadcrumb-nav">
-            <Link href="/">Accueil</Link>
+          <div className="breadcrumb-nav" dir={isAr ? 'rtl' : 'ltr'}>
+            <Link href="/">{isAr ? 'الرئيسية' : 'Accueil'}</Link>
             <span>›</span>
-            <span>{pageTitle || 'Meilleures Offres'}</span>
+            <span>{pageTitle || (isAr ? 'أفضل العروض' : 'Meilleures Offres')}</span>
           </div>
-          <h1>{pageTitle || 'Meilleures Offres'}</h1>
-          <p>
+          <h1 dir={isAr ? 'rtl' : 'ltr'}>{pageTitle || (isAr ? 'أفضل العروض' : 'Meilleures Offres')}</h1>
+          <p dir={isAr ? 'rtl' : 'ltr'}>
             {pageSubtitle ||
-              'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix'}
+              (isAr ? 'اكتشف تشكيلتنا الكاملة من الكتب المدرسية بأفضل الأسعار' : 'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix')}
           </p>
         </div>
       </div>
@@ -482,7 +488,7 @@ export default function BestOffersClient({
         <div className="flex-1 min-w-0">
 
           {/* Sort bar */}
-          <div className="sort-bar">
+          <div className="sort-bar" dir={isAr ? 'rtl' : 'ltr'}>
             <div className="sort-bar-left">
               {/* Mobile filter button */}
               <button
@@ -490,7 +496,7 @@ export default function BestOffersClient({
                 className="mobile-filter-trigger"
               >
                 <SlidersHorizontal style={{ width: '16px', height: '16px', color: 'var(--primary)' }} strokeWidth={2.2} />
-                <span>Filtres</span>
+                <span>{isAr ? 'تصفية' : 'Filtres'}</span>
                 {activeFilterCount > 0 && (
                   <span className="mobile-filter-count">{activeFilterCount}</span>
                 )}
@@ -498,27 +504,28 @@ export default function BestOffersClient({
 
               <p className="sort-bar-count">
                 <span className="sort-bar-count-num">{filtered.length}</span>{' '}
-                produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
+                {isAr ? 'منتج تم العثور عليه' : `produit${filtered.length !== 1 ? 's' : ''} trouvé${filtered.length !== 1 ? 's' : ''}`}
               </p>
             </div>
 
             <div className="sort-bar-right">
-              <label className="sort-label-text">Trier par :</label>
+              <label className="sort-label-text">{isAr ? 'ترتيب حسب :' : 'Trier par :'}</label>
               <div className="sort-dropdown-wrapper">
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
                   className={`sort-trigger-btn ${sortOpen ? 'open' : ''}`}
+                  dir={isAr ? 'rtl' : 'ltr'}
                 >
                   <span>
                     {sort === 'price_asc' || sort === 'price-asc'
-                      ? 'Prix croissant'
+                      ? (isAr ? 'السعر تصاعدي' : 'Prix croissant')
                       : sort === 'price_desc' || sort === 'price-desc'
-                      ? 'Prix décroissant'
+                      ? (isAr ? 'السعر تنازلي' : 'Prix décroissant')
                       : sort === 'newest' || sort === 'new'
-                      ? 'Nouveautés'
+                      ? (isAr ? 'الأحدث' : 'Nouveautés')
                       : sort === 'popular' || sort === 'rating'
-                      ? 'Popularité'
-                      : 'Par défaut'}
+                      ? (isAr ? 'الأكثر شعبية' : 'Popularité')
+                      : (isAr ? 'الافتراضي' : 'Par défaut')}
                   </span>
                   <ChevronDown
                     style={{
@@ -533,13 +540,13 @@ export default function BestOffersClient({
                 {sortOpen && (
                   <>
                     <div className="sort-dropdown-backdrop" onClick={() => setSortOpen(false)} />
-                    <div className="sort-dropdown-menu">
+                    <div className="sort-dropdown-menu" dir={isAr ? 'rtl' : 'ltr'}>
                       {[
-                        { value: 'default', label: 'Par défaut' },
-                        { value: 'price_asc', label: 'Prix croissant' },
-                        { value: 'price_desc', label: 'Prix décroissant' },
-                        { value: 'newest', label: 'Nouveautés' },
-                        { value: 'popular', label: 'Popularité' },
+                        { value: 'default', label: isAr ? 'الافتراضي' : 'Par défaut' },
+                        { value: 'price_asc', label: isAr ? 'السعر تصاعدي' : 'Prix croissant' },
+                        { value: 'price_desc', label: isAr ? 'السعر تنازلي' : 'Prix décroissant' },
+                        { value: 'newest', label: isAr ? 'الأحدث' : 'Nouveautés' },
+                        { value: 'popular', label: isAr ? 'الأكثر شعبية' : 'Popularité' },
                       ].map((opt) => (
                         <button
                           key={opt.value}
@@ -564,7 +571,7 @@ export default function BestOffersClient({
 
           {/* Active Filter Chips */}
           {hasActiveFilters && (
-            <div className="active-chips-bar">
+            <div className="active-chips-bar" dir={isAr ? 'rtl' : 'ltr'}>
               {selectedCats.map((cat) => (
                 <div key={`chip-cat-${cat}`} className="filter-chip">
                   <span>{titleCase(cat)}</span>
@@ -575,7 +582,7 @@ export default function BestOffersClient({
               ))}
               {priceMin > 0 && (
                 <div className="filter-chip">
-                  <span>Min {priceMin} DH</span>
+                  <span>{isAr ? `الأدنى ${priceMin} درهم` : `Min ${priceMin} DH`}</span>
                   <button onClick={() => setPriceMin(0)}>
                     <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
@@ -583,7 +590,7 @@ export default function BestOffersClient({
               )}
               {priceMax < 9999 && (
                 <div className="filter-chip">
-                  <span>Max {priceMax} DH</span>
+                  <span>{isAr ? `الأقصى ${priceMax} درهم` : `Max ${priceMax} DH`}</span>
                   <button onClick={() => setPriceMax(9999)}>
                     <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
@@ -591,7 +598,7 @@ export default function BestOffersClient({
               )}
               {inStockOnly && (
                 <div className="filter-chip">
-                  <span>En stock</span>
+                  <span>{isAr ? 'متوفر' : 'En stock'}</span>
                   <button onClick={() => setInStockOnly(false)}>
                     <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
@@ -599,7 +606,7 @@ export default function BestOffersClient({
               )}
               {promoOnly && (
                 <div className="filter-chip">
-                  <span>En promotion</span>
+                  <span>{isAr ? 'في تخفيض' : 'En promotion'}</span>
                   <button onClick={() => setPromoOnly(false)}>
                     <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
@@ -614,16 +621,16 @@ export default function BestOffersClient({
               <div className="empty-state-icon">
                 <Search style={{ width: '28px', height: '28px', color: 'var(--text2)' }} />
               </div>
-              <h3 className="empty-state-title">Aucun produit trouvé</h3>
+              <h3 className="empty-state-title">{isAr ? 'لم يتم العثور على أي منتج' : 'Aucun produit trouvé'}</h3>
               <p className="empty-state-text">
-                Aucun produit ne correspond à vos filtres.
+                {isAr ? 'لا توجد منتجات تطابق عوامل التصفية الخاصة بك.' : 'Aucun produit ne correspond à vos filtres.'}
               </p>
               <button
                 onClick={clearFilters}
                 className="empty-state-reset"
               >
                 <RotateCcw style={{ width: '14px', height: '14px' }} strokeWidth={2.2} />
-                Réinitialiser les filtres
+                {isAr ? 'إعادة ضبط عوامل التصفية' : 'Réinitialiser les filtres'}
               </button>
             </div>
           ) : (

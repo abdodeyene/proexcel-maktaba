@@ -14,6 +14,7 @@ import {
   RotateCcw,
   ChevronDown,
 } from '@/components/LucideIcons'
+import { useLang } from '@/components/LangContext'
 
 // ─── Subject definitions per niveau ──────────────────────────────────────────
 
@@ -170,14 +171,17 @@ function FilterPanel({
   activeFilterCount: number
   onApply?: () => void
 }) {
+  const { lang } = useLang()
+  const isAr = lang === 'ar'
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="filter-header">
         <div className="filter-header-left">
           <SlidersHorizontal style={{ width: '18px', height: '18px', color: 'var(--primary)', flexShrink: 0 }} strokeWidth={2.2} />
-          <span className="filter-title">Filtres</span>
+          <span className="filter-title">{isAr ? 'تصفية' : 'Filtres'}</span>
           {activeFilterCount > 0 && (
             <span className="filter-active-badge">
               {activeFilterCount}
@@ -194,7 +198,7 @@ function FilterPanel({
           }}
         >
           <RotateCcw style={{ width: '13px', height: '13px' }} strokeWidth={2.3} />
-          Réinitialiser
+          {isAr ? 'إعادة ضبط' : 'Réinitialiser'}
         </button>
       </div>
 
@@ -203,7 +207,7 @@ function FilterPanel({
         <Search className="filter-search-icon" strokeWidth={2} />
         <input
           type="text"
-          placeholder="Rechercher..."
+          placeholder={isAr ? 'بحث...' : 'Rechercher...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="filter-search-input"
@@ -222,7 +226,7 @@ function FilterPanel({
       {/* ── Matière ─────────────────────────────────────────────────────── */}
       {subjects.length > 0 && (
         <div className="filter-section-wrapper">
-          <SectionTitle>Matière</SectionTitle>
+          <SectionTitle>{isAr ? 'المادة' : 'Matière'}</SectionTitle>
           <div>
             {subjects.map((sub) => {
               const selected = selectedSubjects.includes(sub.id)
@@ -240,7 +244,7 @@ function FilterPanel({
 
       {/* ── Price ───────────────────────────────────────────────────────── */}
       <div className="filter-section-wrapper">
-        <SectionTitle>Prix</SectionTitle>
+        <SectionTitle>{isAr ? 'السعر' : 'Prix'}</SectionTitle>
         <div className="filter-price-wrapper" dir="ltr">
           <input
             type="number"
@@ -269,10 +273,10 @@ function FilterPanel({
 
       {/* ── Availability ────────────────────────────────────────────────── */}
       <div className="filter-section-wrapper" style={{ marginBottom: '8px' }}>
-        <SectionTitle>Disponibilité</SectionTitle>
+        <SectionTitle>{isAr ? 'التوفر' : 'Disponibilité'}</SectionTitle>
         {[
-          { id: 'inStock', label: 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
-          { id: 'onSale',  label: 'En promotion',        value: promoOnly,   set: setPromoOnly  },
+          { id: 'inStock', label: isAr ? 'متوفر في المخزون' : 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
+          { id: 'onSale',  label: isAr ? 'في تخفيض' : 'En promotion',        value: promoOnly,   set: setPromoOnly  },
         ].map((opt) => (
           <CheckRow key={opt.id} selected={opt.value} onClick={() => opt.set(!opt.value)}>
             <span className="filter-cat-name">
@@ -285,7 +289,7 @@ function FilterPanel({
       {/* ── Active filters ───────────────────────────────────────────────── */}
       {hasActiveFilters && (
         <div className="filter-active-chips-container">
-          <SectionTitle>Filtres actifs</SectionTitle>
+          <SectionTitle>{isAr ? 'عوامل التصفية النشطة' : 'Filtres actifs'}</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {selectedSubjects.map((sid) => {
               const label = subjects.find(s => s.id === sid)?.label ?? sid
@@ -300,7 +304,7 @@ function FilterPanel({
             })}
             {priceMin > 0 && (
               <span key="active-min" className="filter-active-chip">
-                Min {priceMin} DH
+                {isAr ? `الأدنى ${priceMin} درهم` : `Min ${priceMin} DH`}
                 <button onClick={() => setPriceMin(0)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -308,7 +312,7 @@ function FilterPanel({
             )}
             {priceMax < 9999 && (
               <span key="active-max" className="filter-active-chip">
-                Max {priceMax} DH
+                {isAr ? `الأقصى ${priceMax} درهم` : `Max ${priceMax} DH`}
                 <button onClick={() => setPriceMax(9999)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -316,7 +320,7 @@ function FilterPanel({
             )}
             {inStockOnly && (
               <span key="active-stock" className="filter-active-chip">
-                En stock
+                {isAr ? 'متوفر' : 'En stock'}
                 <button onClick={() => setInStockOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -324,7 +328,7 @@ function FilterPanel({
             )}
             {promoOnly && (
               <span key="active-promo" className="filter-active-chip">
-                En promo
+                {isAr ? 'في تخفيض' : 'En promo'}
                 <button onClick={() => setPromoOnly(false)}>
                   <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
                 </button>
@@ -349,7 +353,7 @@ function FilterPanel({
           }}
         >
           <Check style={{ width: '16px', height: '16px' }} strokeWidth={2.5} />
-          Appliquer les filtres
+          {isAr ? 'تطبيق الفلاتر' : 'Appliquer les filtres'}
           {activeFilterCount > 0 && ` (${activeFilterCount})`}
         </button>
       )}
@@ -366,6 +370,9 @@ export default function NiveauPage({
   niveau: string
   initialProducts: Product[]
 }) {
+  const { lang } = useLang()
+  const isAr = lang === 'ar'
+
   const [products, setProducts] = useState<Product[]>(initialProducts)
 
   // Filter state
@@ -484,24 +491,24 @@ export default function NiveauPage({
         <div className="niveau-banner-glow" aria-hidden="true" />
         <div className="niveau-banner-grid" aria-hidden="true" />
         <div className="niveau-banner-inner">
-          <nav className="niveau-breadcrumb" aria-label="Fil d'Ariane">
-            <Link href="/" className="niveau-breadcrumb-link">Accueil</Link>
+          <nav className="niveau-breadcrumb" aria-label="Fil d'Ariane" dir={isAr ? 'rtl' : 'ltr'}>
+            <Link href="/" className="niveau-breadcrumb-link">{isAr ? 'الرئيسية' : 'Accueil'}</Link>
             <span className="niveau-breadcrumb-sep" aria-hidden="true">›</span>
-            <span className="niveau-breadcrumb-link">Niveaux</span>
+            <span className="niveau-breadcrumb-link">{isAr ? 'المستويات' : 'Niveaux'}</span>
             <span className="niveau-breadcrumb-sep" aria-hidden="true">›</span>
-            <span className="niveau-breadcrumb-current">{meta.fr}</span>
+            <span className="niveau-breadcrumb-current">{isAr ? meta.ar : meta.fr}</span>
           </nav>
-          <div className="niveau-banner-content">
+          <div className="niveau-banner-content" dir={isAr ? 'rtl' : 'ltr'}>
             <div className="niveau-banner-icon" aria-hidden="true">{meta.icon}</div>
             <div className="niveau-banner-text">
-              <div className="niveau-banner-tag">Niveau scolaire</div>
-              <h1 className="niveau-banner-title">{meta.fr}</h1>
-              <p className="niveau-banner-years">{meta.years_fr}</p>
-              <p className="niveau-banner-desc">{meta.desc_fr}</p>
+              <div className="niveau-banner-tag">{isAr ? 'مستوى دراسي' : 'Niveau scolaire'}</div>
+              <h1 className="niveau-banner-title">{isAr ? meta.ar : meta.fr}</h1>
+              <p className="niveau-banner-years">{isAr ? meta.years_ar : meta.years_fr}</p>
+              <p className="niveau-banner-desc">{isAr ? meta.desc_ar : meta.desc_fr}</p>
             </div>
             <div className="niveau-banner-stat" aria-label={`${products.length} produits disponibles`}>
               <span className="niveau-banner-stat-num">{products.length}</span>
-              <span className="niveau-banner-stat-label">Produits</span>
+              <span className="niveau-banner-stat-label">{isAr ? 'منتج' : 'Produits'}</span>
             </div>
           </div>
         </div>
@@ -524,57 +531,65 @@ export default function NiveauPage({
         <div className="flex-1 min-w-0">
 
           {/* Sort bar */}
-          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
+          <div className="sort-bar" dir={isAr ? 'rtl' : 'ltr'}>
+            <div className="sort-bar-left">
               {/* Mobile filter button */}
               <button
                 onClick={() => setFilterOpen(true)}
-                className="premium-filter-btn md:hidden"
+                className="mobile-filter-trigger"
               >
-                <SlidersHorizontal className="w-4 h-4 text-red-600" />
-                Filtres
+                <SlidersHorizontal style={{ width: '16px', height: '16px', color: 'var(--primary)' }} strokeWidth={2.2} />
+                <span>{isAr ? 'تصفية' : 'Filtres'}</span>
                 {activeFilterCount > 0 && (
-                  <span className="bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {activeFilterCount}
-                  </span>
+                  <span className="mobile-filter-count">{activeFilterCount}</span>
                 )}
               </button>
-              <p className="text-sm text-gray-500">
-                <span className="font-bold text-gray-900 dark:text-gray-100">{filtered.length}</span>{' '}
-                produit{filtered.length !== 1 ? 's' : ''} trouvé{filtered.length !== 1 ? 's' : ''}
+
+              <p className="sort-bar-count">
+                <span className="sort-bar-count-num">{filtered.length}</span>{' '}
+                {isAr ? 'منتج تم العثور عليه' : `produit${filtered.length !== 1 ? 's' : ''} trouvé${filtered.length !== 1 ? 's' : ''}`}
               </p>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <label className="sort-label-custom font-medium hidden sm:block">Trier par :</label>
-              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+
+            <div className="sort-bar-right">
+              <label className="sort-label-text">{isAr ? 'ترتيب حسب :' : 'Trier par :'}</label>
+              <div className="sort-dropdown-wrapper">
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
-                  className="premium-filter-btn"
+                  className={`sort-trigger-btn ${sortOpen ? 'open' : ''}`}
+                  dir={isAr ? 'rtl' : 'ltr'}
                 >
                   <span>
                     {sortBy === 'price_asc'
-                      ? 'Prix croissant'
+                      ? (isAr ? 'السعر تصاعدي' : 'Prix croissant')
                       : sortBy === 'price_desc'
-                      ? 'Prix décroissant'
+                      ? (isAr ? 'السعر تنازلي' : 'Prix décroissant')
                       : sortBy === 'newest'
-                      ? 'Nouveautés'
+                      ? (isAr ? 'الأحدث' : 'Nouveautés')
                       : sortBy === 'popular'
-                      ? 'Popularité'
-                      : 'Par défaut'}
+                      ? (isAr ? 'الأكثر شعبية' : 'Popularité')
+                      : (isAr ? 'الافتراضي' : 'Par défaut')}
                   </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sortOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    style={{
+                      width: '15px', height: '15px',
+                      transition: 'transform 0.25s ease',
+                      transform: sortOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    }}
+                    strokeWidth={2.5}
+                  />
                 </button>
 
                 {sortOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />
-                    <div className="sort-dropdown-container">
+                    <div className="sort-dropdown-backdrop" onClick={() => setSortOpen(false)} />
+                    <div className="sort-dropdown-menu" dir={isAr ? 'rtl' : 'ltr'}>
                       {[
-                        { value: 'default', label: 'Par défaut' },
-                        { value: 'price_asc', label: 'Prix croissant' },
-                        { value: 'price_desc', label: 'Prix décroissant' },
-                        { value: 'newest', label: 'Nouveautés' },
-                        { value: 'popular', label: 'Popularité' },
+                        { value: 'default', label: isAr ? 'الافتراضي' : 'Par défaut' },
+                        { value: 'price_asc', label: isAr ? 'السعر تصاعدي' : 'Prix croissant' },
+                        { value: 'price_desc', label: isAr ? 'السعر تنازلي' : 'Prix décroissant' },
+                        { value: 'newest', label: isAr ? 'الأحدث' : 'Nouveautés' },
+                        { value: 'popular', label: isAr ? 'الأكثر شعبية' : 'Popularité' },
                       ].map((opt) => (
                         <button
                           key={opt.value}
@@ -582,10 +597,12 @@ export default function NiveauPage({
                             setSortBy(opt.value)
                             setSortOpen(false)
                           }}
-                          className={`sort-dropdown-option ${sortBy === opt.value ? 'selected' : ''}`}
+                          className={`sort-dropdown-item ${sortBy === opt.value ? 'active' : ''}`}
                         >
                           <span>{opt.label}</span>
-                          {sortBy === opt.value && <Check className="w-3.5 h-3.5 text-red-600" />}
+                          {sortBy === opt.value && (
+                            <Check style={{ width: '14px', height: '14px', color: 'var(--primary)' }} strokeWidth={2.5} />
+                          )}
                         </button>
                       ))}
                     </div>
@@ -597,47 +614,47 @@ export default function NiveauPage({
 
           {/* Active filter chips */}
           {hasActiveFilters && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="active-chips-bar" dir={isAr ? 'rtl' : 'ltr'}>
               {selectedSubjects.map((sid) => {
                 const label = subjects.find(s => s.id === sid)?.label ?? sid
                 return (
                   <div key={`chip-${sid}`} className="filter-chip">
                     <span>{label}</span>
                     <button onClick={() => toggleSubject(sid)}>
-                      <X className="w-3.5 h-3.5" />
+                      <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                     </button>
                   </div>
                 )
               })}
               {priceMin > 0 && (
                 <div key="chip-min" className="filter-chip">
-                  <span>Min {priceMin} DH</span>
+                  <span>{isAr ? `الأدنى ${priceMin} درهم` : `Min ${priceMin} DH`}</span>
                   <button onClick={() => setPriceMin(0)}>
-                    <X className="w-3.5 h-3.5" />
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {priceMax < 9999 && (
                 <div key="chip-max" className="filter-chip">
-                  <span>Max {priceMax} DH</span>
+                  <span>{isAr ? `الأقصى ${priceMax} درهم` : `Max ${priceMax} DH`}</span>
                   <button onClick={() => setPriceMax(9999)}>
-                    <X className="w-3.5 h-3.5" />
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {inStockOnly && (
                 <div key="chip-stock" className="filter-chip">
-                  <span>En stock</span>
+                  <span>{isAr ? 'متوفر' : 'En stock'}</span>
                   <button onClick={() => setInStockOnly(false)}>
-                    <X className="w-3.5 h-3.5" />
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
               {promoOnly && (
                 <div key="chip-promo" className="filter-chip">
-                  <span>En promotion</span>
+                  <span>{isAr ? 'في تخفيض' : 'En promotion'}</span>
                   <button onClick={() => setPromoOnly(false)}>
-                    <X className="w-3.5 h-3.5" />
+                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
                   </button>
                 </div>
               )}
@@ -650,11 +667,11 @@ export default function NiveauPage({
               <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
                 <Search className="w-7 h-7 text-gray-400" />
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1">Aucun produit trouvé</h3>
+              <h3 className="font-bold text-gray-900 dark:text-white mb-1">{isAr ? 'لم يتم العثور على أي منتج' : 'Aucun produit trouvé'}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 {hasActiveFilters
-                  ? 'Aucun produit ne correspond à vos filtres.'
-                  : `Aucun produit pour le niveau ${meta.fr} pour le moment.`}
+                  ? (isAr ? 'لا توجد منتجات تطابق عوامل التصفية الخاصة بك.' : 'Aucun produit ne correspond à vos filtres.')
+                  : (isAr ? `لا توجد منتجات لمستوى ${meta.ar} حاليا.` : `Aucun produit pour le niveau ${meta.fr} pour le moment.`)}
               </p>
               {hasActiveFilters && (
                 <button
@@ -662,7 +679,7 @@ export default function NiveauPage({
                   className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  Réinitialiser les filtres
+                  {isAr ? 'إعادة ضبط عوامل التصفية' : 'Réinitialiser les filtres'}
                 </button>
               )}
             </div>
@@ -735,7 +752,7 @@ export default function NiveauPage({
         .niveau-banner {
           position: relative;
           overflow: hidden;
-          padding: 3.5rem 0 2.75rem;
+          padding: 8rem 0 2.5rem;
           background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 60%, var(--bg) 100%);
           border-bottom: 1px solid var(--border);
         }
@@ -815,7 +832,7 @@ export default function NiveauPage({
 
         /* ── Responsive ── */
         @media (max-width: 768px) {
-          .niveau-banner { padding: 2.25rem 0 2rem; }
+          .niveau-banner { padding: 6rem 0 2rem; }
           .niveau-banner-inner { padding: 0 1.25rem; }
           .niveau-banner-content { flex-wrap: wrap; gap: 1rem; }
           .niveau-banner-icon { width: 54px; height: 54px; border-radius: 14px; }
