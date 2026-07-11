@@ -11,27 +11,27 @@ export default function InfoStrip({ lang = 'fr' }: InfoStripProps) {
 
   const items = isAr
     ? [
-        { icon: 'book',    title: '+1200 عنوان متوفر',   sub: 'كتب ومستلزمات', color: 'purple' },
-        { icon: 'users',   title: '+15K عميل راضٍ',      sub: 'على مستوى المغرب', color: 'gold' },
-        { icon: 'truck',   title: 'توصيل 24/48 ساعة',   sub: 'في جميع أنحاء المغرب', color: 'blue' },
-        { icon: 'shield',  title: 'الدفع عند الاستلام',   sub: 'أو عبر البطاقة', color: 'red' },
-        { icon: 'whatsapp',title: 'دعم واتساب 6j/7',     sub: 'لأي استفسار أو مساعدة', color: 'green' },
-      ]
+      { icon: 'book', title: '+1200 عنوان متوفر', sub: 'كتب ومستلزمات', color: 'purple' },
+      { icon: 'users', title: '+15K عميل راضٍ', sub: 'على مستوى المغرب', color: 'gold' },
+      { icon: 'truck', title: 'توصيل 24/48 ساعة', sub: 'في جميع أنحاء المغرب', color: 'blue' },
+      { icon: 'shield', title: 'الدفع عند الاستلام', sub: 'أو عبر البطاقة', color: 'red' },
+      { icon: 'whatsapp', title: 'دعم واتساب 6j/7', sub: 'لأي استفسار أو مساعدة', color: 'green' },
+    ]
     : [
-        { icon: 'book',    title: '+1200 titres',         sub: 'Disponibles en stock', color: 'purple' },
-        { icon: 'users',   title: '+15K clients',         sub: 'Satisfaits de nos services', color: 'gold' },
-        { icon: 'truck',   title: 'Livraison 24/48h',     sub: 'Partout au Maroc', color: 'blue' },
-        { icon: 'shield',  title: 'Paiement à la livraison', sub: 'Ou par carte bancaire', color: 'red' },
-        { icon: 'whatsapp',title: 'Support WhatsApp',     sub: 'Conseils & commande 7j/7', color: 'green' },
-      ]
+      { icon: 'book', title: '+1200 titres', sub: 'Disponibles en stock', color: 'purple' },
+      { icon: 'users', title: '+15K clients', sub: 'Satisfaits de nos services', color: 'gold' },
+      { icon: 'truck', title: 'Livraison 24/48h', sub: 'Partout au Maroc', color: 'blue' },
+      { icon: 'shield', title: 'Paiement à la livraison', sub: 'Ou par carte bancaire', color: 'red' },
+      { icon: 'whatsapp', title: 'Support WhatsApp', sub: 'Conseils & commande 7j/7', color: 'green' },
+    ]
 
   const iconMap: Record<string, React.ReactNode> = {
-    truck:    <Truck size={20} />,
-    shield:   <ShieldCheck size={20} />,
-    premium:  <Sparkles size={20} />,
+    truck: <Truck size={20} />,
+    shield: <ShieldCheck size={20} />,
+    premium: <Sparkles size={20} />,
     whatsapp: <MessageCircle size={20} />,
-    book:     <BookOpen size={20} />,
-    users:    <Users size={20} />,
+    book: <BookOpen size={20} />,
+    users: <Users size={20} />,
   }
 
   return (
@@ -40,9 +40,9 @@ export default function InfoStrip({ lang = 'fr' }: InfoStripProps) {
       <div className="info-strip-wrapper animate-fadeInUp [animation-delay:200ms]">
         <div className="info-strip" role="list" aria-label="Informations livraison et garanties">
           {items.map((item, i) => (
-            <div 
-              key={i} 
-              className={`info-strip-item group shine-sweep animate-fadeInUp`} 
+            <div
+              key={i}
+              className={`info-strip-item group shine-sweep animate-fadeInUp`}
               style={{ animationDelay: `${300 + (i * 100)}ms` }}
               role="listitem"
             >

@@ -14,8 +14,9 @@ import {
   Moon,
   LogOut,
   BookOpen,
-  Layers
-} from '@/components/LucideIcons'
+  Layers,
+  BellRing
+} from 'lucide-react'
 import './admin.css'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -224,7 +225,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           transition: 'all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
           zIndex: 9999
         }}>
-          <div style={{ fontSize: '1.5rem' }}>🔔</div>
+          <div><BellRing size={24} /></div>
           <div>
             <div style={{ fontWeight: 700, fontSize: '1rem' }}>Nouvelle Commande !</div>
             <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Vérifiez l'onglet Commandes.</div>

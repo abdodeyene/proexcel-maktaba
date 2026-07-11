@@ -61,16 +61,18 @@ model Category {
 }
 
 model Order {
-  id       Int      @id @default(autoincrement())
-  orderNum String   @unique
-  name     String
-  phone    String
-  address  String
-  city     String
-  total    Float
-  status   String   @default("pending")
-  cart     Json
-  date     DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  orderNum  String   @unique
+  name      String
+  phone     String
+  address   String
+  city      String
+  total     Float
+  promoCode String?
+  discount  Float?
+  status    String   @default("pending")
+  cart      Json
+  date      DateTime @default(now())
 
   @@map("orders")
 }

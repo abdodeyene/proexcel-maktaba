@@ -20,40 +20,40 @@ import { useLang } from '@/components/LangContext'
 
 const NIVEAU_SUBJECTS: Record<string, { id: string; label: string }[]> = {
   primaire: [
-    { id: 'arabe',    label: 'Langue Arabe' },
-    { id: 'francais', label: 'Langue Française' },
-    { id: 'anglais',  label: 'Langue Anglaise' },
-    { id: 'maths',    label: 'Mathématiques' },
-    { id: 'sciences', label: 'Sciences' },
-    { id: 'islamia',  label: 'Éducation Islamique' },
-    { id: 'tarbia',   label: 'Éducation Civique' },
-    { id: 'tchkila',  label: 'Arts Plastiques' },
-    { id: 'histoire', label: 'Histoire-Géographie' },
+    { id: 'arabe',    label: 'Langue Arabe', labelAr: 'اللغة العربية' },
+    { id: 'francais', label: 'Langue Française', labelAr: 'اللغة الفرنسية' },
+    { id: 'anglais',  label: 'Langue Anglaise', labelAr: 'اللغة الإنجليزية' },
+    { id: 'maths',    label: 'Mathématiques', labelAr: 'الرياضيات' },
+    { id: 'sciences', label: 'Sciences', labelAr: 'النشاط العلمي' },
+    { id: 'islamia',  label: 'Éducation Islamique', labelAr: 'التربية الإسلامية' },
+    { id: 'tarbia',   label: 'Éducation Civique', labelAr: 'التربية التشكيلية/المدنية' },
+    { id: 'tchkila',  label: 'Arts Plastiques', labelAr: 'التربية التشكيلية' },
+    { id: 'histoire', label: 'Histoire-Géographie', labelAr: 'الاجتماعيات' },
   ],
   college: [
-    { id: 'arabe',        label: 'Langue Arabe' },
-    { id: 'francais',     label: 'Langue Française' },
-    { id: 'anglais',      label: 'Langue Anglaise' },
-    { id: 'maths',        label: 'Mathématiques' },
-    { id: 'svt',          label: 'SVT' },
-    { id: 'pc',           label: 'Physique-Chimie' },
-    { id: 'histoire',     label: 'Histoire-Géo' },
-    { id: 'islamia',      label: 'Éducation Islamique' },
-    { id: 'tarbia',       label: 'Éducation Civique' },
-    { id: 'informatique', label: 'Informatique' },
+    { id: 'arabe',        label: 'Langue Arabe', labelAr: 'اللغة العربية' },
+    { id: 'francais',     label: 'Langue Française', labelAr: 'اللغة الفرنسية' },
+    { id: 'anglais',      label: 'Langue Anglaise', labelAr: 'اللغة الإنجليزية' },
+    { id: 'maths',        label: 'Mathématiques', labelAr: 'الرياضيات' },
+    { id: 'svt',          label: 'SVT', labelAr: 'علوم الحياة والأرض' },
+    { id: 'pc',           label: 'Physique-Chimie', labelAr: 'الفيزياء والكيمياء' },
+    { id: 'histoire',     label: 'Histoire-Géo', labelAr: 'الاجتماعيات' },
+    { id: 'islamia',      label: 'Éducation Islamique', labelAr: 'التربية الإسلامية' },
+    { id: 'tarbia',       label: 'Éducation Civique', labelAr: 'التربية التشكيلية' },
+    { id: 'informatique', label: 'Informatique', labelAr: 'المعلوميات' },
   ],
   lycee: [
-    { id: 'arabe',        label: 'Langue Arabe' },
-    { id: 'francais',     label: 'Langue Française' },
-    { id: 'anglais',      label: 'Langue Anglaise' },
-    { id: 'maths',        label: 'Mathématiques' },
-    { id: 'svt',          label: 'SVT' },
-    { id: 'pc',           label: 'Physique-Chimie' },
-    { id: 'falsafa',      label: 'Philosophie' },
-    { id: 'histoire',     label: 'Histoire-Géo' },
-    { id: 'islamia',      label: 'Éducation Islamique' },
-    { id: 'informatique', label: 'Informatique' },
-    { id: 'economie',     label: 'Économie' },
+    { id: 'arabe',        label: 'Langue Arabe', labelAr: 'اللغة العربية' },
+    { id: 'francais',     label: 'Langue Française', labelAr: 'اللغة الفرنسية' },
+    { id: 'anglais',      label: 'Langue Anglaise', labelAr: 'اللغة الإنجليزية' },
+    { id: 'maths',        label: 'Mathématiques', labelAr: 'الرياضيات' },
+    { id: 'svt',          label: 'SVT', labelAr: 'علوم الحياة والأرض' },
+    { id: 'pc',           label: 'Physique-Chimie', labelAr: 'الفيزياء والكيمياء' },
+    { id: 'falsafa',      label: 'Philosophie', labelAr: 'الفلسفة' },
+    { id: 'histoire',     label: 'Histoire-Géo', labelAr: 'الاجتماعيات' },
+    { id: 'islamia',      label: 'Éducation Islamique', labelAr: 'التربية الإسلامية' },
+    { id: 'informatique', label: 'Informatique', labelAr: 'المعلوميات' },
+    { id: 'economie',     label: 'Économie', labelAr: 'الاقتصاد' },
   ],
 }
 
@@ -158,7 +158,7 @@ function FilterPanel({
   activeFilterCount,
   onApply,
 }: {
-  subjects: { id: string; label: string }[]
+  subjects: { id: string; label: string; labelAr?: string }[]
   selectedSubjects: string[]
   toggleSubject: (id: string) => void
   inStockOnly: boolean; setInStockOnly: (v: boolean) => void
@@ -228,16 +228,13 @@ function FilterPanel({
         <div className="filter-section-wrapper">
           <SectionTitle>{isAr ? 'المادة' : 'Matière'}</SectionTitle>
           <div>
-            {subjects.map((sub) => {
-              const selected = selectedSubjects.includes(sub.id)
-              return (
-                <CheckRow key={sub.id} selected={selected} onClick={() => toggleSubject(sub.id)}>
-                  <span className="filter-cat-name">
-                    {sub.label}
-                  </span>
-                </CheckRow>
-              )
-            })}
+            {subjects.map((sub) => (
+              <CheckRow key={sub.id} selected={selectedSubjects.includes(sub.id)} onClick={() => toggleSubject(sub.id)}>
+                <span className="filter-cat-name">
+                  {isAr && sub.labelAr ? sub.labelAr : sub.label}
+                </span>
+              </CheckRow>
+            ))}
           </div>
         </div>
       )}
@@ -487,35 +484,30 @@ export default function NiveauPage({
     <div className="niveau-page">
 
       {/* ── HERO BANNER ─────────────────────────────────────────────────── */}
-      <div className="niveau-banner">
-        <div className="niveau-banner-glow" aria-hidden="true" />
-        <div className="niveau-banner-grid" aria-hidden="true" />
-        <div className="niveau-banner-inner">
-          <nav className="niveau-breadcrumb" aria-label="Fil d'Ariane" dir={isAr ? 'rtl' : 'ltr'}>
-            <Link href="/" className="niveau-breadcrumb-link">{isAr ? 'الرئيسية' : 'Accueil'}</Link>
-            <span className="niveau-breadcrumb-sep" aria-hidden="true">›</span>
-            <span className="niveau-breadcrumb-link">{isAr ? 'المستويات' : 'Niveaux'}</span>
-            <span className="niveau-breadcrumb-sep" aria-hidden="true">›</span>
-            <span className="niveau-breadcrumb-current">{isAr ? meta.ar : meta.fr}</span>
-          </nav>
-          <div className="niveau-banner-content" dir={isAr ? 'rtl' : 'ltr'}>
-            <div className="niveau-banner-icon" aria-hidden="true">{meta.icon}</div>
-            <div className="niveau-banner-text">
-              <div className="niveau-banner-tag">{isAr ? 'مستوى دراسي' : 'Niveau scolaire'}</div>
-              <h1 className="niveau-banner-title">{isAr ? meta.ar : meta.fr}</h1>
-              <p className="niveau-banner-years">{isAr ? meta.years_ar : meta.years_fr}</p>
-              <p className="niveau-banner-desc">{isAr ? meta.desc_ar : meta.desc_fr}</p>
-            </div>
-            <div className="niveau-banner-stat" aria-label={`${products.length} produits disponibles`}>
-              <span className="niveau-banner-stat-num">{products.length}</span>
-              <span className="niveau-banner-stat-label">{isAr ? 'منتج' : 'Produits'}</span>
-            </div>
+      <div className="page-hero">
+        <div className="page-hero-inner">
+          <div className="breadcrumb-nav" dir={isAr ? 'rtl' : 'ltr'}>
+            <Link href="/">{isAr ? 'الرئيسية' : 'Accueil'}</Link>
+            <span>›</span>
+            <span>{isAr ? 'المستويات' : 'Niveaux'}</span>
+            <span>›</span>
+            <span>{isAr ? meta.ar : meta.fr}</span>
           </div>
+          <div dir={isAr ? 'rtl' : 'ltr'} style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+            <span style={{ color: 'var(--primary)' }}>{meta.icon}</span>
+            <h1 style={{ margin: 0 }}>{isAr ? meta.ar : meta.fr}</h1>
+          </div>
+          <p dir={isAr ? 'rtl' : 'ltr'} style={{ marginBottom: '0.5rem', fontWeight: 600, color: 'var(--primary)' }}>
+            {isAr ? meta.years_ar : meta.years_fr}
+          </p>
+          <p dir={isAr ? 'rtl' : 'ltr'}>
+            {isAr ? meta.desc_ar : meta.desc_fr}
+          </p>
         </div>
       </div>
 
       {/* ── LAYOUT ──────────────────────────────────────────────────────── */}
-      <div className="niveau-layout">
+      <div className="offers-layout">
 
         {/* ── DESKTOP SIDEBAR ─────────────────────────────────────────── */}
         <aside

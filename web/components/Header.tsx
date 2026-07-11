@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLang } from '@/components/LangContext'
+import MobileSideMenu from '@/components/MobileSideMenu'
 import { 
   Search, 
   ShoppingCart, 
@@ -266,45 +267,32 @@ export default function Header() {
             </Link>
 
             {/* Mobile: hamburger on right */}
-            <button className="mobile-menu-btn" aria-label="Menu" onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            <button 
+              className="mobile-menu-btn" 
+              aria-label="Menu" 
+              onClick={() => setMenuOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--primary)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                width: '38px',
+                height: '38px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(232, 53, 42, 0.25)',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Menu size={20} />
             </button>
           </div>
         </div>
       </header>
 
-      <nav className={`mobile-nav ${menuOpen ? 'open' : ''}`} id="mobileNav" dir="ltr" style={{ direction: 'ltr' }}>
-        <Link href="/" onClick={() => setMenuOpen(false)}>{currentT.home}</Link>
-        <Link href="/best-offers" onClick={() => setMenuOpen(false)}>{currentT.offers}</Link>
-        <div className="mobile-nav-section">{currentT.levels}</div>
-        <Link href="/niveaux/primaire" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎒 {currentT.primaire}</Link>
-        <Link href="/niveaux/college" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>📚 {currentT.college}</Link>
-        <Link href="/niveaux/lycee" onClick={() => setMenuOpen(false)} style={{ paddingLeft: '1.5rem' }}>🎓 {currentT.lycee}</Link>
-        <Link href="/about" onClick={() => setMenuOpen(false)}>{currentT.about}</Link>
-        <Link href="/contact" onClick={() => setMenuOpen(false)}>{currentT.contact}</Link>
-        <div className="mobile-nav-extras">
-          <button className="btn-theme btn-theme-mob" onClick={toggleTheme}>
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
-          {/* Mobile lang buttons */}
-          <div style={{ display: 'flex', gap: '0.3rem' }}>
-            {LANGS.map(opt => (
-              <button
-                key={opt.code}
-                className={`lang-mob-btn ${lang === opt.code ? 'active' : ''}`}
-                onClick={() => { setLang(opt.code); setMenuOpen(false) }}
-              >
-                {opt.flag} {opt.code.toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          <Link href="/login" className="btn-icon" style={{ display: 'flex', marginLeft: 'auto' }} onClick={() => setMenuOpen(false)} title={currentT.login}>
-            <User size={18} />
-          </Link>
-        </div>
-      </nav>
+      <MobileSideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} cartCount={cartCount} />
 
       {/* Search backdrop */}
       {searchOpen && (

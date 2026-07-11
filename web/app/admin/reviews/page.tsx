@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { Check, Edit2, Eye, EyeOff, Trash2, Plus } from 'lucide-react'
 
 type Review = {
   id: string
@@ -137,10 +138,10 @@ export default function AdminReviews() {
                 </div>
                 <button
                   className="btn-new proexcel-btn-admin-primary-action"
-                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem' }}
+                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                   onClick={() => setAddFor(addFor === p.productId ? null : p.productId)}
                 >
-                  + Ajouter un avis
+                  <Plus size={14} /> Ajouter un avis
                 </button>
               </div>
 
@@ -163,8 +164,8 @@ export default function AdminReviews() {
                   <div className="s-label">Commentaire</div>
                   <textarea className="s-input" rows={3} placeholder="Commentaire…" value={addForm.comment} onChange={e => setAddForm(f => ({ ...f, comment: e.target.value }))} style={{ resize: 'vertical', marginBottom: '0.75rem' }} />
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="btn-new proexcel-btn-admin-save-action" disabled={saving || !addForm.name || !addForm.comment} onClick={() => addReview(p.productId)}>
-                      {saving ? 'Ajout…' : '✓ Publier'}
+                    <button className="btn-new proexcel-btn-admin-save-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} disabled={saving || !addForm.name || !addForm.comment} onClick={() => addReview(p.productId)}>
+                      {saving ? 'Ajout…' : <><Check size={14} /> Publier</>}
                     </button>
                     <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => { setAddFor(null); setAddForm({ name: '', rating: 5, comment: '' }) }}>Annuler</button>
                   </div>
@@ -196,7 +197,9 @@ export default function AdminReviews() {
                         <div className="s-label">Commentaire</div>
                         <textarea className="s-input" rows={3} value={editForm.comment} onChange={e => setEditForm(f => ({ ...f, comment: e.target.value }))} style={{ resize: 'vertical', marginBottom: '0.75rem' }} />
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button className="btn-new proexcel-btn-admin-save-action" disabled={saving} onClick={() => saveEdit(p.productId, rev.id)}>{saving ? '…' : '✓ Sauvegarder'}</button>
+                          <button className="btn-new proexcel-btn-admin-save-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} disabled={saving} onClick={() => saveEdit(p.productId, rev.id)}>
+                            {saving ? '…' : <><Check size={14} /> Sauvegarder</>}
+                          </button>
                           <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => setEditId(null)}>Annuler</button>
                         </div>
                       </div>
@@ -217,24 +220,24 @@ export default function AdminReviews() {
                         <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                           <button
                             className="btn-action proexcel-btn-admin-secondary-action"
-                            style={{ fontSize: '0.75rem' }}
+                            style={{ fontSize: '0.75rem', padding: '0.4rem', minWidth: 'unset' }}
                             onClick={() => startEdit(rev)}
                             title="Modifier"
-                          >✏️</button>
+                          ><Edit2 size={14} /></button>
                           <button
                             className="btn-action proexcel-btn-admin-secondary-action"
-                            style={{ fontSize: '0.75rem', minWidth: '72px' }}
+                            style={{ fontSize: '0.75rem', minWidth: '95px', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                             onClick={() => toggleApprove(p.productId, rev)}
                             title={rev.approved === false ? 'Afficher' : 'Masquer'}
                           >
-                            {rev.approved === false ? '👁 Afficher' : '🚫 Masquer'}
+                            {rev.approved === false ? <><Eye size={14} /> Afficher</> : <><EyeOff size={14} /> Masquer</>}
                           </button>
                           <button
                             className="btn-action btn-action-red proexcel-btn-admin-danger-action"
-                            style={{ fontSize: '0.75rem' }}
+                            style={{ fontSize: '0.75rem', padding: '0.4rem', minWidth: 'unset' }}
                             onClick={() => deleteReview(p.productId, rev.id)}
                             title="Supprimer"
-                          >🗑️</button>
+                          ><Trash2 size={14} /></button>
                         </div>
                       </div>
                     )}

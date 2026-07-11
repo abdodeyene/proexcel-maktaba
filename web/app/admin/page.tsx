@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { Calendar, CircleDollarSign, ShoppingCart, Users, AlertTriangle, Circle, BookOpen, CheckCircle } from 'lucide-react'
 
 type Product = {
   id: number
@@ -256,7 +257,7 @@ export default function AdminDashboard() {
           <div className="stat-card fade-up" style={{ animationDelay: '0s' }}>
             <div className="stat-card-header">
               <span className="stat-label">Revenus totaux</span>
-              <div className="stat-icon si-blue">💰</div>
+              <div className="stat-icon si-blue"><CircleDollarSign size={20} /></div>
             </div>
             <div className="stat-value">
               {stats?.revenue != null ? `${stats.revenue.toLocaleString('fr-FR')} DH` : '—'}
@@ -270,7 +271,7 @@ export default function AdminDashboard() {
           <div className="stat-card fade-up" style={{ animationDelay: '0.08s' }}>
             <div className="stat-card-header">
               <span className="stat-label">Commandes</span>
-              <div className="stat-icon si-green">🛒</div>
+              <div className="stat-icon si-green"><ShoppingCart size={20} /></div>
             </div>
             <div className="stat-value">{stats?.total ?? '—'}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -282,7 +283,7 @@ export default function AdminDashboard() {
           <div className="stat-card fade-up" style={{ animationDelay: '0.16s' }}>
             <div className="stat-card-header">
               <span className="stat-label">Clients</span>
-              <div className="stat-icon si-purple">👥</div>
+              <div className="stat-icon si-purple"><Users size={20} /></div>
             </div>
             <div className="stat-value">
               {orders.length > 0
@@ -298,7 +299,7 @@ export default function AdminDashboard() {
           <div className="stat-card fade-up" style={{ animationDelay: '0.24s' }}>
             <div className="stat-card-header">
               <span className="stat-label">Stock faible</span>
-              <div className="stat-icon si-red">⚠️</div>
+              <div className="stat-icon si-red"><AlertTriangle size={20} /></div>
             </div>
             <div className="stat-value text-red">{lowStockProducts.length}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -329,7 +330,9 @@ export default function AdminDashboard() {
                   className={`chart-filter ${period === 'custom' ? 'active' : ''}`}
                   onClick={() => setPeriod('custom')}
                   title="Plage de dates personnalisée"
-                >📅</button>
+                >
+                  <Calendar size={14} style={{ display: 'block' }} />
+                </button>
               </div>
             </div>
 
@@ -496,8 +499,8 @@ export default function AdminDashboard() {
                       </td>
                       <td><span className="order-amount">{o.total} DH</span></td>
                       <td>
-                        <span className={`status-badge ${STATUS_CLASS[o.status] || 'status-pending'}`}>
-                          ● {STATUS_LABEL[o.status] || o.status}
+                        <span className={`status-badge ${STATUS_CLASS[o.status] || 'status-pending'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <Circle size={10} fill="currentColor" /> {STATUS_LABEL[o.status] || o.status}
                         </span>
                       </td>
                       <td>
@@ -552,14 +555,16 @@ export default function AdminDashboard() {
               </div>
 
               <div style={{ marginTop: '1.25rem', padding: '1rem', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '10px' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--a-red)', marginBottom: '0.5rem' }}>
-                  ⚠️ Stocks faibles
+                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--a-red)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <AlertTriangle size={14} /> Stocks faibles
                 </div>
                 {lowStockProducts.length === 0 ? (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--a-text2)' }}>Aucun stock faible. ✅</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--a-text2)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    Aucun stock faible. <CheckCircle size={14} color="var(--a-green)" />
+                  </div>
                 ) : lowStockProducts.map(p => (
                   <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem', fontSize: '0.78rem' }}>
-                    <span style={{ color: 'var(--a-text)' }}>📚 {p.title.substring(0, 24)}…</span>
+                    <span style={{ color: 'var(--a-text)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}><BookOpen size={12} color="var(--a-text2)" /> {p.title.substring(0, 24)}…</span>
                     <span style={{ color: 'var(--a-red)', fontWeight: 700 }}>{p.stock} unités</span>
                   </div>
                 ))}

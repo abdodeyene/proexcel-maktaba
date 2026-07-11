@@ -53,9 +53,9 @@ const GRADIENTS = [
 ]
 
 const OVERLAYS: Record<string, string> = {
-  light:  'linear-gradient(to bottom, rgba(0,0,0,.35) 0%, rgba(0,0,0,.25) 40%, rgba(0,0,0,.50) 100%)',
+  light: 'linear-gradient(to bottom, rgba(0,0,0,.35) 0%, rgba(0,0,0,.25) 40%, rgba(0,0,0,.50) 100%)',
   medium: 'linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,.40) 40%, rgba(0,0,0,.70) 100%)',
-  dark:   'linear-gradient(to bottom, rgba(0,0,0,.65) 0%, rgba(0,0,0,.50) 40%, rgba(0,0,0,.80) 100%)',
+  dark: 'linear-gradient(to bottom, rgba(0,0,0,.65) 0%, rgba(0,0,0,.50) 40%, rgba(0,0,0,.80) 100%)',
 }
 
 const DEFAULT_BTN: ButtonStyle = {
@@ -165,9 +165,9 @@ export default function HeroSlider() {
   const [progress, setProgress] = useState(0)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const progRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const progRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touchStart = useRef(0)
-  const slidesLen  = useRef(DEFAULT_SLIDES.length)
+  const slidesLen = useRef(DEFAULT_SLIDES.length)
 
   // ── Data loading ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -179,14 +179,14 @@ export default function HeroSlider() {
           slidesLen.current = data.length
         }
       })
-      .catch(() => {})
+      .catch(() => { })
 
     fetch('/api/slider-button-style')
       .then(r => r.json())
       .then((data: Partial<ButtonStyle>) => {
         if (data?.bgType) setBtnStyle({ ...DEFAULT_BTN, ...data })
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   // ── LCP preload for first slide image ────────────────────────────────────────
@@ -261,14 +261,14 @@ export default function HeroSlider() {
     >
       {/* ── SLIDES ───────────────────────────────────────────────────────────── */}
       {slides.map((slide, i) => {
-        const isActive   = i === current
-        const overlay    = OVERLAYS[slide.overlayStrength] ?? OVERLAYS.medium
-        const align      = slide.textAlign === 'left' ? 'left' : 'center'
-        const flexAlign  = align === 'left' ? 'items-start' : 'items-center'
-        const tagColor   = slide.tagColor      || 'rgba(255,255,255,0.75)'
-        const titleColor = slide.titleColor    || '#ffffff'
-        const subColor   = slide.subtitleColor || 'rgba(255,255,255,0.75)'
-        const cta1text   = t(slide.ctaText, slide.ctaTextAr)
+        const isActive = i === current
+        const overlay = OVERLAYS[slide.overlayStrength] ?? OVERLAYS.medium
+        const align = slide.textAlign === 'left' ? 'left' : 'center'
+        const flexAlign = align === 'left' ? 'items-start' : 'items-center'
+        const tagColor = slide.tagColor || 'rgba(255,255,255,0.75)'
+        const titleColor = slide.titleColor || '#ffffff'
+        const subColor = slide.subtitleColor || 'rgba(255,255,255,0.75)'
+        const cta1text = t(slide.ctaText, slide.ctaTextAr)
 
         return (
           <div

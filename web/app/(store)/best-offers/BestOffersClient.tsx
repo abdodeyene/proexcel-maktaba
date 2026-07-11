@@ -354,6 +354,8 @@ export default function BestOffersClient({
     if (catParam) setSelectedCats([catParam])
     const sortParam = searchParams.get('sort')
     if (sortParam) setSort(sortParam)
+    const searchParam = searchParams.get('search')
+    if (searchParam) setSearchQuery(searchParam)
   }, [searchParams])
 
   // Fetch categories once

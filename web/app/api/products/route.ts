@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     console.log('[/api/products] params:', Object.fromEntries(searchParams))
 
     // ── Parse filters ───────────────────────────────────────────────────────
-    const categoryNames = searchParams.getAll('category')
+    const categoryNames = searchParams.getAll('category').map(c => c.trim()).filter(Boolean)
     const search        = searchParams.get('search')?.trim() ?? ''
     const minPrice      = parseFloat(searchParams.get('minPrice') ?? '0') || 0
     const maxPrice      = parseFloat(searchParams.get('maxPrice') ?? '999999') || 999999
@@ -33,7 +33,11 @@ export async function GET(req: NextRequest) {
     }
 
     if (categoryNames.length > 0) {
-      where.category = { in: categoryNames }
+      // Create case-insensitive OR conditions for categories
+      const catOrs = categoryNames.map(c => ({
+        category: { equals: c, mode: 'insensitive' }
+      }))
+      where.AND = [{ OR: catOrs }]
     }
 
     if (minPrice > 0 || maxPrice < 999999) {
@@ -59,7 +63,7 @@ export async function GET(req: NextRequest) {
       const sanitized = search.replace(/[<>]/g, '').slice(0, 100)
       if (sanitized) {
         const searchNum = parseFloat(sanitized)
-        where.OR = [
+        const searchOrs = [
           { title:         { contains: sanitized, mode: 'insensitive' } },
           { titleAr:       { contains: sanitized, mode: 'insensitive' } },
           { category:      { contains: sanitized, mode: 'insensitive' } },
@@ -70,6 +74,11 @@ export async function GET(req: NextRequest) {
             { price: { gte: searchNum - 5, lte: searchNum + 5 } },
           ]),
         ]
+        if (where.AND) {
+          (where.AND as any[]).push({ OR: searchOrs })
+        } else {
+          where.AND = [{ OR: searchOrs }]
+        }
       }
     }
 

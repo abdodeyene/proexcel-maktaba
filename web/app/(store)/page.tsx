@@ -74,14 +74,14 @@ export default function HomePage() {
       fetch('/api/products').then(r => r.json()).then(d => {
         const arr = Array.isArray(d) ? d : (d?.products ?? [])
         if (alive && arr.length >= 0) setProducts(arr)
-      }).catch(() => {})
+      }).catch(() => { })
       fetch('/api/categories').then(r => r.json()).then(d => {
         if (alive && Array.isArray(d)) setCategories(d)
-      }).catch(() => {})
+      }).catch(() => { })
       fetch('/api/settings').then(r => r.json()).then((d: Record<string, string | null>) => {
         if (!alive) return
         setSettings(d)
-      }).catch(() => {})
+      }).catch(() => { })
     }
 
     loadData()
@@ -280,7 +280,7 @@ export default function HomePage() {
                 <div className="level-link proexcel-btn-home-shop-now">
                   {T.shopNow}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                   </svg>
                 </div>
               </Link>
@@ -389,9 +389,9 @@ export default function HomePage() {
           <div className="store-card">
             <div className="store-map scroll-reveal reveal-left">
               {settings?.store_map_iframe ? (
-                <div 
-                  className="store-map-iframe-container" 
-                  dangerouslySetInnerHTML={{ __html: settings.store_map_iframe.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="100%"') }} 
+                <div
+                  className="store-map-iframe-container"
+                  dangerouslySetInnerHTML={{ __html: settings.store_map_iframe.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="100%"') }}
                 />
               ) : (
                 <iframe

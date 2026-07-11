@@ -179,6 +179,8 @@ export async function POST(req: NextRequest) {
           address,
           city,
           total,
+          promoCode: promoCode && typeof promoCode === 'string' ? promoCode.trim().toUpperCase() : null,
+          discount: discount > 0 ? discount : null,
           cart: verifiedCart as unknown as import('@prisma/client').Prisma.JsonArray,
         },
       })

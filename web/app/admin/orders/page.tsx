@@ -1,6 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import ConfirmModal from '@/components/admin/ConfirmModal'
+import {
+  Search, Package, Clock, Settings, CheckCircle, CircleDollarSign,
+  Eye, Printer, Trash2, Phone, MapPin, Calendar, X, Tag, Copy, Circle
+} from 'lucide-react'
 
 type OrderItem = {
   title: string
@@ -18,6 +22,8 @@ type Order = {
   address: string
   city: string
   total: number
+  promoCode?: string | null
+  discount?: number | null
   status: string
   date: string
   cart: unknown // Will cast as OrderItem[]
@@ -169,12 +175,16 @@ export default function AdminOrders() {
 
       {/* Filters */}
       <div className="filter-bar">
-        <input 
-          className="filter-input" 
-          placeholder="🔍 Rechercher par nom, ID, ville…" 
-          value={search} 
-          onChange={e => setSearch(e.target.value)} 
-        />
+        <div style={{ position: 'relative', flex: 1, minWidth: '250px' }}>
+          <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--a-text2)' }} />
+          <input 
+            className="filter-input" 
+            style={{ paddingLeft: '2.5rem', width: '100%' }}
+            placeholder="Rechercher par nom, ID, ville…" 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+          />
+        </div>
         <select className="filter-select" value={city} onChange={e => setCity(e.target.value)}>
           <option value="">Toutes les villes</option>
           <option>Casablanca</option><option>Rabat</option><option>Fès</option>
@@ -192,15 +202,15 @@ export default function AdminOrders() {
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--a-border)' }}>
         {[
-          { label: 'Total', val: summary.all, color: 'var(--a-primary)', icon: '📦' },
-          { label: 'En attente', val: summary.pending, color: 'var(--a-yellow)', icon: '⏳' },
-          { label: 'En cours', val: summary.processing, color: 'var(--a-orange)', icon: '⚙️' },
-          { label: 'Complétées', val: summary.completed, color: 'var(--a-green)', icon: '✅' },
-          { label: 'Revenus', val: `${summary.revenue.toLocaleString()} DH`, color: 'var(--a-primary)', icon: '💰' },
+          { label: 'Total', val: summary.all, color: 'var(--a-primary)', icon: <Package size={24} /> },
+          { label: 'En attente', val: summary.pending, color: 'var(--a-yellow)', icon: <Clock size={24} /> },
+          { label: 'En cours', val: summary.processing, color: 'var(--a-orange)', icon: <Settings size={24} /> },
+          { label: 'Complétées', val: summary.completed, color: 'var(--a-green)', icon: <CheckCircle size={24} /> },
+          { label: 'Revenus', val: `${summary.revenue.toLocaleString()} DH`, color: 'var(--a-primary)', icon: <CircleDollarSign size={24} /> },
         ].map(c => (
-          <div key={c.label} style={{ background: 'var(--a-card)', border: '1.5px solid var(--a-border)', borderRadius: '10px', padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.4rem' }}>{c.icon}</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: c.color, marginTop: '0.3rem' }}>{c.val}</div>
+          <div key={c.label} style={{ background: 'var(--a-card)', border: '1.5px solid var(--a-border)', borderRadius: '10px', padding: '1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ color: c.color, marginBottom: '0.3rem' }}>{c.icon}</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: c.color }}>{c.val}</div>
             <div style={{ fontSize: '0.72rem', color: 'var(--a-text2)', marginTop: '0.15rem' }}>{c.label}</div>
           </div>
         ))}
@@ -237,7 +247,14 @@ export default function AdminOrders() {
                       <br />
                       <span style={{ fontSize: '0.72rem' }}>{d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </td>
-                    <td><span className="order-amount">{o.total} DH</span></td>
+                    <td>
+                      <span className="order-amount">{o.total} DH</span>
+                      {o.promoCode && (
+                        <div style={{ fontSize: '0.72rem', color: 'var(--a-green)', fontWeight: 700, marginTop: '0.2rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <Tag size={12} /> {o.promoCode}
+                        </div>
+                      )}
+                    </td>
                     <td>
                       <select 
                         value={o.status} 
@@ -251,9 +268,15 @@ export default function AdminOrders() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => setSelectedOrder(o)}>👁️ Voir</button>
-                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => window.open(`/admin/orders/${o.id}/receipt`, '_blank')}>🖨️ Bon</button>
-                        <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => delOrder(o.id)}>🗑️</button>
+                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => setSelectedOrder(o)} title="Voir détails">
+                          <Eye size={16} />
+                        </button>
+                        <button className="btn-action proexcel-btn-admin-secondary-action" onClick={() => window.open(`/admin/orders/${o.id}/receipt`, '_blank')} title="Imprimer le bon">
+                          <Printer size={16} />
+                        </button>
+                        <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => delOrder(o.id)} title="Supprimer">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -290,70 +313,119 @@ export default function AdminOrders() {
           onClick={e => { if (e.target === e.currentTarget) setSelectedOrder(null) }}
         >
           <div style={{ background: 'var(--a-card)', borderRadius: '16px', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,0.3)' }}>
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--a-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Commande #{selectedOrder.orderNum}</h2>
-              <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: 'var(--a-text2)' }}>✕</button>
-            </div>
-            <div style={{ padding: '1.5rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ background: 'var(--a-bg)', borderRadius: '10px', padding: '1rem' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--a-text2)', marginBottom: '0.5rem' }}>Client</div>
-                  <div style={{ fontWeight: 700 }}>{selectedOrder.name}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--a-text2)', marginTop: '0.25rem' }}>📞 {selectedOrder.phone}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--a-text2)', marginTop: '0.15rem' }}>📍 {selectedOrder.address}, {selectedOrder.city}</div>
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--a-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--a-bg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--a-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Package size={20} />
                 </div>
-                <div style={{ background: 'var(--a-bg)', borderRadius: '10px', padding: '1rem' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--a-text2)', marginBottom: '0.5rem' }}>Détails</div>
-                  <div style={{ fontSize: '0.82rem' }}>📅 {new Date(selectedOrder.date).toLocaleDateString('fr-FR')}</div>
-                  <div style={{ marginTop: '0.4rem' }}>
-                    <span className={`status-badge ${STATUS_CLASS[selectedOrder.status]}`}>
-                      ● {STATUS_LABEL[selectedOrder.status] || selectedOrder.status}
+                <div>
+                  <h2 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, color: 'var(--a-text)' }}>Commande #{selectedOrder.orderNum}</h2>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--a-text2)', marginTop: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <Calendar size={12} /> {new Date(selectedOrder.date).toLocaleDateString('fr-FR')} à {new Date(selectedOrder.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} style={{ background: 'var(--a-card)', border: '1px solid var(--a-border)', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--a-text2)' }}>
+                <X size={16} />
+              </button>
+            </div>
+            
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ border: '1px solid var(--a-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--a-bg)' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--a-text2)', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Circle size={8} fill="currentColor" /> Informations Client
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--a-text)' }}>{selectedOrder.name}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.8rem' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--a-text2)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Phone size={14} color="var(--a-primary)" /> {selectedOrder.phone}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--a-text2)', display: 'flex', alignItems: 'flex-start', gap: '0.5rem', lineHeight: 1.4 }}>
+                      <MapPin size={14} color="var(--a-primary)" style={{ flexShrink: 0, marginTop: '2px' }} /> 
+                      <span>{selectedOrder.address}<br/>{selectedOrder.city}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ border: '1px solid var(--a-border)', borderRadius: '12px', padding: '1.25rem', background: 'var(--a-bg)' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--a-text2)', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Circle size={8} fill="currentColor" /> Statut
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <span className={`status-badge ${STATUS_CLASS[selectedOrder.status]}`} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', alignSelf: 'flex-start' }}>
+                      <Circle size={10} fill="currentColor" /> {STATUS_LABEL[selectedOrder.status] || selectedOrder.status}
                     </span>
+                    
+                    {selectedOrder.promoCode && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--a-green)', fontWeight: 700, background: 'rgba(16, 185, 129, 0.1)', padding: '0.4rem 0.8rem', borderRadius: '6px', alignSelf: 'flex-start' }}>
+                        <Tag size={14} /> Code: {selectedOrder.promoCode}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--a-text2)', marginBottom: '0.75rem' }}>Produits commandés</div>
-              {((selectedOrder.cart as OrderItem[]) || []).map((item, index) => (
-                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--a-border)', fontSize: '0.85rem' }}>
-                  <div>{item.title}</div>
-                  <div style={{ color: 'var(--a-text2)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    {item.selectedVariant?.type === 'color' && item.selectedVariant.colorHex && (
-                      <span style={{ display: 'inline-block', width: '10px', height: '10px', borderRadius: '50%', background: item.selectedVariant.colorHex, border: '1px solid rgba(0,0,0,0.15)', flexShrink: 0 }} />
-                    )}
-                    {(item.selectedVariant?.name || item.variant) ? `${item.selectedVariant?.name || item.variant} ×` : ''}
-                    {' '}{item.qty}
-                  </div>
-                  <div style={{ fontWeight: 700, color: 'var(--a-primary)' }}>{item.price * item.qty} DH</div>
+              <div style={{ border: '1px solid var(--a-border)', borderRadius: '12px', overflow: 'hidden' }}>
+                <div style={{ padding: '1rem', background: 'var(--a-bg)', borderBottom: '1px solid var(--a-border)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--a-text2)' }}>
+                  Détail de la commande
                 </div>
-              ))}
+                <div style={{ padding: '0 1rem' }}>
+                {((selectedOrder.cart as OrderItem[]) || []).map((item, index) => (
+                  <div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 0', borderBottom: '1px solid var(--a-border)' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--a-text)' }}>{item.title}</div>
+                      <div style={{ color: 'var(--a-text2)', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', marginTop: '0.2rem' }}>
+                        {item.selectedVariant?.type === 'color' && item.selectedVariant.colorHex && (
+                          <span style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', background: item.selectedVariant.colorHex, border: '1px solid rgba(0,0,0,0.15)', flexShrink: 0 }} />
+                        )}
+                        {(item.selectedVariant?.name || item.variant) ? `${item.selectedVariant?.name || item.variant}` : 'Standard'}
+                        <span style={{ margin: '0 0.3rem', color: 'var(--a-border)' }}>|</span>
+                        <span>Qté: {item.qty}</span>
+                      </div>
+                    </div>
+                    <div style={{ fontWeight: 800, color: 'var(--a-text)', fontSize: '0.95rem' }}>{item.price * item.qty} DH</div>
+                  </div>
+                ))}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0 0', fontSize: '1rem', fontWeight: 800, borderTop: '2px solid var(--a-border)', marginTop: '0.5rem' }}>
-                <span>Total</span>
-                <span style={{ color: 'var(--a-primary)' }}>{selectedOrder.total} DH</span>
+                <div style={{ padding: '1rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {selectedOrder.discount && selectedOrder.discount > 0 ? (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--a-green)', fontWeight: 600 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><Tag size={14} /> Réduction</span>
+                      <span>-{selectedOrder.discount} DH</span>
+                    </div>
+                  ) : null}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 900, color: 'var(--a-primary)', paddingTop: '0.5rem', borderTop: '2px dashed var(--a-border)' }}>
+                    <span>Total</span>
+                    <span>{selectedOrder.total} DH</span>
+                  </div>
+                </div>
+              </div>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <button 
                   className="btn-action proexcel-btn-admin-secondary-action" 
-                  style={{ flex: 1, padding: '0.7rem', borderRadius: '9px', background: 'var(--a-card)', border: '1px solid var(--a-border)' }}
+                  style={{ flex: 1, padding: '0.85rem', borderRadius: '10px', background: 'var(--a-card)', border: '1px solid var(--a-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 600, color: 'var(--a-text)' }}
                   onClick={() => window.open(`/admin/orders/${selectedOrder.id}/receipt`, '_blank')}
                 >
-                  🖨️ Imprimer Bon
+                  <Printer size={18} /> Imprimer Bon
                 </button>
                 <button 
                   className="btn-save proexcel-btn-admin-save-action" 
-                  style={{ flex: 1, position: 'static', padding: '0.7rem', background: 'var(--a-green)', borderRadius: '9px', boxShadow: 'none' }}
+                  style={{ flex: 1, position: 'static', padding: '0.85rem', background: 'var(--a-green)', borderRadius: '10px', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 600 }}
                   onClick={() => { updateStatus(selectedOrder.id, 'completed'); setSelectedOrder(null) }}
                 >
-                  ✅ Marquer complété
+                  <CheckCircle size={18} /> Marquer complété
                 </button>
                 <button 
                   className="btn-action btn-action-red proexcel-btn-admin-danger-action" 
-                  style={{ flex: 1, padding: '0.7rem', borderRadius: '9px' }}
+                  style={{ flex: 1, padding: '0.85rem', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontWeight: 600 }}
                   onClick={() => { updateStatus(selectedOrder.id, 'cancelled'); setSelectedOrder(null) }}
                 >
-                  ❌ Annuler
+                  <X size={18} /> Annuler
                 </button>
               </div>
             </div>

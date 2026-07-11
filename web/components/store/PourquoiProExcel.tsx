@@ -284,14 +284,14 @@ export default function PourquoiProExcel() {
             <div className="bento-glow glow-red"></div>
             <div className="bento-glow glow-green"></div>
             <div className="shimmer"></div>
-            
+
             <div className="badge-officiel">✓ {lang === 'ar' ? 'رسمي' : 'Officiel'}</div>
-        <div className="flag-icon" style={{ display: 'flex', justifyContent: 'center' }}>
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.2))' }}>
-            <circle cx="12" cy="8" r="7"/>
-            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-          </svg>
-        </div>
+            <div className="flag-icon" style={{ display: 'flex', justifyContent: 'center' }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.2))' }}>
+                <circle cx="12" cy="8" r="7" />
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+              </svg>
+            </div>
             <h3>{lang === 'ar' ? 'البرنامج الوطني المغربي' : 'Programme Officiel Marocain'}</h3>
             <p>{lang === 'ar' ? 'جميع كتبنا متوافقة مع برنامج وزارة التربية الوطنية.' : 'Tous nos livres suivent le programme officiel du Ministère de l\'Éducation.'}</p>
           </div>
@@ -299,15 +299,15 @@ export default function PourquoiProExcel() {
           <div className="bento-card bento-medium-1">
             <div className="bento-glow glow-blue"></div>
             <div className="truck-container">
-          <div className="truck-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
-              <rect x="1" y="3" width="15" height="13"/>
-              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-              <circle cx="5.5" cy="18.5" r="2.5"/>
-              <circle cx="18.5" cy="18.5" r="2.5"/>
-            </svg>
-          </div>
-        </div>
+              <div className="truck-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))' }}>
+                  <rect x="1" y="3" width="15" height="13" />
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                  <circle cx="5.5" cy="18.5" r="2.5" />
+                  <circle cx="18.5" cy="18.5" r="2.5" />
+                </svg>
+              </div>
+            </div>
             <h3>{lang === 'ar' ? 'توصيل سريع خلال 48 ساعة' : 'Livraison 24/48h'}</h3>
             <p>{lang === 'ar' ? 'توصيل سريع في جميع أنحاء المغرب في وقت قياسي.' : 'Livraison rapide partout au Maroc en un temps record pour vos fournitures.'}</p>
           </div>
@@ -329,13 +329,13 @@ export default function PourquoiProExcel() {
           </div>
 
           <div className="bento-card bento-small">
-          <div className="bento-glow glow-wa"></div>
-          <div className="wa-container">
-            <span className="wa-pulse"></span>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-            </svg>
-          </div>
+            <div className="bento-glow glow-wa"></div>
+            <div className="wa-container">
+              <span className="wa-pulse"></span>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+              </svg>
+            </div>
             <h3>{lang === 'ar' ? 'دعم عبر واتساب' : 'Support WhatsApp'}</h3>
             <p>{lang === 'ar' ? 'فريقنا يجيبك بسرعة 7 أيام/7.' : 'Notre équipe vous répond rapidement 7j/7.'}</p>
           </div>

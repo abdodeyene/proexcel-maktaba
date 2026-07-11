@@ -96,9 +96,6 @@ export default function AvisClients() {
             display: flex;
             width: 100%;
           }
-          .marquee-row:hover .marquee-content {
-            animation-play-state: paused;
-          }
           .marquee-content {
             display: flex;
             width: max-content;
@@ -113,6 +110,7 @@ export default function AvisClients() {
             display: flex;
             gap: 16px;
             padding-right: 16px;
+            flex-shrink: 0;
           }
           @keyframes scroll-left {
             0% { transform: translateX(0); }
@@ -193,13 +191,13 @@ export default function AvisClients() {
                 {content.testimonials1.map((item) => <TestimonialCard key={item.id} item={item} />)}
               </div>
               <div className="marquee-group" aria-hidden="true">
-                {content.testimonials1.map((item) => <TestimonialCard key={'dup1-'+item.id} item={item} />)}
+                {content.testimonials1.map((item) => <TestimonialCard key={'dup1-' + item.id} item={item} />)}
               </div>
               <div className="marquee-group" aria-hidden="true">
-                {content.testimonials1.map((item) => <TestimonialCard key={'dup2-'+item.id} item={item} />)}
+                {content.testimonials1.map((item) => <TestimonialCard key={'dup2-' + item.id} item={item} />)}
               </div>
               <div className="marquee-group" aria-hidden="true">
-                {content.testimonials1.map((item) => <TestimonialCard key={'dup3-'+item.id} item={item} />)}
+                {content.testimonials1.map((item) => <TestimonialCard key={'dup3-' + item.id} item={item} />)}
               </div>
             </div>
           </div>
@@ -210,13 +208,13 @@ export default function AvisClients() {
                 {content.testimonials2.map((item) => <TestimonialCard key={item.id} item={item} />)}
               </div>
               <div className="marquee-group" aria-hidden="true">
-                {content.testimonials2.map((item) => <TestimonialCard key={'dup1-'+item.id} item={item} />)}
+                {content.testimonials2.map((item) => <TestimonialCard key={'dup1-' + item.id} item={item} />)}
               </div>
               <div className="marquee-group" aria-hidden="true">
-                {content.testimonials2.map((item) => <TestimonialCard key={'dup2-'+item.id} item={item} />)}
+                {content.testimonials2.map((item) => <TestimonialCard key={'dup2-' + item.id} item={item} />)}
               </div>
               <div className="marquee-group" aria-hidden="true">
-                {content.testimonials2.map((item) => <TestimonialCard key={'dup3-'+item.id} item={item} />)}
+                {content.testimonials2.map((item) => <TestimonialCard key={'dup3-' + item.id} item={item} />)}
               </div>
             </div>
           </div>

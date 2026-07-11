@@ -44,7 +44,7 @@ export default function Footer() {
         fb: d?.store_facebook || 'https://facebook.com',
         ig: d?.store_instagram || 'https://instagram.com',
         phone: d?.store_phone || '+212 6 00 00 00 00',
-        whatsapp: d?.store_whatsapp || '+212600000000',
+        whatsapp: d?.store_phone || d?.store_whatsapp || '+212 6 00 00 00 00',
         email: d?.store_email || 'contact@proexcel.ma',
         address: d?.store_address || 'Casablanca, Maroc'
       })

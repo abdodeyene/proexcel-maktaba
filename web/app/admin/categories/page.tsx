@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import { Edit2, Trash2, Camera, Loader2, Save, X, Plus } from 'lucide-react'
 
 type Category = {
   id: number
@@ -94,7 +95,9 @@ export default function AdminCategories() {
       <div className="admin-topbar">
         <div className="topbar-title">Catégories <span>Gérer les catégories</span></div>
         <div className="topbar-actions">
-          <button className="btn-new proexcel-btn-admin-primary-action" onClick={openCreate}>+ Nouvelle catégorie</button>
+          <button className="btn-new proexcel-btn-admin-primary-action" onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Plus size={16} /> Nouvelle catégorie
+          </button>
         </div>
       </div>
 
@@ -107,14 +110,18 @@ export default function AdminCategories() {
                   ? <img src={c.image} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   : <span style={{ fontSize: '2.8rem' }}>{c.emoji || '📚'}</span>
                 }
-                <div className="cat-admin-img-overlay">✏️</div>
+                <div className="cat-admin-img-overlay"><Edit2 size={24} color="white" /></div>
               </div>
               <div className="cat-admin-body">
                 <div className="cat-admin-name">{c.name}</div>
                 <div className="cat-admin-count">{c.count} produit{c.count !== 1 ? 's' : ''}</div>
                 <div className="cat-admin-actions" onClick={e => e.stopPropagation()}>
-                  <button className="btn-action proexcel-btn-admin-secondary-action" style={{ flex: 1 }} onClick={() => openEdit(c)}>✏️ Modifier</button>
-                  <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => delCat(c.id)}>🗑️</button>
+                  <button className="btn-action proexcel-btn-admin-secondary-action" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }} onClick={() => openEdit(c)}>
+                    <Edit2 size={14} /> Modifier
+                  </button>
+                  <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" onClick={() => delCat(c.id)}>
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -133,7 +140,7 @@ export default function AdminCategories() {
           <div style={{ background: 'var(--a-card)', borderRadius: '16px', maxWidth: '480px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', overflow: 'hidden' }}>
             <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--a-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{editingId ? 'Modifier catégorie' : 'Nouvelle catégorie'}</h2>
-              <button onClick={() => setModal(false)} style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer', color: 'var(--a-text2)' }}>✕</button>
+              <button onClick={() => setModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--a-text2)' }}><X size={20} /></button>
             </div>
             <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
 
@@ -155,8 +162,8 @@ export default function AdminCategories() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     <label style={{ cursor: 'pointer' }}>
                       <input ref={imgRef} type="file" accept="image/*" hidden onChange={e => { if (e.target.files?.[0]) uploadImage(e.target.files[0]); e.target.value = '' }} />
-                      <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'inline-block', cursor: 'pointer' }}>
-                        {imgUploading ? '⏳ Upload…' : '📷 Choisir image'}
+                      <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                        {imgUploading ? <><Loader2 size={14} className="animate-spin" /> Upload…</> : <><Camera size={14} /> Choisir image</>}
                       </span>
                     </label>
                     {imgError && <div style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.25rem' }}>{imgError}</div>}
@@ -232,8 +239,8 @@ export default function AdminCategories() {
 
               <div style={{ display: 'flex', gap: '0.75rem', paddingTop: '0.25rem' }}>
                 <button className="btn-action proexcel-btn-admin-secondary-action" style={{ flex: 1, padding: '0.75rem', borderRadius: '10px' }} onClick={() => setModal(false)}>Annuler</button>
-                <button className="btn-save proexcel-btn-admin-save-action" style={{ flex: 2, padding: '0.75rem', borderRadius: '10px', position: 'static', boxShadow: 'none' }} onClick={saveCat} disabled={loading}>
-                  💾 {loading ? 'Enregistrement…' : 'Enregistrer'}
+                <button className="btn-save proexcel-btn-admin-save-action" style={{ flex: 2, padding: '0.75rem', borderRadius: '10px', position: 'static', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={saveCat} disabled={loading}>
+                  <Save size={18} /> {loading ? 'Enregistrement…' : 'Enregistrer'}
                 </button>
               </div>
             </div>

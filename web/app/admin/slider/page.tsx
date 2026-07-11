@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { Plus, Trash2, Upload, ChevronUp, ChevronDown, Save, Eye, EyeOff, ImageIcon } from '@/components/LucideIcons'
+import { Plus, Trash2, Upload, ChevronUp, ChevronDown, Save, Eye, EyeOff, ImageIcon, Palette, Film } from 'lucide-react'
 
 type Slide = {
   id: number
@@ -286,7 +286,7 @@ export default function SliderAdminPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', fontSize: '1rem', flexShrink: 0,
           }}>
-            🎨
+            <Palette size={18} />
           </div>
           <div>
             <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--a-text, #0f172a)', margin: 0 }}>
@@ -433,7 +433,7 @@ export default function SliderAdminPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#fff', fontSize: '1rem', flexShrink: 0,
         }}>
-          🎞️
+          <Film size={18} />
         </div>
         <div>
           <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--a-text, #0f172a)', margin: 0 }}>
@@ -647,8 +647,8 @@ export default function SliderAdminPage() {
 
               {/* Colors */}
               <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--a-text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
-                  🎨 Couleurs du texte <span style={{ fontWeight: 400, textTransform: 'none' }}>(laisser vide = couleurs par défaut)</span>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--a-text2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Palette size={14} /> Couleurs du texte <span style={{ fontWeight: 400, textTransform: 'none' }}>(laisser vide = couleurs par défaut)</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                   {([

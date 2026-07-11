@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { Save as SaveIcon, Check, Image as ImageIconLucide, Upload as UploadIcon, AlertTriangle } from 'lucide-react'
 import {
   BUTTON_STYLE_PAGES,
   ButtonStyle,
@@ -855,9 +856,9 @@ export default function AdminSettings() {
       <div className="admin-topbar">
         <div className="topbar-title">Paramètres <span>Configuration globale</span></div>
         <div className="topbar-actions">
-          {uploadError && <span style={{ color: '#ef4444', fontSize: '0.8rem', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>⚠ {uploadError}</span>}
-          <button className="btn-new proexcel-btn-admin-save-action" onClick={saveSettings} disabled={loading}>
-            {loading ? 'Enregistrement…' : saved ? '💾 Enregistré !' : '💾 Sauvegarder tout'}
+          {uploadError && <span style={{ color: '#ef4444', fontSize: '0.8rem', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.3rem' }}><AlertTriangle size={14} /> {uploadError}</span>}
+          <button className="btn-new proexcel-btn-admin-save-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }} onClick={saveSettings} disabled={loading}>
+            {loading ? 'Enregistrement…' : saved ? <><Check size={14} /> Enregistré !</> : <><SaveIcon size={14} /> Sauvegarder tout</>}
           </button>
         </div>
       </div>
@@ -980,8 +981,8 @@ export default function AdminSettings() {
                                 <img src={currentVal} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                               </div>
                             ) : (
-                              <div style={{ width: '56px', height: '56px', borderRadius: '8px', border: '2px dashed var(--a-border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--a-text2)', fontSize: '1.5rem' }}>
-                                🖼️
+                              <div style={{ width: '56px', height: '56px', borderRadius: '8px', border: '2px dashed var(--a-border)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--a-text2)' }}>
+                                <ImageIconLucide size={24} />
                               </div>
                             )}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flex: 1 }}>
@@ -1008,7 +1009,7 @@ export default function AdminSettings() {
                                     e.target.value = ''
                                   }}
                                 />
-                                <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'inline-block', cursor: 'pointer', fontSize: '0.78rem' }}>📷 Upload</span>
+                                <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.78rem' }}><UploadIcon size={12} /> Upload</span>
                               </label>
                               {currentVal && (
                                 <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" style={{ fontSize: '0.72rem' }} onClick={() => updateKey(item.settingKey, '')}>Supprimer</button>
@@ -1048,8 +1049,7 @@ export default function AdminSettings() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
                     {[
                       { key: 'store_email', label: 'Email', type: 'email' },
-                      { key: 'store_phone', label: 'Téléphone', type: 'text' },
-                      { key: 'store_whatsapp', label: 'WhatsApp', type: 'text' },
+                      { key: 'store_phone', label: 'Téléphone / WhatsApp', type: 'text' },
                       { key: 'store_address', label: 'Adresse', type: 'text' },
                     ].map(f => (
                       <div key={f.key}>
@@ -1535,7 +1535,7 @@ export default function AdminSettings() {
                                   } catch (err) { setUploadError(err instanceof Error ? err.message : 'Erreur') }
                                   e.target.value = ''
                                 }} />
-                                <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'inline-block', cursor: 'pointer', fontSize: '0.75rem' }}>📷 Upload</span>
+                                <span className="btn-action proexcel-btn-admin-upload-action" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.75rem' }}><UploadIcon size={12} /> Upload</span>
                               </label>
                               {val && <button className="btn-action btn-action-red proexcel-btn-admin-danger-action" style={{ fontSize: '0.72rem' }} onClick={() => updateKey(key, '')}>Supprimer</button>}
                             </div>
@@ -1643,19 +1643,12 @@ export default function AdminSettings() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
                       <div>
-                        <div className="s-label">Téléphone</div>
+                        <div className="s-label">Téléphone / WhatsApp</div>
                         <div style={{ position: 'relative' }}>
                           <Phone size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--a-text2)' }} />
-                          <input className="s-input" style={{ paddingLeft: '36px' }} value={settings.store_phone} onChange={e => updateKey('store_phone', e.target.value)} placeholder="+212 6..." />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="s-label">WhatsApp</div>
-                        <div style={{ position: 'relative' }}>
-                          <MessageCircle size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--a-text2)' }} />
-                          <input className="s-input" style={{ paddingLeft: '36px' }} value={settings.store_whatsapp} onChange={e => updateKey('store_whatsapp', e.target.value)} placeholder="2126..." />
+                          <input className="s-input" style={{ paddingLeft: '36px' }} value={settings.store_phone} onChange={e => { updateKey('store_phone', e.target.value); updateKey('store_whatsapp', e.target.value); }} placeholder="+212 6..." />
                         </div>
                       </div>
                     </div>
