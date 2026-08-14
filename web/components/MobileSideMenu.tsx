@@ -2,18 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useLang } from '@/components/LangContext'
 import {
   Search,
   ShoppingCart,
-  User,
   X,
   ChevronRight,
-  Phone,
-  HelpCircle,
-  LogIn,
-  BookOpen
+  Layout
 } from '@/components/LucideIcons'
 
 type Category = {
@@ -32,9 +28,15 @@ interface MobileSideMenuProps {
 export default function MobileSideMenu({ isOpen, onClose, cartCount }: MobileSideMenuProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const pathname = usePathname()
   const { lang } = useLang()
-  const isAr = lang === 'ar'
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const activeLang = mounted ? lang : 'ar'
+  const isAr = activeLang === 'ar'
 
   const [categories, setCategories] = useState<Category[]>([])
   const [logoSrc, setLogoSrc] = useState('/logo.png')
@@ -90,70 +92,55 @@ export default function MobileSideMenu({ isOpen, onClose, cartCount }: MobileSid
     }
   }
 
-  // Fallback static categories requested
+  // Fallback categories if database is loading
   const staticCategories = [
-    'Blocs, cahiers, carnets',
-    'Bureautique',
-    'Classement et archivage',
-    'Consommables informatiques',
-    'Correspondance',
-    'Dessin et beaux-arts',
-    'Environnement informatique',
-    'Écriture et correction',
-    'Équipement de bureau',
-    'Les papiers',
-    'Loisirs créatifs',
-    'Matériel de bureau',
-    'Matériels et jeux éducatifs',
-    'Nathan maternelle',
-    'Petites fournitures',
-    'Services généraux et réception'
+    'Accessoires',
+    'Cahiers',
+    'Cartables',
+    'Outils scolaires',
+    'Romans',
+    'Trousses'
   ]
 
-  // Determine active category in the URL to highlight it
+  // Determine active category in URL to highlight
   const activeCategoryParam = searchParams.get('cat')
 
   const t = {
     fr: {
       subtitle: 'Papeterie & fournitures scolaires',
       searchPlaceholder: 'Vous cherchez un produit ?',
-      listTitle: 'LISTES',
-      listsCol: 'Listes scolaires',
-      catTitle: 'ACHETER PAR CATÉGORIE',
-      helpTitle: 'AIDE ET PARAMÈTRES',
-      profile: 'Mon profil',
-      contact: 'Contact',
-      login: 'Se connecter',
+      searchBtn: 'Rechercher',
+      catTitle: 'CATÉGORIES DE PRODUITS',
+      allCategories: 'Toutes les catégories',
+      cart: 'Mon Panier',
     },
     ar: {
       subtitle: 'الوراقة والأدوات المدرسية',
       searchPlaceholder: 'ما الذي تبحث عنه؟',
-      listTitle: 'القوائم',
-      listsCol: 'القوائم المدرسية',
-      catTitle: 'تسوق حسب الفئة',
-      helpTitle: 'المساعدة والإعدادات',
-      profile: 'ملفي الشخصي',
-      contact: 'اتصل بنا',
-      login: 'تسجيل الدخول',
+      searchBtn: 'بحث',
+      catTitle: 'فئات المنتجات',
+      allCategories: 'جميع الفئات',
+      cart: 'سلتي',
     }
   }
 
-  const currentT = t[lang as keyof typeof t] ?? t.fr
+  const currentT = t[activeLang as keyof typeof t] ?? t.fr
 
   return (
     <>
       {/* Background Overlay */}
       <div
         onClick={onClose}
+        suppressHydrationWarning
         style={{
           position: 'fixed',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          backdropFilter: 'blur(3px)',
-          WebkitBackdropFilter: 'blur(3px)',
+          backgroundColor: 'rgba(15, 23, 42, 0.45)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'all' : 'none',
-          transition: 'opacity 300ms ease-in-out',
+          transition: 'opacity 300ms cubic-bezier(0.16, 1, 0.3, 1)',
           zIndex: 9998,
         }}
       />
@@ -161,40 +148,46 @@ export default function MobileSideMenu({ isOpen, onClose, cartCount }: MobileSid
       {/* Slide Drawer */}
       <div
         dir={isAr ? 'rtl' : 'ltr'}
+        suppressHydrationWarning
         style={{
           position: 'fixed',
           top: 0,
           bottom: 0,
           left: isAr ? 'auto' : 0,
           right: isAr ? 0 : 'auto',
-          width: '85vw',
-          maxWidth: '380px',
+          width: '88vw',
+          maxWidth: '360px',
           height: '100vh',
           backgroundColor: '#ffffff',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
+          boxShadow: isAr
+            ? '-12px 0 40px rgba(0, 0, 0, 0.15)'
+            : '12px 0 40px rgba(0, 0, 0, 0.15)',
           zIndex: 9999,
           transform: isOpen ? 'translateX(0)' : isAr ? 'translateX(100%)' : 'translateX(-100%)',
-          transition: 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)',
+          transition: 'transform 320ms cubic-bezier(0.16, 1, 0.3, 1)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
           color: '#0f172a',
+          borderRight: !isAr ? '1px solid #e2e8f0' : 'none',
+          borderLeft: isAr ? '1px solid #e2e8f0' : 'none',
         }}
       >
         {/* Top Header Section */}
         <div
           style={{
-            padding: '1.25rem 1rem',
+            padding: '1.15rem 1.25rem',
             borderBottom: '1px solid #f1f5f9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '1rem',
+            backgroundColor: '#ffffff',
           }}
         >
           {/* Logo & Subtitle */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem', minWidth: 0 }}>
-            <Link href="/" onClick={onClose} style={{ display: 'block', maxWidth: '140px' }}>
+            <Link href="/" onClick={onClose} style={{ display: 'block', maxWidth: '145px' }}>
               <img
                 src={logoSrc}
                 alt="ProExcel Maktaba"
@@ -220,441 +213,177 @@ export default function MobileSideMenu({ isOpen, onClose, cartCount }: MobileSid
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              color: '#334155',
-              transition: 'all 200ms ease',
+              color: '#475569',
+              transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+              flexShrink: 0,
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9'
-              e.currentTarget.style.color = '#ef233c'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc'
-              e.currentTarget.style.color = '#334155'
-            }}
+            className="sidebar-close-btn"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Quick Action Icons */}
-        <div
+        {/* Search form */}
+        <form
+          onSubmit={handleSearchSubmit}
           style={{
-            padding: '0.75rem 1rem',
-            backgroundColor: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
+            padding: '1rem 1.25rem 0.5rem 1.25rem',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            gap: '1rem',
+            gap: '0.5rem',
           }}
         >
-          <Link
-            href="/contact"
-            onClick={onClose}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.2rem',
-              color: '#334155',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              flex: 1,
-              padding: '0.35rem 0',
-              borderRadius: '8px',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#e2e8f0' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+          <div style={{ position: 'relative', flex: 1 }}>
+            <input
+              type="text"
+              placeholder={currentT.searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="sidebar-search-input"
+            />
+            <Search
+              size={16}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                left: isAr ? 'auto' : '0.85rem',
+                right: isAr ? '0.85rem' : 'auto',
+                color: '#94a3b8',
+                pointerEvents: 'none',
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            className="sidebar-search-btn"
           >
-            <Phone size={18} style={{ color: '#ef233c' }} />
-            <span>Contact</span>
+            {currentT.searchBtn}
+          </button>
+        </form>
+
+        {/* Product Categories Section (Scrollable) */}
+        <div
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '0.75rem 1rem 2rem 1rem',
+            WebkitOverflowScrolling: 'touch',
+          }}
+          className="thin-scrollbar"
+        >
+          <div className="sidebar-section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <Layout size={15} style={{ color: '#dc2626' }} />
+            <span>{currentT.catTitle}</span>
+          </div>
+
+          {/* All Categories link */}
+          <Link
+            href="/best-offers"
+            onClick={onClose}
+            className={`sidebar-nav-item ${!activeCategoryParam ? 'active' : ''}`}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+              <span className="cat-icon-badge">✨</span>
+              <span className="item-label" style={{ fontWeight: 700 }}>{currentT.allCategories}</span>
+            </div>
+            <ChevronRight size={15} className="item-chevron" />
           </Link>
 
-          <Link
-            href="/login"
-            onClick={onClose}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.2rem',
-              color: '#334155',
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              flex: 1,
-              padding: '0.35rem 0',
-              borderRadius: '8px',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#e2e8f0' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
-          >
-            <User size={18} style={{ color: '#ef233c' }} />
-            <span>Compte</span>
-          </Link>
+          {/* Dynamic Categories */}
+          {categories.length > 0 ? (
+            categories.map((cat) => {
+              const isActive = activeCategoryParam === cat.name
+              return (
+                <Link
+                  key={cat.id}
+                  href={`/best-offers?cat=${encodeURIComponent(cat.name)}`}
+                  onClick={onClose}
+                  className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+                    <span className="cat-icon-badge">
+                      {cat.emoji || '📚'}
+                    </span>
+                    <span className="item-label">{cat.name}</span>
+                  </div>
+                  {cat.count !== undefined && cat.count > 0 && (
+                    <span className="cat-count-pill">{cat.count}</span>
+                  )}
+                  <ChevronRight size={15} className="item-chevron" />
+                </Link>
+              )
+            })
+          ) : (
+            /* Static Fallback Categories */
+            staticCategories.map((name, idx) => {
+              const isActive = activeCategoryParam === name
+              return (
+                <Link
+                  key={idx}
+                  href={`/best-offers?cat=${encodeURIComponent(name)}`}
+                  onClick={onClose}
+                  className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+                    <span className="cat-icon-badge">📦</span>
+                    <span className="item-label">{name}</span>
+                  </div>
+                  <ChevronRight size={15} className="item-chevron" />
+                </Link>
+              )
+            })
+          )}
+        </div>
 
+        {/* Footer Panier Quick Link */}
+        <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
           <Link
             href="/cart"
             onClick={onClose}
             style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.2rem',
-              color: '#334155',
-              fontSize: '0.72rem',
+              justifyContent: 'space-between',
+              padding: '0.75rem 1rem',
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: '#0f172a',
               fontWeight: 600,
-              flex: 1,
-              padding: '0.35rem 0',
-              borderRadius: '8px',
-              transition: 'background 0.2s',
-              position: 'relative',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#e2e8f0' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
-          >
-            <div style={{ position: 'relative', display: 'flex' }}>
-              <ShoppingCart size={18} style={{ color: '#ef233c' }} />
-              {cartCount > 0 && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '-6px',
-                    right: '-8px',
-                    backgroundColor: '#ef233c',
-                    color: '#ffffff',
-                    fontSize: '0.55rem',
-                    fontWeight: 700,
-                    minWidth: '15px',
-                    height: '15px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0 2px',
-                  }}
-                >
-                  {cartCount}
-                </span>
-              )}
-            </div>
-            <span>Panier</span>
-          </Link>
-        </div>
-
-        {/* Scrollable Content Container */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            paddingBottom: '2.5rem',
-            WebkitOverflowScrolling: 'touch',
-          }}
-          className="thin-scrollbar"
-        >
-          {/* Search form */}
-          <form
-            onSubmit={handleSearchSubmit}
-            style={{
-              padding: '1rem',
-              display: 'flex',
-              gap: '0.35rem',
+              fontSize: '0.85rem',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
             }}
           >
-            <div style={{ position: 'relative', flex: 1 }}>
-              <input
-                type="text"
-                placeholder={currentT.searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <ShoppingCart size={18} style={{ color: '#dc2626' }} />
+              <span>{currentT.cart}</span>
+            </div>
+            {cartCount > 0 && (
+              <span
                 style={{
-                  width: '100%',
-                  height: '42px',
-                  padding: isAr ? '0 1rem 0 2.5rem' : '0 2.5rem 0 1rem',
-                  fontSize: '0.85rem',
-                  color: '#1e293b',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '10px',
-                  outline: 'none',
-                  fontWeight: 500,
-                  transition: 'border-color 0.2s',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '999px',
                 }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = '#ef233c' }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = '#cbd5e1' }}
-              />
-              <Search
-                size={16}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  left: isAr ? 'auto' : '0.85rem',
-                  right: isAr ? '0.85rem' : 'auto',
-                  color: '#64748b',
-                  pointerEvents: 'none',
-                }}
-              />
-            </div>
-            <button
-              type="submit"
-              style={{
-                height: '42px',
-                padding: '0 1rem',
-                backgroundColor: '#ef233c',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '10px',
-                fontWeight: 600,
-                fontSize: '0.82rem',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#d90429' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ef233c' }}
-            >
-              Search
-            </button>
-          </form>
-
-          {/* Section: LISTES */}
-          <div style={{ marginTop: '0.5rem' }}>
-            <div
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.68rem',
-                fontWeight: 800,
-                color: '#64748b',
-                letterSpacing: '0.08em',
-                backgroundColor: '#f8fafc',
-                borderTop: '1px solid #f1f5f9',
-                borderBottom: '1px solid #f1f5f9',
-              }}
-            >
-              {currentT.listTitle}
-            </div>
-
-            <Link
-              href="/best-offers?search=liste"
-              onClick={onClose}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                color: '#0f172a',
-                borderBottom: '1px solid #f1f5f9',
-                transition: 'all 200ms ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#ef233c' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#0f172a' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <BookOpen size={16} />
-                <span>{currentT.listsCol}</span>
-              </div>
-              <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-            </Link>
-          </div>
-
-          {/* Section: ACHETER PAR CATÉGORIE */}
-          <div style={{ marginTop: '1.25rem' }}>
-            <div
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.68rem',
-                fontWeight: 800,
-                color: '#64748b',
-                letterSpacing: '0.08em',
-                backgroundColor: '#f8fafc',
-                borderTop: '1px solid #f1f5f9',
-                borderBottom: '1px solid #f1f5f9',
-              }}
-            >
-              {currentT.catTitle}
-            </div>
-
-            {/* Dynamic Categories */}
-            {categories.length > 0 ? (
-              categories.map((cat) => {
-                const isActive = activeCategoryParam === cat.name
-                return (
-                  <Link
-                    key={cat.id}
-                    href={`/best-offers?cat=${encodeURIComponent(cat.name)}`}
-                    onClick={onClose}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '1.1rem 1rem',
-                      fontSize: '0.84rem',
-                      fontWeight: 700,
-                      color: isActive ? '#ef233c' : '#1e293b',
-                      borderBottom: '1px solid #f1f5f9',
-                      borderLeft: !isAr && isActive ? '4px solid #ef233c' : 'none',
-                      borderRight: isAr && isActive ? '4px solid #ef233c' : 'none',
-                      backgroundColor: isActive ? '#fef2f2' : 'transparent',
-                      transition: 'all 200ms ease',
-                      textTransform: 'uppercase',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = '#fef2f2'
-                        e.currentTarget.style.color = '#ef233c'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                        e.currentTarget.style.color = '#1e293b'
-                      }
-                    }}
-                  >
-                    <span>{cat.emoji || '📚'} {cat.name}</span>
-                    <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-                  </Link>
-                )
-              })
-            ) : (
-              /* Static Fallback Categories */
-              staticCategories.map((name, idx) => {
-                const isActive = activeCategoryParam === name
-                const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
-                return (
-                  <Link
-                    key={idx}
-                    href={`/best-offers?cat=${encodeURIComponent(name)}`}
-                    onClick={onClose}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '1.1rem 1rem',
-                      fontSize: '0.84rem',
-                      fontWeight: 700,
-                      color: isActive ? '#ef233c' : '#1e293b',
-                      borderBottom: '1px solid #f1f5f9',
-                      borderLeft: !isAr && isActive ? '4px solid #ef233c' : 'none',
-                      borderRight: isAr && isActive ? '4px solid #ef233c' : 'none',
-                      backgroundColor: isActive ? '#fef2f2' : 'transparent',
-                      transition: 'all 200ms ease',
-                      textTransform: 'uppercase',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = '#fef2f2'
-                        e.currentTarget.style.color = '#ef233c'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                        e.currentTarget.style.color = '#1e293b'
-                      }
-                    }}
-                  >
-                    <span>{name}</span>
-                    <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-                  </Link>
-                )
-              })
+              >
+                {cartCount}
+              </span>
             )}
-          </div>
-
-          {/* Section: AIDE ET PARAMÈTRES */}
-          <div style={{ marginTop: '1.25rem' }}>
-            <div
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.68rem',
-                fontWeight: 800,
-                color: '#64748b',
-                letterSpacing: '0.08em',
-                backgroundColor: '#f8fafc',
-                borderTop: '1px solid #f1f5f9',
-                borderBottom: '1px solid #f1f5f9',
-              }}
-            >
-              {currentT.helpTitle}
-            </div>
-
-            <Link
-              href="/login"
-              onClick={onClose}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                color: '#0f172a',
-                borderBottom: '1px solid #f1f5f9',
-                transition: 'all 200ms ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#ef233c' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#0f172a' }}
-            >
-              <span>{currentT.profile}</span>
-              <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-            </Link>
-
-            <Link
-              href="/contact"
-              onClick={onClose}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                color: '#0f172a',
-                borderBottom: '1px solid #f1f5f9',
-                transition: 'all 200ms ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#ef233c' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#0f172a' }}
-            >
-              <span>{currentT.contact}</span>
-              <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-            </Link>
-
-            <Link
-              href="/login"
-              onClick={onClose}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                fontSize: '0.86rem',
-                fontWeight: 600,
-                color: '#0f172a',
-                borderBottom: '1px solid #f1f5f9',
-                transition: 'all 200ms ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.color = '#ef233c' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#0f172a' }}
-            >
-              <span>{currentT.login}</span>
-              <ChevronRight size={14} style={{ color: '#94a3b8' }} />
-            </Link>
-          </div>
+          </Link>
         </div>
       </div>
 
-      {/* Global thin scrollbar style */}
+      {/* Styles */}
       <style jsx global>{`
         .thin-scrollbar::-webkit-scrollbar {
           width: 5px;
         }
         .thin-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
+          background: #f8fafc;
         }
         .thin-scrollbar::-webkit-scrollbar-thumb {
           background: #cbd5e1;
@@ -662,6 +391,128 @@ export default function MobileSideMenu({ isOpen, onClose, cartCount }: MobileSid
         }
         .thin-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #94a3b8;
+        }
+
+        .sidebar-close-btn:hover {
+          background-color: #f1f5f9 !important;
+          color: #dc2626 !important;
+          transform: scale(1.05);
+        }
+
+        .sidebar-search-input {
+          width: 100%;
+          padding: 0.6rem 0.85rem 0.6rem 2.4rem;
+          background-color: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          font-size: 0.83rem;
+          color: #0f172a;
+          outline: none;
+          transition: all 200ms ease;
+        }
+        [dir="rtl"] .sidebar-search-input {
+          padding: 0.6rem 2.4rem 0.6rem 0.85rem;
+        }
+        .sidebar-search-input:focus {
+          background-color: #ffffff;
+          border-color: #dc2626;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+        }
+
+        .sidebar-search-btn {
+          background-color: #dc2626;
+          color: #ffffff;
+          border: none;
+          border-radius: 10px;
+          padding: 0 1rem;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background-color 150ms ease;
+          flex-shrink: 0;
+        }
+        .sidebar-search-btn:hover {
+          background-color: #b91c1c;
+        }
+
+        .sidebar-section-title {
+          font-size: 0.72rem;
+          font-weight: 800;
+          letter-spacing: 0.05em;
+          color: #64748b;
+          padding: 0.35rem 0.5rem;
+          text-transform: uppercase;
+        }
+
+        .sidebar-nav-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.7rem 0.75rem;
+          border-radius: 10px;
+          text-decoration: none;
+          color: #334155;
+          font-size: 0.86rem;
+          font-weight: 600;
+          transition: all 180ms ease;
+          margin-bottom: 2px;
+        }
+        .sidebar-nav-item:hover {
+          background-color: #fff1f2;
+          color: #dc2626;
+        }
+        .sidebar-nav-item.active {
+          background-color: #fff1f2;
+          color: #dc2626;
+        }
+
+        .cat-icon-badge {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          border-radius: 8px;
+          background: #f8fafc;
+          border: 1px solid #f1f5f9;
+          font-size: 0.9rem;
+          flex-shrink: 0;
+        }
+        .sidebar-nav-item:hover .cat-icon-badge,
+        .sidebar-nav-item.active .cat-icon-badge {
+          background: #ffe4e6;
+          border-color: #fecdd3;
+        }
+
+        .cat-count-pill {
+          font-size: 0.68rem;
+          font-weight: 700;
+          background: #f1f5f9;
+          color: #64748b;
+          padding: 1px 7px;
+          border-radius: 999px;
+          margin-right: 4px;
+        }
+        [dir="rtl"] .cat-count-pill {
+          margin-right: 0;
+          margin-left: 4px;
+        }
+
+        .item-chevron {
+          color: #cbd5e1;
+          transition: transform 180ms ease, color 180ms ease;
+        }
+        .sidebar-nav-item:hover .item-chevron,
+        .sidebar-nav-item.active .item-chevron {
+          color: #dc2626;
+          transform: translateX(2px);
+        }
+        [dir="rtl"] .sidebar-nav-item:hover .item-chevron,
+        [dir="rtl"] .sidebar-nav-item.active .item-chevron {
+          transform: translateX(-2px) rotate(180deg);
+        }
+        [dir="rtl"] .item-chevron {
+          transform: rotate(180deg);
         }
       `}</style>
     </>

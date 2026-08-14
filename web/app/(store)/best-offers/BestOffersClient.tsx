@@ -12,6 +12,12 @@ import {
   X,
   Check,
   ChevronDown,
+  ChevronUp,
+  Truck,
+  CreditCard,
+  RotateCw,
+  MessageCircle,
+  ArrowUpDown,
 } from '@/components/LucideIcons'
 import { useLang } from '@/components/LangContext'
 
@@ -47,7 +53,7 @@ type Category = {
 const titleCase = (s: string) =>
   s.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 
-// ─── Premium CheckRow ─────────────────────────────────────────────────────────
+// ─── CheckRow ─────────────────────────────────────────────────────────────────
 
 function CheckRow({
   selected, onClick, children,
@@ -58,29 +64,17 @@ function CheckRow({
       tabIndex={0}
       onClick={onClick}
       onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className={`filter-check-row ${selected ? 'selected' : ''}`}
+      className={`bo-filter-row ${selected ? 'selected' : ''}`}
     >
-      <div className="filter-checkbox">
-        {selected && (
-          <Check style={{ width: '11px', height: '11px', color: '#fff', strokeWidth: 3 }} />
-        )}
+      <div className={`bo-checkbox ${selected ? 'checked' : ''}`}>
+        {selected && <Check style={{ width: '10px', height: '10px', color: '#fff', strokeWidth: 3 }} />}
       </div>
-      {children}
+      <span className="bo-filter-row-label">{children}</span>
     </div>
   )
 }
 
-// ─── Section title ────────────────────────────────────────────────────────────
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="filter-section-title">
-      {children}
-    </p>
-  )
-}
-
-// ─── Premium FilterPanel ──────────────────────────────────────────────────────
+// ─── FilterPanel ──────────────────────────────────────────────────────────────
 
 function FilterPanel({
   categories,
@@ -88,9 +82,9 @@ function FilterPanel({
   toggleCategory,
   isCatSelected,
   inStockOnly, setInStockOnly,
-  promoOnly,   setPromoOnly,
-  priceMin,    setPriceMin,
-  priceMax,    setPriceMax,
+  promoOnly, setPromoOnly,
+  priceMin, setPriceMin,
+  priceMax, setPriceMax,
   searchQuery, setSearchQuery,
   clearFilters,
   hasActiveFilters,
@@ -102,10 +96,10 @@ function FilterPanel({
   toggleCategory: (name: string) => void
   isCatSelected: (name: string) => boolean
   inStockOnly: boolean; setInStockOnly: (v: boolean) => void
-  promoOnly: boolean;   setPromoOnly:   (v: boolean) => void
-  priceMin: number;     setPriceMin:    (v: number) => void
-  priceMax: number;     setPriceMax:    (v: number) => void
-  searchQuery: string;  setSearchQuery: (v: string) => void
+  promoOnly: boolean; setPromoOnly: (v: boolean) => void
+  priceMin: number; setPriceMin: (v: number) => void
+  priceMax: number; setPriceMax: (v: number) => void
+  searchQuery: string; setSearchQuery: (v: string) => void
   clearFilters: () => void
   hasActiveFilters: boolean
   activeFilterCount: number
@@ -113,208 +107,217 @@ function FilterPanel({
 }) {
   const { lang } = useLang()
   const isAr = lang === 'ar'
+  const [catExpanded, setCatExpanded] = useState(true)
+  const [availExpanded, setAvailExpanded] = useState(true)
+  const [priceExpanded, setPriceExpanded] = useState(true)
+
+  const fT = {
+    title: isAr ? 'الفلاتر والتصفية' : 'Filtres',
+    reset: isAr ? 'إعادة ضبط' : 'Réinitialiser',
+    search: isAr ? 'بحث عن منتج...' : 'Rechercher un produit…',
+    category: isAr ? 'الفئات' : 'Catégorie',
+    availability: isAr ? 'الحالة والوفرة' : 'Disponibilité',
+    inStock: isAr ? 'المتوفر في المخزون فقط' : 'En stock uniquement',
+    promo: isAr ? 'العروض والتخفيضات' : 'En promotion',
+    price: isAr ? 'السعر (درهم)' : 'Prix (MAD)',
+    min: isAr ? 'الأدنى' : 'Min',
+    max: isAr ? 'الأقصى' : 'Max',
+    apply: isAr ? 'تطبيق الفلاتر' : 'Appliquer',
+  }
 
   return (
-    <div className="flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
-
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="filter-header">
-        <div className="filter-header-left">
-          <SlidersHorizontal style={{ width: '18px', height: '18px', color: 'var(--primary)', flexShrink: 0 }} strokeWidth={2.2} />
-          <span className="filter-title">{isAr ? 'تصفية' : 'Filtres'}</span>
+    <div className="bo-filter-panel" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className="bo-filter-header">
+        <div className="bo-filter-header-left">
+          <SlidersHorizontal size={16} strokeWidth={2.2} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+          <span className="bo-filter-title">{fT.title}</span>
           {activeFilterCount > 0 && (
-            <span className="filter-active-badge">
-              {activeFilterCount}
-            </span>
+            <span className="bo-filter-badge">{activeFilterCount}</span>
           )}
         </div>
         <button
           onClick={clearFilters}
-          className="filter-reset-btn"
-          style={{
-            color: hasActiveFilters ? 'var(--primary)' : 'var(--text2)',
-            pointerEvents: hasActiveFilters ? 'auto' : 'none',
-            cursor: hasActiveFilters ? 'pointer' : 'default',
-          }}
+          className="bo-filter-reset"
+          disabled={!hasActiveFilters}
+          aria-label={fT.reset}
         >
-          <RotateCcw style={{ width: '13px', height: '13px' }} strokeWidth={2.3} />
-          {isAr ? 'إعادة ضبط' : 'Réinitialiser'}
+          <RotateCcw size={12} strokeWidth={2.5} />
+          {fT.reset}
         </button>
       </div>
 
-      {/* ── Search ──────────────────────────────────────────────────────── */}
-      <div className="filter-search-wrapper">
-        <Search className="filter-search-icon" strokeWidth={2} />
+      {/* Search */}
+      <div className="bo-filter-search">
+        <Search size={14} strokeWidth={2} style={{ color: 'var(--text2)', flexShrink: 0 }} />
         <input
           type="text"
-          placeholder={isAr ? 'بحث...' : 'Rechercher...'}
+          placeholder={fT.search}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="filter-search-input"
-          style={{ paddingRight: searchQuery ? '40px' : '16px' }}
+          className="bo-filter-search-input"
         />
         {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            className="filter-search-clear"
-          >
-            <X style={{ width: '14px', height: '14px' }} />
+          <button onClick={() => setSearchQuery('')} className="bo-filter-search-clear">
+            <X size={13} />
           </button>
         )}
       </div>
 
-      {/* ── Categories ──────────────────────────────────────────────────── */}
+      {/* Catégories (Pure Text Only, No Thumbnails) */}
       {categories.length > 0 && (
-        <div className="filter-section-wrapper">
-          <SectionTitle>{isAr ? 'الفئة' : 'Catégorie'}</SectionTitle>
-          <div>
-            {categories.map((cat) => {
-              const selected = isCatSelected(cat.name)
-              const count = cat.count ?? cat._count?.products ?? 0
-              return (
-                <CheckRow key={cat.id} selected={selected} onClick={() => toggleCategory(cat.name)}>
-                  {/* Thumbnail */}
-                  <div className="filter-cat-thumb">
-                    {cat.image ? (
-                      <Image src={cat.image} alt={cat.name} width={34} height={34} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                    ) : cat.emoji ? (
-                      <span className="text-base leading-none">{cat.emoji}</span>
-                    ) : (
-                      <span className="text-sm text-[var(--text2)]">📁</span>
-                    )}
-                  </div>
-                  {/* Name */}
-                  <span className="filter-cat-name">
-                    {titleCase(cat.name)}
-                  </span>
-                  {/* Count */}
-                  {count > 0 && (
-                    <span className="filter-cat-count">
-                      {count}
-                    </span>
-                  )}
-                </CheckRow>
-              )
-            })}
-          </div>
+        <div className="bo-filter-section">
+          <button
+            className="bo-filter-section-title"
+            onClick={() => setCatExpanded(v => !v)}
+            aria-expanded={catExpanded}
+          >
+            <span>{fT.category}</span>
+            {catExpanded ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
+          </button>
+          {catExpanded && (
+            <div className="bo-filter-section-body">
+              {categories.map((cat) => {
+                const count = cat.count ?? cat._count?.products ?? 0
+                return (
+                  <CheckRow key={cat.id} selected={isCatSelected(cat.name)} onClick={() => toggleCategory(cat.name)}>
+                    <span className="bo-filter-cat-name">{titleCase(cat.name)}</span>
+                    {count > 0 && <span className="bo-filter-cat-count">{count}</span>}
+                  </CheckRow>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 
-      {/* ── Price ───────────────────────────────────────────────────────── */}
-      <div className="filter-section-wrapper">
-        <SectionTitle>{isAr ? 'السعر' : 'Prix'}</SectionTitle>
-        <div className="filter-price-wrapper" dir="ltr">
-          <input
-            type="number"
-            value={priceMin === 0 ? '' : priceMin}
-            min={0}
-            max={9999}
-            placeholder="0"
-            onChange={(e) => setPriceMin(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
-            className="filter-price-input"
-          />
-          <span className="filter-price-sep">—</span>
-          <input
-            type="number"
-            value={priceMax === 9999 ? '' : priceMax}
-            min={0}
-            max={9999}
-            placeholder="9 999"
-            onChange={(e) => setPriceMax(e.target.value === '' ? 9999 : Math.max(0, Number(e.target.value)))}
-            className="filter-price-input"
-          />
-        </div>
-        <p className="filter-price-range-text" dir="ltr" style={{ textAlign: 'right' }}>
-          {priceMin > 0 ? priceMin : 0} DH — {priceMax === 9999 ? '9 999' : priceMax} DH
-        </p>
-      </div>
-
-      {/* ── Availability ────────────────────────────────────────────────── */}
-      <div className="filter-section-wrapper" style={{ marginBottom: '8px' }}>
-        <SectionTitle>{isAr ? 'التوفر' : 'Disponibilité'}</SectionTitle>
-        {[
-          { id: 'inStock', label: isAr ? 'متوفر في المخزون' : 'En stock uniquement', value: inStockOnly, set: setInStockOnly },
-          { id: 'onSale',  label: isAr ? 'في تخفيض' : 'En promotion',        value: promoOnly,   set: setPromoOnly  },
-        ].map((opt) => (
-          <CheckRow key={opt.id} selected={opt.value} onClick={() => opt.set(!opt.value)}>
-            <span className="filter-cat-name">
-              {opt.label}
-            </span>
-          </CheckRow>
-        ))}
-      </div>
-
-      {/* ── Active filters ───────────────────────────────────────────────── */}
-      {hasActiveFilters && (
-        <div className="filter-active-chips-container">
-          <SectionTitle>{isAr ? 'عوامل التصفية النشطة' : 'Filtres actifs'}</SectionTitle>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-            {selectedCats.map((catName) => (
-              <span key={catName} className="filter-active-chip">
-                {titleCase(catName)}
-                <button onClick={() => toggleCategory(catName)}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            ))}
-            {priceMin > 0 && (
-              <span key="active-min" className="filter-active-chip">
-                {isAr ? `الأدنى ${priceMin} درهم` : `Min ${priceMin} DH`}
-                <button onClick={() => setPriceMin(0)}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-            {priceMax < 9999 && (
-              <span key="active-max" className="filter-active-chip">
-                {isAr ? `الأقصى ${priceMax} درهم` : `Max ${priceMax} DH`}
-                <button onClick={() => setPriceMax(9999)}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-            {inStockOnly && (
-              <span key="active-stock" className="filter-active-chip">
-                {isAr ? 'متوفر' : 'En stock'}
-                <button onClick={() => setInStockOnly(false)}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-            {promoOnly && (
-              <span key="active-promo" className="filter-active-chip">
-                {isAr ? 'في تخفيض' : 'En promo'}
-                <button onClick={() => setPromoOnly(false)}>
-                  <X style={{ width: '12px', height: '12px' }} strokeWidth={2.5} />
-                </button>
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Mobile apply ─────────────────────────────────────────────────── */}
-      {onApply && (
+      {/* Disponibilité */}
+      <div className="bo-filter-section">
         <button
-          onClick={onApply}
-          style={{
-            width: '100%', marginTop: '20px',
-            background: '#ef233c', color: '#fff',
-            padding: '16px', borderRadius: '16px',
-            fontWeight: 700, fontSize: '15px', letterSpacing: '0.01em',
-            border: 'none', cursor: 'pointer',
-            boxShadow: '0 4px 14px rgba(239,35,60,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-          }}
+          className="bo-filter-section-title"
+          onClick={() => setAvailExpanded(v => !v)}
+          aria-expanded={availExpanded}
         >
-          <Check style={{ width: '16px', height: '16px' }} strokeWidth={2.5} />
-          {isAr ? 'تطبيق الفلاتر' : 'Appliquer les filtres'}
-          {activeFilterCount > 0 && ` (${activeFilterCount})`}
+          <span>{fT.availability}</span>
+          {availExpanded ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
+        </button>
+        {availExpanded && (
+          <div className="bo-filter-section-body">
+            <CheckRow selected={inStockOnly} onClick={() => setInStockOnly(!inStockOnly)}>
+              {fT.inStock}
+            </CheckRow>
+            <CheckRow selected={promoOnly} onClick={() => setPromoOnly(!promoOnly)}>
+              {fT.promo}
+            </CheckRow>
+          </div>
+        )}
+      </div>
+
+      {/* Prix */}
+      <div className="bo-filter-section" style={{ borderBottom: 'none' }}>
+        <button
+          className="bo-filter-section-title"
+          onClick={() => setPriceExpanded(v => !v)}
+          aria-expanded={priceExpanded}
+        >
+          <span>{fT.price}</span>
+          {priceExpanded ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
+        </button>
+        {priceExpanded && (
+          <div className="bo-filter-section-body">
+            <div className="bo-price-inputs" dir="ltr">
+              <div className="bo-price-input-wrap">
+                <label className="bo-price-label">{fT.min}</label>
+                <input
+                  type="number"
+                  value={priceMin === 0 ? '' : priceMin}
+                  min={0} max={9999}
+                  placeholder="0"
+                  onChange={(e) => setPriceMin(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
+                  className="bo-price-input"
+                />
+              </div>
+              <span className="bo-price-sep">–</span>
+              <div className="bo-price-input-wrap">
+                <label className="bo-price-label">{fT.max}</label>
+                <input
+                  type="number"
+                  value={priceMax === 9999 ? '' : priceMax}
+                  min={0} max={9999}
+                  placeholder="9 999"
+                  onChange={(e) => setPriceMax(e.target.value === '' ? 9999 : Math.max(0, Number(e.target.value)))}
+                  className="bo-price-input"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile apply */}
+      {onApply && (
+        <button onClick={onApply} className="bo-filter-apply-btn">
+          <Check size={15} strokeWidth={2.5} />
+          {fT.apply}{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </button>
       )}
     </div>
   )
 }
+
+// ─── Trust Strip ──────────────────────────────────────────────────────────────
+
+function TrustStrip() {
+  const { lang } = useLang()
+  const isAr = lang === 'ar'
+
+  const items = [
+    { 
+      icon: <Truck size={20} strokeWidth={2.2} />, 
+      label: isAr ? 'التوصيل لجميع مدن المغرب' : 'Livraison partout au Maroc', 
+      sub: isAr ? 'خلال 24 – 48 ساعة' : '24 – 48h' 
+    },
+    { 
+      icon: <CreditCard size={20} strokeWidth={2.2} />, 
+      label: isAr ? 'الدفع عند الاستلام' : 'Paiement à la livraison', 
+      sub: isAr ? 'آمن ومضمون 100%' : 'Sécurisé & flexible' 
+    },
+    { 
+      icon: <RotateCw size={20} strokeWidth={2.2} />, 
+      label: isAr ? 'إرجاع خلال 7 أيام' : 'Retour sous 7 jours', 
+      sub: isAr ? 'بدون مصاريف إضافية' : 'Sans frais' 
+    },
+    { 
+      icon: <MessageCircle size={20} strokeWidth={2.2} />, 
+      label: isAr ? 'دعم عبر الواتساب' : 'Support WhatsApp', 
+      sub: isAr ? 'متوفر 6 أيام / 7' : '6j/7 disponible' 
+    },
+  ]
+
+  return (
+    <div className="bo-trust-strip" dir={isAr ? 'rtl' : 'ltr'}>
+      {items.map((item, i) => (
+        <div key={i} className="bo-trust-item">
+          <div className="bo-trust-icon">{item.icon}</div>
+          <div className="bo-trust-text">
+            <span className="bo-trust-label">{item.label}</span>
+            <span className="bo-trust-sub">{item.sub}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Sort options ─────────────────────────────────────────────────────────────
+
+const SORT_OPTIONS = [
+  { value: 'default',    label: 'Pertinence' },
+  { value: 'price_asc',  label: 'Prix croissant' },
+  { value: 'price_desc', label: 'Prix décroissant' },
+  { value: 'newest',     label: 'Nouveautés' },
+  { value: 'popular',    label: 'Promotions' },
+]
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
@@ -337,7 +340,7 @@ export default function BestOffersClient({
   const [products,   setProducts]   = useState<Product[]>(initialProducts)
   const [categories, setCategories] = useState<Category[]>(initialCategories)
 
-  // Filter states
+  // Filter state
   const [searchQuery,  setSearchQuery]  = useState('')
   const [selectedCats, setSelectedCats] = useState<string[]>([])
   const [inStockOnly,  setInStockOnly]  = useState(false)
@@ -347,10 +350,11 @@ export default function BestOffersClient({
   const [sort,         setSort]         = useState('default')
   const [filterOpen,   setFilterOpen]   = useState(false)
   const [sortOpen,     setSortOpen]     = useState(false)
+  const [mobileSortOpen, setMobileSortOpen] = useState(false)
 
   // Read URL params on mount
   useEffect(() => {
-    const catParam  = searchParams.get('cat')
+    const catParam = searchParams.get('cat')
     if (catParam) setSelectedCats([catParam])
     const sortParam = searchParams.get('sort')
     if (sortParam) setSort(sortParam)
@@ -358,7 +362,7 @@ export default function BestOffersClient({
     if (searchParam) setSearchQuery(searchParam)
   }, [searchParams])
 
-  // Fetch categories once
+  // Fetch categories
   useEffect(() => {
     fetch('/api/categories')
       .then((r) => r.json())
@@ -366,7 +370,7 @@ export default function BestOffersClient({
       .catch(() => {})
   }, [])
 
-  // Fetch products from API whenever filters change
+  // Fetch products when filters change
   useEffect(() => {
     const params = new URLSearchParams()
     selectedCats.forEach((name) => params.append('category', name))
@@ -383,18 +387,16 @@ export default function BestOffersClient({
           setProducts(data.products)
         } else if (Array.isArray(data)) {
           setProducts(data)
-        } else {
-          console.error('[BestOffersClient] API error:', data)
         }
       })
-      .catch((err) => console.error('[BestOffersClient] fetch error:', err))
+      .catch(() => {})
   }, [selectedCats, searchQuery, priceMax, inStockOnly, promoOnly, sort])
 
-  // Lock body scroll when mobile filter open
+  // Lock body scroll when filter drawer open
   useEffect(() => {
-    document.body.style.overflow = filterOpen ? 'hidden' : ''
+    document.body.style.overflow = (filterOpen || mobileSortOpen) ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [filterOpen])
+  }, [filterOpen, mobileSortOpen])
 
   const isCatSelected = (name: string) =>
     selectedCats.some((c) => c.toLowerCase() === name.toLowerCase())
@@ -430,7 +432,6 @@ export default function BestOffersClient({
     (priceMin > 0 ? 1 : 0) +
     (priceMax < 9999 ? 1 : 0)
 
-  // Local sort + priceMin filter (API handles the rest)
   const filtered = useMemo(() => {
     let list = [...products]
     if (priceMin > 0) list = list.filter((p) => p.price >= priceMin)
@@ -448,120 +449,107 @@ export default function BestOffersClient({
     searchQuery, setSearchQuery, clearFilters, hasActiveFilters, activeFilterCount,
   }
 
+  const currentSortLabel = SORT_OPTIONS.find(o => o.value === sort)?.label ?? 'Pertinence'
+
   return (
     <>
-      {/* ── PAGE HERO ──────────────────────────────────────────────────── */}
-      <div className="page-hero">
-        <div className="page-hero-inner">
-          <div className="breadcrumb-nav" dir={isAr ? 'rtl' : 'ltr'}>
-            <Link href="/">{isAr ? 'الرئيسية' : 'Accueil'}</Link>
-            <span>›</span>
-            <span>{pageTitle || (isAr ? 'أفضل العروض' : 'Meilleures Offres')}</span>
-          </div>
-          <h1 dir={isAr ? 'rtl' : 'ltr'}>{pageTitle || (isAr ? 'أفضل العروض' : 'Meilleures Offres')}</h1>
-          <p dir={isAr ? 'rtl' : 'ltr'}>
-            {pageSubtitle ||
-              (isAr ? 'اكتشف تشكيلتنا الكاملة من الكتب المدرسية بأفضل الأسعار' : 'Découvrez toute notre sélection de livres scolaires avec les meilleurs prix')}
+      {/* ── PAGE HERO ──────────────────────────────────────────────────────── */}
+      <div className="bo-hero">
+        <div className="bo-hero-inner">
+          <nav className="bo-breadcrumb" aria-label="Fil d'Ariane" dir={isAr ? 'rtl' : 'ltr'}>
+            <Link href="/" className="bo-breadcrumb-link">
+              {isAr ? 'الرئيسية' : 'Accueil'}
+            </Link>
+            <span className="bo-breadcrumb-sep">›</span>
+            <span className="bo-breadcrumb-current">
+              {pageTitle || (isAr ? 'أفضل العروض' : 'Meilleures Offres')}
+            </span>
+          </nav>
+          <h1 className="bo-hero-title" dir={isAr ? 'rtl' : 'ltr'}>
+            {pageTitle || (isAr ? 'أفضل العروض' : 'Meilleures Offres')}
+          </h1>
+          <p className="bo-hero-sub" dir={isAr ? 'rtl' : 'ltr'}>
+            {pageSubtitle || (isAr
+              ? 'اكتشف تشكيلتنا من الكتب المدرسية بأفضل الأسعار'
+              : 'Découvrez notre sélection de fournitures scolaires aux meilleurs prix')}
           </p>
         </div>
       </div>
 
-      {/* ── LAYOUT ────────────────────────────────────────────────────── */}
-      <div className="offers-layout">
+      {/* ── LAYOUT ───────────────────────────────────────────────────────── */}
+      <div className="main-products-layout bo-layout">
 
-        {/* ── DESKTOP SIDEBAR ───────────────────────────────────────── */}
-        <aside
-          className="hidden md:block sticky self-start flex-shrink-0"
-          style={{ top: '88px', width: '300px' }}
-        >
-          <div style={{
-            background: 'var(--card)',
-            borderRadius: '24px',
-            padding: '24px',
-            border: '1px solid var(--border)',
-            boxShadow: '0 18px 45px rgba(15,23,42,0.08)',
-            overflow: 'hidden',
-          }}>
-            <FilterPanel {...filterProps} />
-          </div>
+        {/* ── DESKTOP SIDEBAR ─────────────────────────────────────────── */}
+        <aside className="filter-sidebar bo-sidebar" aria-label="Filtres">
+          <FilterPanel {...filterProps} />
         </aside>
 
-        {/* ── RESULTS ───────────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
+        {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
+        <div className="product-area bo-main">
 
-          {/* Sort bar */}
-          <div className="sort-bar" dir={isAr ? 'rtl' : 'ltr'}>
-            <div className="sort-bar-left">
+          {/* Sort + count bar */}
+          <div className="bo-sort-bar" dir={isAr ? 'rtl' : 'ltr'}>
+            {/* Left: mobile filter/sort buttons + count */}
+            <div className="bo-sort-bar-left">
               {/* Mobile filter button */}
               <button
+                className="bo-mob-btn bo-mob-filter"
                 onClick={() => setFilterOpen(true)}
-                className="mobile-filter-trigger"
+                aria-label="Ouvrir les filtres"
               >
-                <SlidersHorizontal style={{ width: '16px', height: '16px', color: 'var(--primary)' }} strokeWidth={2.2} />
-                <span>{isAr ? 'تصفية' : 'Filtres'}</span>
+                <SlidersHorizontal size={15} strokeWidth={2.2} />
+                <span>Filtrer</span>
                 {activeFilterCount > 0 && (
-                  <span className="mobile-filter-count">{activeFilterCount}</span>
+                  <span className="bo-mob-btn-badge">{activeFilterCount}</span>
                 )}
               </button>
 
-              <p className="sort-bar-count">
-                <span className="sort-bar-count-num">{filtered.length}</span>{' '}
-                {isAr ? 'منتج تم العثور عليه' : `produit${filtered.length !== 1 ? 's' : ''} trouvé${filtered.length !== 1 ? 's' : ''}`}
+              {/* Mobile sort button */}
+              <button
+                className="bo-mob-btn bo-mob-sort"
+                onClick={() => setMobileSortOpen(true)}
+                aria-label="Trier les produits"
+              >
+                <ArrowUpDown size={15} strokeWidth={2.2} />
+                <span>Trier</span>
+              </button>
+
+              <p className="bo-product-count">
+                <strong>{filtered.length}</strong>
+                {' '}{isAr ? 'منتج' : `produit${filtered.length !== 1 ? 's' : ''} trouvé${filtered.length !== 1 ? 's' : ''}`}
               </p>
             </div>
 
-            <div className="sort-bar-right">
-              <label className="sort-label-text">{isAr ? 'ترتيب حسب :' : 'Trier par :'}</label>
-              <div className="sort-dropdown-wrapper">
+            {/* Right: desktop sort dropdown */}
+            <div className="bo-sort-right">
+              <span className="bo-sort-label">Trier par :</span>
+              <div className="bo-sort-dropdown-wrap">
                 <button
+                  className={`bo-sort-btn ${sortOpen ? 'open' : ''}`}
                   onClick={() => setSortOpen(!sortOpen)}
-                  className={`sort-trigger-btn ${sortOpen ? 'open' : ''}`}
-                  dir={isAr ? 'rtl' : 'ltr'}
+                  aria-expanded={sortOpen}
+                  aria-haspopup="listbox"
                 >
-                  <span>
-                    {sort === 'price_asc' || sort === 'price-asc'
-                      ? (isAr ? 'السعر تصاعدي' : 'Prix croissant')
-                      : sort === 'price_desc' || sort === 'price-desc'
-                      ? (isAr ? 'السعر تنازلي' : 'Prix décroissant')
-                      : sort === 'newest' || sort === 'new'
-                      ? (isAr ? 'الأحدث' : 'Nouveautés')
-                      : sort === 'popular' || sort === 'rating'
-                      ? (isAr ? 'الأكثر شعبية' : 'Popularité')
-                      : (isAr ? 'الافتراضي' : 'Par défaut')}
-                  </span>
+                  <span>{currentSortLabel}</span>
                   <ChevronDown
-                    style={{
-                      width: '15px', height: '15px',
-                      transition: 'transform 0.25s ease',
-                      transform: sortOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    }}
-                    strokeWidth={2.5}
+                    size={14} strokeWidth={2.5}
+                    style={{ transition: 'transform 0.2s', transform: sortOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                   />
                 </button>
-
                 {sortOpen && (
                   <>
-                    <div className="sort-dropdown-backdrop" onClick={() => setSortOpen(false)} />
-                    <div className="sort-dropdown-menu" dir={isAr ? 'rtl' : 'ltr'}>
-                      {[
-                        { value: 'default', label: isAr ? 'الافتراضي' : 'Par défaut' },
-                        { value: 'price_asc', label: isAr ? 'السعر تصاعدي' : 'Prix croissant' },
-                        { value: 'price_desc', label: isAr ? 'السعر تنازلي' : 'Prix décroissant' },
-                        { value: 'newest', label: isAr ? 'الأحدث' : 'Nouveautés' },
-                        { value: 'popular', label: isAr ? 'الأكثر شعبية' : 'Popularité' },
-                      ].map((opt) => (
+                    <div className="bo-sort-backdrop" onClick={() => setSortOpen(false)} />
+                    <div className="bo-sort-menu" role="listbox">
+                      {SORT_OPTIONS.map((opt) => (
                         <button
                           key={opt.value}
-                          onClick={() => {
-                            setSort(opt.value)
-                            setSortOpen(false)
-                          }}
-                          className={`sort-dropdown-item ${sort === opt.value ? 'active' : ''}`}
+                          role="option"
+                          aria-selected={sort === opt.value}
+                          className={`bo-sort-option ${sort === opt.value ? 'active' : ''}`}
+                          onClick={() => { setSort(opt.value); setSortOpen(false) }}
                         >
-                          <span>{opt.label}</span>
-                          {sort === opt.value && (
-                            <Check style={{ width: '14px', height: '14px', color: 'var(--primary)' }} strokeWidth={2.5} />
-                          )}
+                          {opt.label}
+                          {sort === opt.value && <Check size={13} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />}
                         </button>
                       ))}
                     </div>
@@ -571,72 +559,62 @@ export default function BestOffersClient({
             </div>
           </div>
 
-          {/* Active Filter Chips */}
+          {/* Active filter chips */}
           {hasActiveFilters && (
-            <div className="active-chips-bar" dir={isAr ? 'rtl' : 'ltr'}>
+            <div className="bo-chips-bar" dir={isAr ? 'rtl' : 'ltr'}>
               {selectedCats.map((cat) => (
-                <div key={`chip-cat-${cat}`} className="filter-chip">
+                <div key={`chip-cat-${cat}`} className="bo-chip">
                   <span>{titleCase(cat)}</span>
-                  <button onClick={() => toggleCategory(cat)}>
-                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
+                  <button onClick={() => toggleCategory(cat)} aria-label={`Supprimer ${cat}`}>
+                    <X size={12} strokeWidth={2.5} />
                   </button>
                 </div>
               ))}
               {priceMin > 0 && (
-                <div className="filter-chip">
-                  <span>{isAr ? `الأدنى ${priceMin} درهم` : `Min ${priceMin} DH`}</span>
-                  <button onClick={() => setPriceMin(0)}>
-                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
-                  </button>
+                <div className="bo-chip">
+                  <span>Min {priceMin} DH</span>
+                  <button onClick={() => setPriceMin(0)}><X size={12} strokeWidth={2.5} /></button>
                 </div>
               )}
               {priceMax < 9999 && (
-                <div className="filter-chip">
-                  <span>{isAr ? `الأقصى ${priceMax} درهم` : `Max ${priceMax} DH`}</span>
-                  <button onClick={() => setPriceMax(9999)}>
-                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
-                  </button>
+                <div className="bo-chip">
+                  <span>Max {priceMax} DH</span>
+                  <button onClick={() => setPriceMax(9999)}><X size={12} strokeWidth={2.5} /></button>
                 </div>
               )}
               {inStockOnly && (
-                <div className="filter-chip">
-                  <span>{isAr ? 'متوفر' : 'En stock'}</span>
-                  <button onClick={() => setInStockOnly(false)}>
-                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
-                  </button>
+                <div className="bo-chip">
+                  <span>En stock</span>
+                  <button onClick={() => setInStockOnly(false)}><X size={12} strokeWidth={2.5} /></button>
                 </div>
               )}
               {promoOnly && (
-                <div className="filter-chip">
-                  <span>{isAr ? 'في تخفيض' : 'En promotion'}</span>
-                  <button onClick={() => setPromoOnly(false)}>
-                    <X style={{ width: '14px', height: '14px' }} strokeWidth={2.5} />
-                  </button>
+                <div className="bo-chip">
+                  <span>Promotion</span>
+                  <button onClick={() => setPromoOnly(false)}><X size={12} strokeWidth={2.5} /></button>
                 </div>
               )}
+              <button className="bo-chip-clear-all" onClick={clearFilters}>
+                Tout effacer
+              </button>
             </div>
           )}
 
-          {/* Products grid */}
+          {/* Product grid */}
           {filtered.length === 0 ? (
-            <div className="empty-state-container">
-              <div className="empty-state-icon">
-                <Search style={{ width: '28px', height: '28px', color: 'var(--text2)' }} />
+            <div className="bo-empty-state">
+              <div className="bo-empty-icon">
+                <Search size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="empty-state-title">{isAr ? 'لم يتم العثور على أي منتج' : 'Aucun produit trouvé'}</h3>
-              <p className="empty-state-text">
-                {isAr ? 'لا توجد منتجات تطابق عوامل التصفية الخاصة بك.' : 'Aucun produit ne correspond à vos filtres.'}
-              </p>
-              <button
-                onClick={clearFilters}
-                className="empty-state-reset"
-              >
-                <RotateCcw style={{ width: '14px', height: '14px' }} strokeWidth={2.2} />
-                {isAr ? 'إعادة ضبط عوامل التصفية' : 'Réinitialiser les filtres'}
+              <h3 className="bo-empty-title">Aucun produit trouvé</h3>
+              <p className="bo-empty-text">Aucun produit ne correspond à vos filtres.</p>
+              <button onClick={clearFilters} className="bo-empty-reset">
+                <RotateCcw size={14} strokeWidth={2.2} />
+                Réinitialiser les filtres
               </button>
             </div>
           ) : (
-            <div className="products-grid">
+            <div className="products-grid bo-products-grid">
               {filtered.map((p, i) => (
                 <ProductCard key={p.id} product={p as any} index={i} />
               ))}
@@ -645,50 +623,63 @@ export default function BestOffersClient({
         </div>
       </div>
 
-      {/* ── MOBILE BOTTOM SHEET ───────────────────────────────────────── */}
+      {/* ── MOBILE FILTER DRAWER ────────────────────────────────────────────── */}
       {filterOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setFilterOpen(false)}
-          />
-          <div
-            className="absolute bottom-0 left-0 right-0 flex flex-col shadow-2xl"
-            style={{ borderRadius: '24px 24px 0 0', maxHeight: '85vh', background: 'var(--card)' }}
-          >
-            {/* Mobile drawer header */}
-            <div style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '20px 20px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <SlidersHorizontal style={{ width: '18px', height: '18px', color: '#ef233c' }} strokeWidth={2.2} />
-                <span style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a' }}>Filtres</span>
+        <div className="bo-drawer-overlay" role="dialog" aria-modal="true" aria-label="Filtres">
+          <div className="bo-drawer-backdrop" onClick={() => setFilterOpen(false)} />
+          <div className="bo-drawer">
+            <div className="bo-drawer-header">
+              <div className="bo-drawer-title">
+                <SlidersHorizontal size={17} strokeWidth={2.2} style={{ color: 'var(--primary)' }} />
+                <span>Filtres</span>
                 {activeFilterCount > 0 && (
-                  <span style={{
-                    background: '#ef233c', color: '#fff', fontSize: '11px', fontWeight: 700,
-                    minWidth: '20px', height: '20px', padding: '0 6px',
-                    borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {activeFilterCount}
-                  </span>
+                  <span className="bo-filter-badge">{activeFilterCount}</span>
                 )}
               </div>
               <button
+                className="bo-drawer-close"
                 onClick={() => setFilterOpen(false)}
-                style={{
-                  width: '32px', height: '32px', borderRadius: '50%',
-                  background: '#f1f5f9', border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b',
-                }}
+                aria-label="Fermer"
               >
-                <X style={{ width: '16px', height: '16px' }} />
+                <X size={16} />
               </button>
             </div>
-
-            {/* Scrollable content */}
-            <div style={{ overflowY: 'auto', overscrollBehavior: 'contain', padding: '20px', flex: 1 }}>
+            <div className="bo-drawer-body">
               <FilterPanel {...filterProps} onApply={() => setFilterOpen(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MOBILE SORT DRAWER ─────────────────────────────────────────────── */}
+      {mobileSortOpen && (
+        <div className="bo-drawer-overlay" role="dialog" aria-modal="true" aria-label="Trier">
+          <div className="bo-drawer-backdrop" onClick={() => setMobileSortOpen(false)} />
+          <div className="bo-drawer bo-sort-drawer">
+            <div className="bo-drawer-header">
+              <div className="bo-drawer-title">
+                <ArrowUpDown size={17} strokeWidth={2.2} style={{ color: 'var(--primary)' }} />
+                <span>Trier par</span>
+              </div>
+              <button
+                className="bo-drawer-close"
+                onClick={() => setMobileSortOpen(false)}
+                aria-label="Fermer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="bo-drawer-body">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`bo-sort-drawer-option ${sort === opt.value ? 'active' : ''}`}
+                  onClick={() => { setSort(opt.value); setMobileSortOpen(false) }}
+                >
+                  {opt.label}
+                  {sort === opt.value && <Check size={15} strokeWidth={2.5} style={{ color: 'var(--primary)' }} />}
+                </button>
+              ))}
             </div>
           </div>
         </div>

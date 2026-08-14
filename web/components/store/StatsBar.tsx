@@ -107,6 +107,7 @@ export default function StatsBar({ settings, lang = 'fr' }: StatsBarProps) {
   return (
     <section
       ref={ref}
+      suppressHydrationWarning
       className="relative overflow-hidden"
       style={{ background: 'linear-gradient(105deg, #0c0703 0%, #170f06 40%, #130a04 70%, #0c0703 100%)' }}
       dir={isAr ? 'rtl' : 'ltr'}

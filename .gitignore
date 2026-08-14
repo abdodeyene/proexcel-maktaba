@@ -23,3 +23,9 @@ web/.env
 web/node_modules/
 web/.next/
 web/seed-admin.js
+
+# Python cache & temporary files
+__pycache__/
+*.pyc
+*.tmp
+

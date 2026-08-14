@@ -35,7 +35,7 @@ export default function InfoStrip({ lang = 'fr' }: InfoStripProps) {
   }
 
   return (
-    <div className="info-strip-section" dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="info-strip-section" dir={isAr ? 'rtl' : 'ltr'} suppressHydrationWarning>
       {/* Animated subtle glow border wrapper */}
       <div className="info-strip-wrapper animate-fadeInUp [animation-delay:200ms]">
         <div className="info-strip" role="list" aria-label="Informations livraison et garanties">

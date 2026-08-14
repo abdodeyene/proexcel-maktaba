@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
 import { usePathname } from 'next/navigation'
 import { useLang } from '@/components/LangContext'
 import MobileSideMenu from '@/components/MobileSideMenu'
@@ -34,7 +34,7 @@ export default function Header() {
   const [isSearching, setIsSearching] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
-  const isHome = pathname === '/' || (typeof window !== 'undefined' && window.location.pathname === '/')
+  const isHome = pathname === '/'
   const { lang, setLang } = useLang()
   const langRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -142,6 +142,12 @@ export default function Header() {
   // Transparent when at the top of the home page and no panels are open
   const atHero = isHome && !scrolled && !menuOpen && !searchOpen
 
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const LANGS = [
     { code: 'fr' as const, label: 'Français', flag: '🇫🇷' },
     { code: 'ar' as const, label: 'العربية', flag: '🇲🇦' },
@@ -151,8 +157,9 @@ export default function Header() {
     fr: { home: 'Accueil', offers: 'Meilleures Offres', levels: 'Niveaux', primaire: 'Primaire', college: 'Collège', lycee: 'Lycée', about: 'À Propos', contact: 'Contact', login: 'Connexion', search: 'Rechercher...' },
     ar: { home: 'الرئيسية', offers: 'أفضل العروض', levels: 'المستويات', primaire: 'ابتدائي', college: 'إعدادي', lycee: 'ثانوي', about: 'من نحن', contact: 'اتصل بنا', login: 'دخول', search: 'بحث...' },
   }
-  const currentT = t[lang as keyof typeof t] ?? t.fr
-  const isAr = lang === 'ar'
+  const activeLang = mounted ? lang : 'ar'
+  const currentT = t[activeLang as keyof typeof t] ?? t.ar
+  const isAr = activeLang === 'ar'
 
   const headerClass = [
     isHome ? 'header-home' : '',
@@ -164,109 +171,17 @@ export default function Header() {
       <header
         className={headerClass}
         dir="ltr"
+        suppressHydrationWarning
         style={{ position: 'fixed', top: 0, left: 0, right: 0, width: '100%', zIndex: 1000, direction: 'ltr' }}
       >
-        <div className="header-inner" style={{ direction: 'ltr' }}>
-          {/* Mobile: cart on left */}
-          <Link href="/cart" className="btn-icon mob-only" title="Panier" style={{ position: 'relative' }}>
-            <ShoppingCart size={20} />
-            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-          </Link>
-
-          <Link href="/" className="logo">
-            {logoReady && logoSrc ? (
-              <img
-                src={logoSrc}
-                alt="ProExcel Maktaba"
-                className="logo-img"
-                style={{ animation: 'logo-fadein 0.3s ease' }}
-                onError={() => setLogoReady(false)}
-              />
-            ) : (
-              <span className="logo-text-fallback">ProExcel</span>
-            )}
-          </Link>
-
-          <nav className="header-nav-center" style={{ direction: 'ltr' }}>
-            <Link href="/" className={pathname === '/' ? 'active' : ''}>
-              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.home}</span>
-            </Link>
-            <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>
-              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.offers}</span>
-            </Link>
-            <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee', '/niveaux/primaire', '/niveaux/college', '/niveaux/lycee'].some(p => pathname.startsWith(p)) ? 'active' : ''}`}>
-              <button className="nav-dropdown-btn">
-                <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.levels}</span>
-                <ChevronDown size={14} style={{ marginLeft: '4px' }} />
-              </button>
-              <div className="nav-dropdown-menu">
-                <Link href="/niveaux/primaire" className={pathname.includes('primaire') ? 'active' : ''}>
-                  <span className="nav-dropdown-icon"><Backpack size={18} /></span>
-                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.primaire}</span>
-                </Link>
-                <Link href="/niveaux/college" className={pathname.includes('college') ? 'active' : ''}>
-                  <span className="nav-dropdown-icon"><BookOpen size={18} /></span>
-                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.college}</span>
-                </Link>
-                <Link href="/niveaux/lycee" className={pathname.includes('lycee') ? 'active' : ''}>
-                  <span className="nav-dropdown-icon"><GraduationCap size={18} /></span>
-                  <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.lycee}</span>
-                </Link>
-              </div>
-            </div>
-            <Link href="/about" className={pathname === '/about' ? 'active' : ''}>
-              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.about}</span>
-            </Link>
-            <Link href="/contact" className={pathname === '/contact' ? 'active' : ''}>
-              <span dir={lang === 'ar' ? 'rtl' : 'ltr'}>{currentT.contact}</span>
-            </Link>
-          </nav>
-
-          <div className="header-actions" style={{ direction: 'ltr' }}>
-            <button className="btn-icon proexcel-btn-home-search-btn" title="Rechercher" onClick={() => setSearchOpen(v => !v)}>
-              <Search size={20} />
-            </button>
-
-            <button className="btn-icon" title="Thème" onClick={toggleTheme}>
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-
-            {/* Premium Language Switcher */}
-            <div className="lang-switcher desk-only" ref={langRef}>
-              <button
-                className={`lang-btn ${langOpen ? 'open' : ''}`}
-                onClick={() => setLangOpen(v => !v)}
-                title="Langue / اللغة / Language"
-              >
-                <Globe size={18} className="lang-globe-icon" />
-                <span className="lang-current">{lang.toUpperCase()}</span>
-                <ChevronDown size={14} className="lang-chevron" />
-              </button>
-              <div className={`lang-dropdown ${langOpen ? 'open' : ''}`}>
-                {LANGS.map(opt => (
-                  <button
-                    key={opt.code}
-                    className={`lang-option ${lang === opt.code ? 'active' : ''}`}
-                    onClick={() => { setLang(opt.code); setLangOpen(false); setMenuOpen(false) }}
-                  >
-                    <span className="lang-flag">{opt.flag}</span>
-                    {opt.label}
-                    {lang === opt.code && <Check size={14} className="lang-check" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Link href="/cart" className="btn-icon desk-only" title="Panier">
+        <div className="header-inner" style={{ direction: 'ltr' }} suppressHydrationWarning>
+          {/* Left Side: Cart on left for RTL, Hamburger on left for LTR */}
+          {isAr ? (
+            <Link href="/cart" className="btn-icon mob-only" title="Panier" style={{ position: 'relative' }}>
               <ShoppingCart size={20} />
               {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
             </Link>
-
-            <Link href="/login" className="btn-icon desk-only" title={currentT.login}>
-              <User size={20} />
-            </Link>
-
-            {/* Mobile: hamburger on right */}
+          ) : (
             <button 
               className="mobile-menu-btn" 
               aria-label="Menu" 
@@ -284,15 +199,146 @@ export default function Header() {
                 cursor: 'pointer',
                 boxShadow: '0 4px 12px rgba(232, 53, 42, 0.25)',
                 transition: 'all 0.2s ease',
+                flexShrink: 0,
               }}
             >
               <Menu size={20} />
             </button>
+          )}
+
+          <Link href="/" className="logo">
+            {logoReady && logoSrc ? (
+              <img
+                src={logoSrc}
+                alt="ProExcel Maktaba"
+                className="logo-img"
+                style={{ animation: 'logo-fadein 0.3s ease' }}
+                onError={() => setLogoReady(false)}
+              />
+            ) : (
+              <span className="logo-text-fallback">ProExcel</span>
+            )}
+          </Link>
+
+          <nav className="header-nav-center" style={{ direction: 'ltr' }} suppressHydrationWarning>
+            <Link href="/" className={pathname === '/' ? 'active' : ''}>
+              <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.home}</span>
+            </Link>
+            <Link href="/best-offers" className={pathname === '/best-offers' ? 'active' : ''}>
+              <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.offers}</span>
+            </Link>
+            <div className={`nav-dropdown-wrap ${['/primaire', '/college', '/lycee', '/niveaux/primaire', '/niveaux/college', '/niveaux/lycee'].some(p => pathname.startsWith(p)) ? 'active' : ''}`}>
+              <button className="nav-dropdown-btn" suppressHydrationWarning>
+                <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.levels}</span>
+                <ChevronDown size={14} style={{ marginLeft: '4px' }} />
+              </button>
+              <div className="nav-dropdown-menu">
+                <Link href="/niveaux/primaire" className={pathname.includes('primaire') ? 'active' : ''}>
+                  <span className="nav-dropdown-icon"><Backpack size={18} /></span>
+                  <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.primaire}</span>
+                </Link>
+                <Link href="/niveaux/college" className={pathname.includes('college') ? 'active' : ''}>
+                  <span className="nav-dropdown-icon"><BookOpen size={18} /></span>
+                  <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.college}</span>
+                </Link>
+                <Link href="/niveaux/lycee" className={pathname.includes('lycee') ? 'active' : ''}>
+                  <span className="nav-dropdown-icon"><GraduationCap size={18} /></span>
+                  <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.lycee}</span>
+                </Link>
+              </div>
+            </div>
+            <Link href="/about" className={pathname === '/about' ? 'active' : ''}>
+              <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.about}</span>
+            </Link>
+            <Link href="/contact" className={pathname === '/contact' ? 'active' : ''}>
+              <span dir={activeLang === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>{currentT.contact}</span>
+            </Link>
+          </nav>
+
+          <div className="header-actions" style={{ direction: 'ltr' }}>
+            <button className="btn-icon proexcel-btn-home-search-btn" title="Rechercher" onClick={() => setSearchOpen(v => !v)}>
+              <Search size={20} />
+            </button>
+
+            <button className="btn-icon" title="Thème" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
+            {/* Premium Language Switcher */}
+            <div className="lang-switcher desk-only" ref={langRef} suppressHydrationWarning>
+              <button
+                className={`lang-btn ${langOpen ? 'open' : ''}`}
+                onClick={() => setLangOpen(v => !v)}
+                title="Langue / اللغة / Language"
+                suppressHydrationWarning
+              >
+                <Globe size={18} className="lang-globe-icon" />
+                <span className="lang-current" suppressHydrationWarning>{activeLang.toUpperCase()}</span>
+                <ChevronDown size={14} className="lang-chevron" />
+              </button>
+              <div className={`lang-dropdown ${langOpen ? 'open' : ''}`} suppressHydrationWarning>
+                {LANGS.map(opt => (
+                  <button
+                    key={opt.code}
+                    className={`lang-option ${activeLang === opt.code ? 'active' : ''}`}
+                    onClick={() => { setLang(opt.code); setLangOpen(false); setMenuOpen(false) }}
+                    suppressHydrationWarning
+                  >
+                    <span className="lang-flag">{opt.flag}</span>
+                    {opt.label}
+                    <Check
+                      size={14}
+                      className="lang-check"
+                      style={{
+                        opacity: activeLang === opt.code ? 1 : 0,
+                        visibility: activeLang === opt.code ? 'visible' : 'hidden',
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Link href="/cart" className={`btn-icon ${isAr ? 'desk-only' : ''}`} title="Panier">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+            </Link>
+
+            <Link href="/login" className="btn-icon desk-only" title={currentT.login} suppressHydrationWarning>
+              <User size={20} />
+            </Link>
+
+            {/* Mobile: hamburger on right (only in RTL/Arabic) */}
+            {isAr && (
+              <button 
+                className="mobile-menu-btn" 
+                aria-label="Menu" 
+                onClick={() => setMenuOpen(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'var(--primary)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  width: '38px',
+                  height: '38px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(232, 53, 42, 0.25)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Menu size={20} />
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      <MobileSideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} cartCount={cartCount} />
+      <Suspense fallback={null}>
+        <MobileSideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} cartCount={cartCount} />
+      </Suspense>
 
       {/* Search backdrop */}
       {searchOpen && (
@@ -406,7 +452,7 @@ export default function Header() {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)', marginBottom: '0.25rem', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                        {lang === 'ar' && p.titleAr ? p.titleAr : p.title}
+                        {activeLang === 'ar' && p.titleAr ? p.titleAr : p.title}
                       </div>
                       <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
                         {p.category && (

@@ -1,13 +1,14 @@
 'use client'
 
-import { useRef, useEffect, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatMoroccanPrice } from '@/lib/format'
-import { ShoppingCart, Eye } from '@/components/LucideIcons'
+import { ShoppingCart, Star } from '@/components/LucideIcons'
 
 type Product = {
   id: number
   title: string
+  titleAr?: string | null
   author?: string | null
   price: number
   compareAtPrice?: number | null
@@ -17,6 +18,7 @@ type Product = {
   emoji?: string | null
   stock: number
   rating?: number | null
+  reviewCount?: number | null
   isPromo?: boolean | null
   isNew?: boolean | null
   isBestOffer?: boolean | null
@@ -25,9 +27,27 @@ type Product = {
   colors?: unknown | null
 }
 
-export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+function StarRating({ rating }: { rating: number }) {
+  const full = Math.floor(rating)
+  const half = rating - full >= 0.5
+  const empty = 5 - full - (half ? 1 : 0)
+  return (
+    <div className="product-rating pcard-stars" aria-label={`${rating} sur 5`}>
+      {Array.from({ length: full }).map((_, i) => (
+        <Star key={`f${i}`} size={11} className="pcard-star filled" />
+      ))}
+      {half && <Star key="h" size={11} className="pcard-star half" />}
+      {Array.from({ length: empty }).map((_, i) => (
+        <Star key={`e${i}`} size={11} className="pcard-star empty" />
+      ))}
+    </div>
+  )
+}
+
+export default function ProductCard({ product }: { product: Product; index?: number }) {
   const router = useRouter()
-  const cardRef = useRef<HTMLDivElement>(null)
+  const [adding, setAdding] = useState(false)
+  const [added, setAdded] = useState(false)
 
   const disc = product.compareAtPrice && product.compareAtPrice > product.price
     ? Math.round((1 - product.price / product.compareAtPrice) * 100)
@@ -36,7 +56,6 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
   const images = Array.isArray(product.media) ? (product.media as string[]) : []
   const mainImage = images[0] || null
 
-  // Parse variants
   const parsedVariants = useMemo(() => {
     if (Array.isArray(product.variants)) return product.variants as string[]
     if (typeof product.variants === 'string') {
@@ -45,57 +64,21 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
     return []
   }, [product.variants])
 
-  const parsedColors = useMemo(() => {
-    if (Array.isArray(product.colors)) return product.colors as string[]
-    if (typeof product.colors === 'string') {
-      try { return JSON.parse(product.colors) as string[] } catch { return [] }
-    }
-    return []
-  }, [product.colors])
+  let badgeLabel: string | null = null
+  let badgeType: 'disc' | 'new' | 'promo' | 'best' | null = null
+  if (disc > 0) { badgeLabel = `-${disc}%`; badgeType = 'disc' }
+  else if (product.isNew) { badgeLabel = 'NOUVEAU'; badgeType = 'new' }
+  else if (product.isPromo) { badgeLabel = 'PROMO'; badgeType = 'promo' }
+  else if (product.isBestOffer) { badgeLabel = 'OFFRE'; badgeType = 'best' }
 
-  const hasVariants = parsedVariants.length > 0 && parsedVariants[0].toLowerCase() !== 'standard'
-  const hasColors = parsedColors.length > 0
-
-  // Scroll-in animation with stagger
-  useEffect(() => {
-    const el = cardRef.current
-    if (!el) return
-
-    const show = () => {
-      el.style.transitionDelay = `${index * 80}ms`
-      el.classList.add('opacity-100', 'translate-y-0')
-      el.classList.remove('opacity-0', 'translate-y-4')
-      setTimeout(() => { if (el) el.style.transitionDelay = '0ms' }, 450 + index * 80)
-    }
-
-    const rect = el.getBoundingClientRect()
-    if (rect.top < window.innerHeight + 100) {
-      show()
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          show()
-          observer.unobserve(el)
-        }
-      },
-      { threshold: 0.05, rootMargin: '0px 0px 80px 0px' }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [index])
-
-  let badgeText: string | null = null
-  if (disc > 0) badgeText = `-${disc}%`
-  else if (product.isNew) badgeText = 'NOUVEAUTÉ'
-  else if (product.isBestOffer) badgeText = 'PREMIUM'
-  else if (product.isPromo) badgeText = 'PROMO'
+  const inStock = product.stock > 0
+  const rating = typeof product.rating === 'number' ? product.rating : 4.5
 
   const addToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
+    if (adding) return
+    setAdding(true)
     const cart = JSON.parse(localStorage.getItem('proexcel_cart') || '[]')
     const variant = parsedVariants.length > 0 ? parsedVariants[0] : 'Standard'
     const key = `${product.id}_${variant}`
@@ -105,126 +88,97 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
     if (existingIdx >= 0) {
       cart[existingIdx].qty += 1
     } else {
-      cart.push({ key, productId: product.id, id: product.id, title: product.title, price: product.price, qty: 1, variant, image: mainImage || null })
+      cart.push({
+        key, productId: product.id, id: product.id,
+        title: product.title, price: product.price,
+        qty: 1, variant, image: mainImage || null
+      })
     }
     localStorage.setItem('proexcel_cart', JSON.stringify(cart))
     window.dispatchEvent(new Event('cart-updated'))
+    setAdded(true)
+    setTimeout(() => { setAdding(false); setAdded(false) }, 1400)
   }
 
   return (
     <div
-      ref={cardRef}
-      className="group relative flex flex-col gap-3 w-full cursor-pointer opacity-0 translate-y-4 transition-all duration-700 ease-out"
+      className="product-card pcard"
       onClick={() => router.push(`/product/${product.id}`)}
+      role="article"
+      aria-label={product.title}
     >
-      {/* ── IMAGE FRAME (Cadre) ── */}
-      <div 
-        className="relative w-full aspect-[4/5] rounded-[20px] overflow-hidden transition-all duration-[400ms] group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)]"
-        style={{ backgroundColor: 'rgba(128, 128, 128, 0.05)' }}
-      >
+      {/* 1. IMAGE BOX */}
+      <div className="product-card-image pcard-img-wrap">
         {mainImage ? (
-          <img 
-            src={mainImage} 
-            alt={product.title} 
-            className="w-full h-full object-cover transition-transform duration-[800ms] ease-[cubic-bezier(0.2,0,0,1)] group-hover:scale-[1.08]" 
+          <img
+            src={mainImage}
+            alt={product.title}
+            className="pcard-img"
+            loading="lazy"
           />
         ) : (
           <div
-            className="w-full h-full flex flex-col justify-end p-4 relative transition-transform duration-700 group-hover:scale-[1.08]"
+            className="pcard-img-fallback"
             style={{ background: `linear-gradient(145deg, ${product.g1 || '#1a237e'}, ${product.g2 || '#3949ab'})` }}
           >
-            <div className="absolute left-4 top-0 bottom-0 w-1 bg-black/20" />
-            <div className="text-white font-bold text-sm line-clamp-3 leading-snug drop-shadow-md z-10">{product.title}</div>
-            {product.author && <div className="text-white/80 text-xs mt-2 truncate z-10">{product.author}</div>}
+            <div className="pcard-fallback-spine" />
+            <div className="pcard-fallback-title">{product.title}</div>
+            {product.author && <div className="pcard-fallback-author">{product.author}</div>}
           </div>
         )}
 
-        {/* Badge */}
-        {badgeText && (
-          <span className="absolute top-3 left-3 bg-red-600 text-white text-[0.65rem] font-bold tracking-wider px-2.5 py-1 rounded-full shadow-md z-10">
-            {badgeText}
+        {/* PROMOTION BADGE */}
+        {badgeLabel && (
+          <span className={`pcard-badge pcard-badge--${badgeType}`}>
+            {badgeLabel}
           </span>
         )}
-
-        {/* Desktop Hover Overlay (Hidden on Mobile) */}
-        <div className="absolute inset-0 bg-black/20 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-all duration-500 hidden md:flex items-center justify-center gap-4 z-20">
-          <button 
-            className="w-12 h-12 rounded-full bg-white/95 text-gray-900 flex items-center justify-center hover:bg-white hover:scale-110 transition-all duration-300 shadow-[0_8px_20px_rgba(0,0,0,0.15)] translate-y-6 group-hover:translate-y-0"
-            onClick={(e) => { e.stopPropagation(); router.push(`/product/${product.id}`) }}
-            title="Voir le produit"
-          >
-            <Eye size={22} />
-          </button>
-          <button 
-            className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-500 hover:scale-110 transition-all duration-300 shadow-[0_8px_20px_rgba(220,38,38,0.35)] translate-y-6 group-hover:translate-y-0 delay-75"
-            onClick={addToCart}
-            title="Ajouter au panier"
-          >
-            <ShoppingCart size={22} />
-          </button>
-        </div>
-
-        {/* Mobile Persistent Cart Icon (Hidden on Desktop) */}
-        <button 
-          className="absolute bottom-3 right-3 md:hidden w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform z-20"
-          onClick={addToCart}
-          title="Ajouter au panier"
-        >
-          <ShoppingCart size={18} />
-        </button>
       </div>
 
-      {/* ── TEXT & PRICE ── */}
-      <div className="flex flex-col gap-1.5 px-1 pb-1">
-        <h3 
-          className="text-[0.95rem] md:text-[1rem] font-medium leading-[1.4] line-clamp-2 transition-colors duration-300 group-hover:text-red-600" 
-          dir="auto" 
-          style={{ color: 'var(--text)' }}
-        >
-          {product.title}
-        </h3>
-
-        {/* ── VARIANTS & COLORS PILLS ── */}
-        {(hasVariants || hasColors) && (
-          <div className="flex flex-wrap items-center gap-1.5 mt-1">
-            {hasColors ? (
-              <>
-                {parsedColors.slice(0, 4).map((c, i) => (
-                  <span 
-                    key={i} 
-                    className="w-4 h-4 rounded-full border border-black/15 dark:border-white/20 shadow-sm hover:scale-110 transition-transform cursor-default"
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-                {parsedColors.length > 4 && (
-                  <span className="text-[0.65rem] font-bold text-[var(--text2)] opacity-80 pl-0.5">
-                    +{parsedColors.length - 4}
-                  </span>
-                )}
-              </>
-            ) : (
-              <>
-                {parsedVariants.slice(0, 3).map((v, i) => (
-                  <span key={i} className="pcard-variant-pill">{v}</span>
-                ))}
-                {parsedVariants.length > 3 && (
-                  <span className="pcard-variant-more">+{parsedVariants.length - 3}</span>
-                )}
-              </>
-            )}
-          </div>
+      {/* 2. CARD CONTENT */}
+      <div className="product-card-content pcard-body">
+        {/* Category */}
+        {product.category && (
+          <span className="product-category-text pcard-category">{product.category}</span>
         )}
 
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[1.1rem] font-bold text-red-600">
+        {/* PRODUCT NAME */}
+        <h3 className="product-name pcard-title" dir="auto">{product.title}</h3>
+
+        {/* RATING */}
+        <div className="product-rating pcard-rating-row">
+          <StarRating rating={rating} />
+          <span className="pcard-rating-val">{rating.toFixed(1)}</span>
+        </div>
+
+        {/* PRICE */}
+        <div className="product-price-row pcard-price-row">
+          <span className="product-price-current pcard-price-current">
             {formatMoroccanPrice(product.price)}
           </span>
           {disc > 0 && product.compareAtPrice && (
-            <span className="text-[0.8rem] line-through opacity-60" style={{ color: 'var(--text2)' }}>
+            <span className="product-price-old pcard-price-old">
               {formatMoroccanPrice(product.compareAtPrice)}
             </span>
           )}
         </div>
+
+        {/* STOCK */}
+        <div className={`product-stock-badge pcard-stock ${inStock ? 'in-stock in' : 'out-of-stock out'}`}>
+          <span className="pcard-stock-dot" />
+          {inStock ? 'En stock' : 'Rupture de stock'}
+        </div>
+
+        {/* ADD TO CART */}
+        <button
+          className={`product-add-to-cart-btn pcard-atc-mobile ${added ? 'added' : ''}`}
+          onClick={addToCart}
+          aria-label="Ajouter au panier"
+          disabled={!inStock}
+        >
+          <ShoppingCart size={15} strokeWidth={2.2} />
+          <span>{added ? 'Ajouté !' : 'Ajouter au panier'}</span>
+        </button>
       </div>
     </div>
   )

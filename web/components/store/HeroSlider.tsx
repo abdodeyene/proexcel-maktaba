@@ -250,6 +250,7 @@ export default function HeroSlider() {
   return (
     <section
       className="relative w-full overflow-hidden"
+      suppressHydrationWarning
       style={{
         height: '100svh',
         minHeight: '560px',

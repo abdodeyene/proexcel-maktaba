@@ -8,18 +8,19 @@ export default async function BestOffersPage() {
   let products: any[] = []
   let categories: any[] = []
 
-  const timeout = (ms: number) => new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Query timeout')), ms))
-
   try {
-    ;[products, categories] = await Promise.race([
-      Promise.all([
-        prisma.product.findMany({ take: 100, orderBy: { createdAt: 'desc' } }),
-        prisma.category.findMany({ orderBy: { name: 'asc' } }),
-      ]),
-      timeout(3000)
-    ]) as any
+    const fetchDb = Promise.all([
+      prisma.product.findMany({ take: 100, orderBy: { createdAt: 'desc' } }),
+      prisma.category.findMany({ orderBy: { name: 'asc' } }),
+    ])
+
+    const timeout = new Promise<[any[], any[]]>((resolve) =>
+      setTimeout(() => resolve([[], []]), 4000)
+    )
+
+    ;[products, categories] = await Promise.race([fetchDb, timeout])
   } catch (err) {
-    console.error('BestOffersPage server-side query failed or timed out:', err)
+    console.error('BestOffersPage server-side query error:', err)
   }
 
   return (
@@ -28,6 +29,7 @@ export default async function BestOffersPage() {
     </Suspense>
   )
 }
+
 
 
 

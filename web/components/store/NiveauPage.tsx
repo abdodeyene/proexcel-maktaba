@@ -18,7 +18,7 @@ import { useLang } from '@/components/LangContext'
 
 // ─── Subject definitions per niveau ──────────────────────────────────────────
 
-const NIVEAU_SUBJECTS: Record<string, { id: string; label: string }[]> = {
+const NIVEAU_SUBJECTS: Record<string, { id: string; label: string; labelAr?: string }[]> = {
   primaire: [
     { id: 'arabe',    label: 'Langue Arabe', labelAr: 'اللغة العربية' },
     { id: 'francais', label: 'Langue Française', labelAr: 'اللغة الفرنسية' },

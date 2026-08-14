@@ -651,4 +651,22 @@ export const Building2 = (props: IconProps) => (
   </Icon>
 )
 
+export const RotateCw = (props: IconProps) => (
+  <Icon {...props}>
+    <polyline points="23 4 23 10 17 10" />
+    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+  </Icon>
+)
+
+export const ArrowUpDown = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="m21 16-4 4-4-4" />
+    <path d="M17 20V4" />
+    <path d="m3 8 4-4 4 4" />
+    <path d="M7 4v16" />
+  </Icon>
+)
+
+
+
 

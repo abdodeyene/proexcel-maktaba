@@ -12,10 +12,10 @@ interface LangContextType {
 }
 
 const LangContext = createContext<LangContextType>({
-  lang: 'fr',
+  lang: 'ar',
   setLang: () => {},
-  t: (fr) => fr,
-  isRTL: false,
+  t: (fr, ar) => ar,
+  isRTL: true,
 })
 
 export function LangProvider({ children }: { children: ReactNode }) {
@@ -27,6 +27,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
     setLangState(defaultLang)
     document.documentElement.setAttribute('dir', defaultLang === 'ar' ? 'rtl' : 'ltr')
     document.documentElement.setAttribute('lang', defaultLang)
+
     // Listen for language change events from Header
     const handler = (e: Event) => {
       const newLang = (e as CustomEvent).detail as Lang

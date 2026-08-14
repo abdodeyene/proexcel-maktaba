@@ -264,7 +264,7 @@ export default function HomePage() {
       <InfoStrip lang={lang} />
 
       {/* ── SCHOOL LEVELS ── */}
-      <div className="levels-section">
+      <div className="levels-section" suppressHydrationWarning>
         <div className="levels-inner">
           <div className="section-header scroll-reveal">
             <div className="section-tag">{T.levelsTag}</div>
