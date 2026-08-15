@@ -62,6 +62,8 @@ export default function HomePage() {
   const { lang } = useLang()
   const pathname = usePathname()
   const [products, setProducts] = useState<Product[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [promoProducts, setPromoProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [settings, setSettings] = useState<Record<string, string | null> | undefined>(undefined)
 
@@ -71,10 +73,21 @@ export default function HomePage() {
     let alive = true
 
     const loadData = () => {
-      fetch('/api/products').then(r => r.json()).then(d => {
+      fetch('/api/products?limit=200').then(r => r.json()).then(d => {
         const arr = Array.isArray(d) ? d : (d?.products ?? [])
         if (alive && arr.length >= 0) setProducts(arr)
       }).catch(() => { })
+
+      fetch('/api/products?isBestOffer=true&limit=20').then(r => r.json()).then(d => {
+        const arr = Array.isArray(d) ? d : (d?.products ?? [])
+        if (alive) setFeaturedProducts(arr)
+      }).catch(() => { })
+
+      fetch('/api/products?isPromo=true&limit=20').then(r => r.json()).then(d => {
+        const arr = Array.isArray(d) ? d : (d?.products ?? [])
+        if (alive) setPromoProducts(arr)
+      }).catch(() => { })
+
       fetch('/api/categories').then(r => r.json()).then(d => {
         if (alive && Array.isArray(d)) setCategories(d)
       }).catch(() => { })
@@ -97,8 +110,11 @@ export default function HomePage() {
     }
   }, [pathname])
 
-  const featured = products.filter(p => p.isBestOffer).slice(0, 8)
-  const promos = products.filter(p => p.isPromo).slice(0, 6)
+  const bestOfferFiltered = products.filter(p => p.isBestOffer)
+  const featured = (featuredProducts.length > 0 ? featuredProducts : (bestOfferFiltered.length > 0 ? bestOfferFiltered : products)).slice(0, 8)
+
+  const promoFiltered = products.filter(p => p.isPromo)
+  const promos = promoProducts.length > 0 ? promoProducts : promoFiltered.length > 0 ? promoFiltered : products.slice(8);
 
   const t = {
     fr: {
